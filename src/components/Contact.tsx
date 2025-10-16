@@ -2,6 +2,7 @@
 
 import { useState, FormEvent } from 'react'
 import styles from './Contact.module.css'
+import { sendContactEmail, ContactFormData } from '@/services/emailService'
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -15,14 +16,15 @@ export default function Contact() {
     type: '',
     message: '',
   })
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    setIsSubmitting(true)
     
-    // Simulación de envío de formulario
     try {
-      // Aquí iría la lógica real de envío (API, email service, etc.)
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Enviar email usando EmailJS
+      await sendContactEmail(formData as ContactFormData)
       
       setFormStatus({
         type: 'success',
@@ -43,10 +45,18 @@ export default function Contact() {
         setFormStatus({ type: '', message: '' })
       }, 5000)
     } catch (error) {
+      console.error('Error al enviar formulario:', error)
       setFormStatus({
         type: 'error',
-        message: 'Hubo un error al enviar el mensaje. Por favor, intenta nuevamente.',
+        message: 'Hubo un error al enviar el mensaje. Por favor, intenta nuevamente o contacta directamente por teléfono.',
       })
+      
+      // Limpiar mensaje de error después de 7 segundos
+      setTimeout(() => {
+        setFormStatus({ type: '', message: '' })
+      }, 7000)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -196,8 +206,12 @@ export default function Contact() {
               />
             </div>
 
-            <button type="submit" className="btn btn-primary btn-submit">
-              Enviar Mensaje
+            <button 
+              type="submit" 
+              className="btn btn-primary btn-submit"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Enviando...' : 'Enviar Mensaje'}
             </button>
             
             {formStatus.message && (
