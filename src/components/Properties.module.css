@@ -1,0 +1,800 @@
+.tabsContainer {
+  margin-bottom: 40px;
+  display: flex;
+  justify-content: center;
+}
+
+.tabs {
+  display: flex;
+  background: var(--light-bg);
+  border-radius: 16px;
+  padding: 8px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(44, 95, 125, 0.1);
+}
+
+.tab {
+  padding: 16px 32px;
+  border: none;
+  background: transparent;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-light);
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tab:hover {
+  color: var(--primary-color);
+  background: rgba(44, 95, 125, 0.1);
+}
+
+.tab.active {
+  background: var(--white);
+  color: var(--primary-color);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(44, 95, 125, 0.2);
+}
+
+.featuredSection {
+  margin-bottom: 60px;
+}
+
+.featuredTitle {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.featuredGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 30px;
+}
+
+/* Buscador Principal */
+.searchHero {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+  padding: 60px 0;
+  margin-bottom: 40px;
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.searchHero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)"/></svg>');
+  opacity: 0.3;
+}
+
+.searchHero .searchContainer {
+  position: relative;
+  z-index: 2;
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.searchHeader {
+  margin-bottom: 40px;
+  color: white;
+}
+
+.searchHeader h3 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: white;
+}
+
+.searchHeader p {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  color: white;
+}
+
+.searchBox {
+  background: white;
+  border-radius: 16px;
+  padding: 8px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  display: flex;
+  gap: 8px;
+  border: 1px solid rgba(44, 95, 125, 0.1);
+}
+
+.searchInputContainer {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 20px;
+  color: var(--text-light);
+  z-index: 2;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 18px 20px 18px 55px;
+  border: none;
+  background: transparent;
+  font-size: 1.1rem;
+  color: var(--text-color);
+  outline: none;
+  border-radius: 12px;
+}
+
+.searchInput::placeholder {
+  color: var(--text-light);
+}
+
+.clearSearchBtn {
+  position: absolute;
+  right: 15px;
+  background: var(--light-bg);
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-light);
+  font-size: 14px;
+  transition: var(--transition);
+}
+
+.clearSearchBtn:hover {
+  background: var(--secondary-color);
+  color: white;
+}
+
+.searchBtn {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 18px 32px;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 140px;
+  justify-content: center;
+}
+
+.searchBtn:hover {
+  background: var(--secondary-color);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(44, 95, 125, 0.3);
+}
+
+/* Filtros Avanzados */
+.filtersSection {
+  background: var(--white);
+  padding: 40px;
+  border-radius: 20px;
+  margin-bottom: 40px;
+  border: 1px solid rgba(44, 95, 125, 0.1);
+  box-shadow: var(--shadow-sm);
+}
+
+.filtersHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid var(--light-bg);
+}
+
+.filtersHeader h4 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  margin: 0;
+}
+
+.clearAllBtn {
+  background: var(--light-bg);
+  color: var(--text-color);
+  border: 1px solid rgba(44, 95, 125, 0.2);
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.clearAllBtn:hover {
+  background: var(--secondary-color);
+  color: white;
+  border-color: var(--secondary-color);
+}
+
+.filtersGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.searchContainer {
+  margin-bottom: 24px;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 16px 20px;
+  border: 2px solid rgba(44, 95, 125, 0.2);
+  border-radius: 12px;
+  font-size: 1rem;
+  background: var(--white);
+  transition: var(--transition);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 0 3px rgba(44, 95, 125, 0.1);
+}
+
+.filtersRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.filterGroup label {
+  font-weight: 600;
+  color: var(--primary-color);
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filterGroup label svg {
+  color: var(--secondary-color);
+}
+
+.filterSelect {
+  padding: 14px 18px;
+  border: 2px solid rgba(44, 95, 125, 0.2);
+  border-radius: 12px;
+  font-size: 1rem;
+  background: var(--white);
+  cursor: pointer;
+  transition: var(--transition);
+  font-weight: 500;
+}
+
+.filterSelect:focus {
+  outline: none;
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 0 3px rgba(44, 95, 125, 0.1);
+}
+
+.priceRange {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.priceDisplay {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--light-bg);
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(44, 95, 125, 0.1);
+}
+
+.priceMin,
+.priceMax {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.priceSeparator {
+  color: var(--text-light);
+  font-weight: 400;
+}
+
+.priceSlider {
+  flex: 1;
+  height: 6px;
+  background: rgba(44, 95, 125, 0.2);
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+}
+
+.priceSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: var(--secondary-color);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.priceSlider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  background: var(--primary-color);
+}
+
+.priceSlider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: var(--secondary-color);
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+  transition: var(--transition);
+}
+
+.priceSlider::-moz-range-thumb:hover {
+  transform: scale(1.2);
+  background: var(--primary-color);
+}
+
+.resultsSection {
+  margin-top: 40px;
+}
+
+.resultsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--light-bg);
+}
+
+.resultsHeader h3 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  margin: 0;
+}
+
+.clearFiltersBtn {
+  background: var(--secondary-color);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.clearFiltersBtn:hover {
+  background: var(--primary-color);
+  transform: translateY(-2px);
+}
+
+.propertiesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 30px;
+}
+
+.noResults {
+  text-align: center;
+  padding: 60px 20px;
+  background: var(--light-bg);
+  border-radius: 16px;
+  border: 2px dashed rgba(44, 95, 125, 0.3);
+}
+
+.noResults p {
+  font-size: 1.1rem;
+  color: var(--text-light);
+  margin: 0 0 8px 0;
+}
+
+.noResults p:first-child {
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .searchHero {
+    padding: 30px 0;
+    margin-bottom: 20px;
+  }
+
+  .searchHero .searchContainer {
+    max-width: 100%;
+    padding: 0 16px;
+  }
+
+  .searchHeader {
+    margin-bottom: 30px;
+  }
+
+  .searchHeader h3 {
+    font-size: 1.6rem;
+    margin-bottom: 8px;
+  }
+
+  .searchHeader p {
+    font-size: 0.95rem;
+  }
+
+  .searchBox {
+    flex-direction: column;
+    gap: 12px;
+    padding: 8px;
+    border-radius: 12px;
+  }
+
+  .searchInput {
+    padding: 14px 16px 14px 45px;
+    font-size: 0.95rem;
+    border-radius: 8px;
+  }
+
+  .searchIcon {
+    left: 14px;
+    width: 18px;
+    height: 18px;
+  }
+
+  .clearSearchBtn {
+    right: 12px;
+    width: 26px;
+    height: 26px;
+    font-size: 12px;
+  }
+
+  .searchBtn {
+    padding: 14px 20px;
+    font-size: 0.95rem;
+    min-width: auto;
+    border-radius: 8px;
+  }
+
+  .tabsContainer {
+    margin-bottom: 20px;
+  }
+
+  .tabs {
+    flex-direction: column;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 12px;
+  }
+
+  .tab {
+    padding: 12px 20px;
+    font-size: 0.9rem;
+    justify-content: center;
+    border-radius: 8px;
+  }
+
+  .featuredSection {
+    margin-bottom: 30px;
+  }
+
+  .featuredTitle {
+    font-size: 1.4rem;
+    margin-bottom: 16px;
+  }
+
+  .featuredGrid,
+  .propertiesGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .filtersSection {
+    padding: 16px;
+    margin-bottom: 20px;
+    border-radius: 16px;
+  }
+
+  .filtersHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+  }
+
+  .filtersHeader h4 {
+    font-size: 1.2rem;
+  }
+
+  .filtersGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .filterGroup {
+    gap: 8px;
+  }
+
+  .filterGroup label {
+    font-size: 0.9rem;
+  }
+
+  .filterGroup label svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .filterSelect {
+    padding: 12px 14px;
+    font-size: 0.95rem;
+    border-radius: 8px;
+  }
+
+  .priceDisplay {
+    padding: 10px 14px;
+    border-radius: 8px;
+  }
+
+  .priceMin,
+  .priceMax {
+    font-size: 0.9rem;
+  }
+
+  .priceSlider {
+    height: 4px;
+  }
+
+  .priceSlider::-webkit-slider-thumb {
+    width: 18px;
+    height: 18px;
+  }
+
+  .resultsHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .resultsHeader h3 {
+    font-size: 1.1rem;
+  }
+
+  .clearFiltersBtn {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+  }
+
+  .noResults {
+    padding: 30px 16px;
+  }
+
+  .noResults p {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .searchHero {
+    padding: 30px 0;
+    margin-bottom: 20px;
+  }
+
+  .searchHeader h3 {
+    font-size: 1.5rem;
+  }
+
+  .searchHeader p {
+    font-size: 0.95rem;
+  }
+
+  .searchBox {
+    padding: 8px;
+  }
+
+  .searchInput {
+    padding: 14px 16px 14px 45px;
+    font-size: 0.95rem;
+  }
+
+  .searchIcon {
+    left: 16px;
+    width: 18px;
+    height: 18px;
+  }
+
+  .searchBtn {
+    padding: 14px 20px;
+    font-size: 0.95rem;
+  }
+
+  .tabs {
+    padding: 4px;
+  }
+
+  .tab {
+    padding: 12px 20px;
+    font-size: 0.9rem;
+  }
+
+  .featuredGrid,
+  .propertiesGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .filtersSection {
+    padding: 16px;
+  }
+
+  .searchInput {
+    padding: 12px 14px 12px 40px;
+    font-size: 0.9rem;
+    border-radius: 6px;
+  }
+
+  .searchIcon {
+    left: 12px;
+    width: 16px;
+    height: 16px;
+  }
+
+  .clearSearchBtn {
+    right: 10px;
+    width: 24px;
+    height: 24px;
+    font-size: 11px;
+  }
+
+  .searchBtn {
+    padding: 12px 16px;
+    font-size: 0.9rem;
+    border-radius: 6px;
+  }
+
+  .tabs {
+    padding: 3px;
+    border-radius: 10px;
+  }
+
+  .tab {
+    padding: 10px 16px;
+    font-size: 0.85rem;
+    border-radius: 6px;
+  }
+
+  .featuredSection {
+    margin-bottom: 20px;
+  }
+
+  .featuredTitle {
+    font-size: 1.2rem;
+    margin-bottom: 12px;
+  }
+
+  .filtersSection {
+    padding: 12px;
+    margin-bottom: 16px;
+    border-radius: 12px;
+  }
+
+  .filtersHeader {
+    gap: 8px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+  }
+
+  .filtersHeader h4 {
+    font-size: 1.1rem;
+  }
+
+  .clearAllBtn {
+    padding: 8px 14px;
+    font-size: 0.8rem;
+  }
+
+  .filtersGrid {
+    gap: 12px;
+  }
+
+  .filterGroup {
+    gap: 6px;
+  }
+
+  .filterGroup label {
+    font-size: 0.85rem;
+  }
+
+  .filterGroup label svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .filterSelect {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+    border-radius: 6px;
+  }
+
+  .priceDisplay {
+    padding: 8px 12px;
+    border-radius: 6px;
+  }
+
+  .priceMin,
+  .priceMax {
+    font-size: 0.85rem;
+  }
+
+  .priceSlider {
+    height: 3px;
+  }
+
+  .priceSlider::-webkit-slider-thumb {
+    width: 16px;
+    height: 16px;
+  }
+
+  .resultsHeader {
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .resultsHeader h3 {
+    font-size: 1rem;
+  }
+
+  .clearFiltersBtn {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+
+  .noResults {
+    padding: 20px 12px;
+  }
+
+  .noResults p {
+    font-size: 0.9rem;
+  }
+
+  /* Evita zoom en iOS */
+  .searchInput,
+  .filterSelect {
+    font-size: 16px;
+  }
+}

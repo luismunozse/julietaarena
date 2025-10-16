@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import styles from './About.module.css'
 
 export default function About() {
@@ -6,24 +7,26 @@ export default function About() {
       <div className="container">
         <div className={styles.aboutContent}>
           <div className={styles.aboutImage}>
-            <div className={styles.aboutImagePlaceholder}>
-              <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-              </svg>
-            </div>
+            <Image 
+              src="/images/perfil.jpeg" 
+              alt="Julieta Arena - Martillera Pública"
+              width={400}
+              height={400}
+              className={styles.profileImage}
+              priority
+            />
           </div>
           <div className={styles.aboutText}>
             <h2 className="section-title">Sobre Mí</h2>
             <h3 className={styles.aboutSubtitle}>Julieta Arena - Martillera Pública</h3>
             <p className={styles.aboutDescription}>
-              Soy martillera pública matriculada con amplia experiencia en el mercado inmobiliario de Córdoba, Argentina. 
+              Soy martillera pública matriculada con amplia experiencia en el mercado inmobiliario de Córdoba. 
               Mi compromiso es brindar un servicio profesional, transparente y personalizado a cada uno de mis clientes.
             </p>
             <p className={styles.aboutDescription}>
               Con años de trayectoria en el sector, me especializo en ofrecer soluciones integrales que abarcan desde 
-              la compra-venta y alquiler de propiedades, hasta la gestión de remates judiciales y asesoramiento en 
-              trámites previsionales.
+              la compra-venta y alquiler de propiedades, hasta la gestión de remates judiciales y particulares como también asesoramiento en 
+              trámites en general.
             </p>
             
             <div className={styles.aboutFeatures}>

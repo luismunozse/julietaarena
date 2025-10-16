@@ -46,6 +46,16 @@ export default function Header() {
               </a>
             </li>
             <li className={styles.navItem}>
+              <a href="/propiedades" className={styles.navLink}>
+                Propiedades
+              </a>
+            </li>
+            <li className={styles.navItem}>
+              <a href="/asesoramiento-legal" className={styles.navLink}>
+                Asesoramiento Legal
+              </a>
+            </li>
+            <li className={styles.navItem}>
               <a href="#sobre-mi" className={styles.navLink} onClick={(e) => handleNavClick(e, '#sobre-mi')}>
                 Sobre Mí
               </a>
