@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { properties, Property, getPropertiesForSale, getPropertiesForRent } from '@/data/properties'
 import PropertyCard from './PropertyCard'
+import MapPlaceholder from './MapPlaceholder'
 import { useAnalytics } from '@/hooks/useAnalytics'
 import styles from './Properties.module.css'
 
@@ -139,50 +140,7 @@ export default function Properties() {
 
   return (
     <section className="section" id="propiedades">
-      <div className="container">
-        {/* Buscador Principal */}
-        <div className={styles.searchHero}>
-          <div className={styles.searchContainer}>
-            <div className={styles.searchHeader}>
-              <h3>🔍 Encuentra tu propiedad ideal</h3>
-              <p>Busca entre nuestras propiedades disponibles</p>
-            </div>
-            
-            <div className={styles.searchBox}>
-              <div className={styles.searchInputContainer}>
-                <svg className={styles.searchIcon} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <path d="m21 21-4.35-4.35"></path>
-                </svg>
-                <input
-                  type="text"
-                  placeholder="Buscar por ubicación, tipo o características..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className={styles.searchInput}
-                />
-                {searchTerm && (
-                  <button 
-                    onClick={() => setSearchTerm('')}
-                    className={styles.clearSearchBtn}
-                    aria-label="Limpiar búsqueda"
-                  >
-                    ✕
-                  </button>
-                )}
-              </div>
-              
-              <button className={styles.searchBtn}>
-                <span>Buscar</span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                  <polyline points="12,5 19,12 12,19"></polyline>
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-
+      <div className="container" style={{ maxWidth: '100%', padding: '0 20px' }}>
         {/* Pestañas de Venta/Alquiler */}
         <div className={styles.tabsContainer}>
           <div className={styles.tabs}>
@@ -201,20 +159,11 @@ export default function Properties() {
           </div>
         </div>
 
-        {/* Propiedades destacadas */}
-        {featuredProperties.filter(prop => prop.operation === activeTab).length > 0 && (
-          <div className={styles.featuredSection}>
-            <h3 className={styles.featuredTitle}>⭐ Propiedades Destacadas</h3>
-            <div className={styles.featuredGrid}>
-              {featuredProperties.filter(prop => prop.operation === activeTab).map(property => (
-                <PropertyCard key={property.id} property={property} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Filtros Avanzados */}
-        <div className={styles.filtersSection}>
+        {/* Layout con Sidebar */}
+        <div className={styles.propertiesLayout}>
+          {/* Sidebar Izquierdo - Filtros */}
+          <aside className={styles.sidebarFilters}>
+            <div className={styles.filtersSection}>
           <div className={styles.filtersHeader}>
             <h4>Filtros Avanzados</h4>
             <button 
@@ -236,6 +185,24 @@ export default function Properties() {
           </div>
 
           <div className={styles.filtersGrid}>
+            {/* Búsqueda */}
+            <div className={styles.filterGroup}>
+              <label>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                Buscar
+              </label>
+              <input
+                type="text"
+                placeholder="Ubicación, tipo..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className={styles.filterSelect}
+              />
+            </div>
+
             <div className={styles.filterGroup}>
               <label>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -424,10 +391,25 @@ export default function Properties() {
               </div>
             </div>
           </div>
-        </div>
+            </div>
+          </aside>
 
-        {/* Resultados */}
-        <div className={styles.resultsSection}>
+          {/* Contenido Principal */}
+          <main className={styles.mainContent}>
+            {/* Propiedades destacadas */}
+            {featuredProperties.filter(prop => prop.operation === activeTab).length > 0 && (
+              <div className={styles.featuredSection}>
+                <h3 className={styles.featuredTitle}>⭐ Propiedades Destacadas</h3>
+                <div className={styles.featuredGrid}>
+                  {featuredProperties.filter(prop => prop.operation === activeTab).map(property => (
+                    <PropertyCard key={property.id} property={property} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Resultados */}
+            <div className={styles.resultsSection}>
           <div className={styles.resultsHeader}>
             <h3>
               {filteredProperties.length} propiedad{filteredProperties.length !== 1 ? 'es' : ''} encontrada{filteredProperties.length !== 1 ? 's' : ''}
@@ -464,6 +446,8 @@ export default function Properties() {
               <p>Intenta ajustar tus criterios de búsqueda.</p>
             </div>
           )}
+        </div>
+          </main>
         </div>
       </div>
     </section>
