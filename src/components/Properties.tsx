@@ -42,8 +42,10 @@ export default function Properties() {
   const currentProperties = activeTab === 'venta' ? getPropertiesForSale() : getPropertiesForRent()
 
   // Ajustar rango de precios según la pestaña activa
-  const maxPrice = activeTab === 'venta' ? 200000000 : 500000
-  const currentPriceRange = priceRange.max > maxPrice ? { min: 0, max: maxPrice } : priceRange
+  const currentPriceRange = useMemo(() => {
+    const maxPrice = activeTab === 'venta' ? 200000000 : 500000
+    return priceRange.max > maxPrice ? { min: 0, max: maxPrice } : priceRange
+  }, [activeTab, priceRange])
 
   const filteredProperties = useMemo(() => {
     return currentProperties.filter(property => {
@@ -219,7 +221,7 @@ export default function Properties() {
               onClick={() => {
                 setSelectedType('all')
                 setSelectedLocation('all')
-                setPriceRange({ min: 0, max: maxPrice })
+                setPriceRange({ min: 0, max: activeTab === 'venta' ? 200000000 : 500000 })
                 setAreaRange({ min: 0, max: 1000 })
                 setBedrooms('all')
                 setBathrooms('all')
@@ -293,7 +295,7 @@ export default function Properties() {
                 <input
                   type="range"
                   min="0"
-                  max={maxPrice}
+                  max={activeTab === 'venta' ? 200000000 : 500000}
                   step={activeTab === 'venta' ? 5000000 : 10000}
                   value={currentPriceRange.max}
                   onChange={(e) => setPriceRange({ ...priceRange, max: parseInt(e.target.value) })}
@@ -430,12 +432,12 @@ export default function Properties() {
             <h3>
               {filteredProperties.length} propiedad{filteredProperties.length !== 1 ? 'es' : ''} encontrada{filteredProperties.length !== 1 ? 's' : ''}
             </h3>
-            {(selectedType !== 'all' || selectedLocation !== 'all' || searchTerm || currentPriceRange.max < maxPrice || areaRange.max < 1000 || bedrooms !== 'all' || bathrooms !== 'all' || yearBuilt !== 'all' || features.length > 0) && (
+            {(selectedType !== 'all' || selectedLocation !== 'all' || searchTerm || currentPriceRange.max < (activeTab === 'venta' ? 200000000 : 500000) || areaRange.max < 1000 || bedrooms !== 'all' || bathrooms !== 'all' || yearBuilt !== 'all' || features.length > 0) && (
               <button 
                 onClick={() => {
                   setSelectedType('all')
                   setSelectedLocation('all')
-                  setPriceRange({ min: 0, max: maxPrice })
+                  setPriceRange({ min: 0, max: activeTab === 'venta' ? 200000000 : 500000 })
                   setAreaRange({ min: 0, max: 1000 })
                   setBedrooms('all')
                   setBathrooms('all')

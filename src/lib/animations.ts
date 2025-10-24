@@ -5,6 +5,10 @@ export const animations = {
     from: { opacity: 0 },
     to: { opacity: 1 }
   },
+  fadeOut: {
+    from: { opacity: 1 },
+    to: { opacity: 0 }
+  },
   fadeInUp: {
     from: { opacity: 0, transform: 'translateY(30px)' },
     to: { opacity: 1, transform: 'translateY(0)' }
@@ -257,7 +261,7 @@ export const createStaggeredAnimation = (
   staggerDelay: string = delays.short,
   maxItems: number = 10
 ) => {
-  const staggered = {}
+  const staggered: any = {}
   for (let i = 0; i < maxItems; i++) {
     staggered[`:nth-child(${i + 1})`] = {
       ...baseAnimation,

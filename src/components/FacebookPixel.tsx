@@ -13,7 +13,8 @@ export default function FacebookPixel({ pixelId }: FacebookPixelProps) {
     if (typeof window !== 'undefined' && pixelId) {
       // Load fbq
       window.fbq = window.fbq || function(...args: any[]) {
-        (window.fbq.q = window.fbq.q || []).push(args)
+        (window.fbq as any).q = (window.fbq as any).q || []
+        ;(window.fbq as any).q.push(args)
       }
       window.fbq('init', pixelId)
       window.fbq('track', 'PageView')

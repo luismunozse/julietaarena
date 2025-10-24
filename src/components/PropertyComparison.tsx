@@ -110,7 +110,7 @@ export default function PropertyComparison({ onClose }: PropertyComparisonProps)
                 </div>
                 {comparisonProperties.map((property) => (
                   <div key={property.id} className={styles.rowValue}>
-                    {row.format(property[row.key as keyof Property] as any)}
+                    {String(property[row.key as keyof Property] || '')}
                   </div>
                 ))}
               </div>

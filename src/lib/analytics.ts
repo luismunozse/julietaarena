@@ -335,6 +335,3 @@ class Analytics {
 
 // Create singleton instance
 export const analytics = new Analytics()
-
-// Export types
-export type { AnalyticsEvent, PageViewEvent }

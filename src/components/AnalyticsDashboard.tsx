@@ -23,7 +23,7 @@ export default function AnalyticsDashboard() {
     const loadData = () => {
       setIsLoading(true)
       const analyticsData = analytics.exportData()
-      setData(analyticsData)
+      setData(analyticsData as any)
       setIsLoading(false)
     }
 

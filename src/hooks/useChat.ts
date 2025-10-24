@@ -106,7 +106,7 @@ export function useChat() {
 
     // Generar respuesta automática
     const response = generateResponse(text)
-    addMessage(response.text, 'agent', response.type, response.metadata)
+    addMessage(response.text, 'agent', response.type)
   }
 
   const generateResponse = (userMessage: string) => {

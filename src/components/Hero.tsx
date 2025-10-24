@@ -1,6 +1,5 @@
 'use client'
 
-import AnimatedElement from './AnimatedElement'
 import { useFadeInUp, useFadeInLeft, useFadeInRight } from '@/hooks/useAnimation'
 import styles from './Hero.module.css'
 
@@ -22,46 +21,31 @@ export default function Hero() {
     <section className={styles.hero} id="inicio">
       <div className={styles.heroOverlay}></div>
       <div className={`${styles.heroContent} container`}>
-        <AnimatedElement
-          ref={titleRef.elementRef}
-          as="h1"
+        <h1
+          ref={titleRef.elementRef as any}
           className={styles.heroTitle}
-          trigger="onMount"
-          animation="fadeInUp"
-          delay="0.2s"
         >
           Julieta Arena
-        </AnimatedElement>
+        </h1>
         
-        <AnimatedElement
-          ref={subtitleRef.elementRef}
-          as="p"
+        <p
+          ref={subtitleRef.elementRef as any}
           className={styles.heroSubtitle}
-          trigger="onMount"
-          animation="fadeInUp"
-          delay="0.4s"
         >
           Martillera Pública Matriculada
-        </AnimatedElement>
+        </p>
         
-        <AnimatedElement
-          ref={descriptionRef.elementRef}
-          as="p"
+        <p
+          ref={descriptionRef.elementRef as any}
           className={styles.heroDescription}
-          trigger="onMount"
-          animation="fadeInUp"
-          delay="0.6s"
         >
           Servicios profesionales de bienes raíces en Córdoba, Argentina.<br />
           Comprometida con la excelencia y la transparencia en cada transacción.
-        </AnimatedElement>
+        </p>
         
-        <AnimatedElement
-          ref={buttonsRef.elementRef}
+        <div
+          ref={buttonsRef.elementRef as any}
           className={styles.heroButtons}
-          trigger="onMount"
-          animation="fadeInUp"
-          delay="0.8s"
         >
           <a href="#servicios" className="btn btn-primary" onClick={(e) => handleScroll(e, '#servicios')}>
             Ver Servicios
@@ -69,7 +53,7 @@ export default function Hero() {
           <a href="#contacto" className="btn btn-secondary" onClick={(e) => handleScroll(e, '#contacto')}>
             Contactar
           </a>
-        </AnimatedElement>
+        </div>
       </div>
       <div className={styles.heroScroll}>
         <a href="#servicios" onClick={(e) => handleScroll(e, '#servicios')}>

@@ -51,9 +51,9 @@ export default function Testimonials() {
                 </svg>
               </div>
               
-              <blockquote className={styles.testimonialText}>
-                "{testimonials[currentIndex]?.comment}"
-              </blockquote>
+                <blockquote className={styles.testimonialText}>
+                  &ldquo;{testimonials[currentIndex]?.comment}&rdquo;
+                </blockquote>
               
               <div className={styles.testimonialRating}>
                 {renderStars(testimonials[currentIndex]?.rating || 0)}

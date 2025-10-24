@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { animations, durations, easings, presets } from '@/lib/animations'
 
-interface UseAnimationOptions {
+export interface UseAnimationOptions {
   animation?: any
   duration?: string
   easing?: string
@@ -124,7 +124,7 @@ export function useAnimation(options: UseAnimationOptions = {}) {
         element.removeEventListener('click', handleClick)
       }
     }
-  }, [trigger, threshold, rootMargin, once])
+  }, [trigger, threshold, rootMargin, once, startAnimation])
 
   return {
     elementRef,
@@ -270,7 +270,7 @@ export function useStaggeredAnimation(
     return () => {
       timeouts.forEach(timeout => clearTimeout(timeout))
     }
-  }, [items.length, staggerDelay])
+  }, [items, staggerDelay])
 
   return animatedItems
 }

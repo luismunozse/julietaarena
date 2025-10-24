@@ -269,19 +269,19 @@ export const accessibility = {
         return 'El formato no coincide con el patrón requerido'
       }
       if (validity.tooShort) {
-        return `Debe tener al menos ${field.minLength} caracteres`
+        return `Debe tener al menos ${(field as HTMLInputElement).minLength || 0} caracteres`
       }
       if (validity.tooLong) {
-        return `No puede tener más de ${field.maxLength} caracteres`
+        return `No puede tener más de ${(field as HTMLInputElement).maxLength || 0} caracteres`
       }
       if (validity.rangeUnderflow) {
-        return `El valor debe ser mayor o igual a ${field.min}`
+        return `El valor debe ser mayor o igual a ${(field as HTMLInputElement).min || 0}`
       }
       if (validity.rangeOverflow) {
-        return `El valor debe ser menor o igual a ${field.max}`
+        return `El valor debe ser menor o igual a ${(field as HTMLInputElement).max || 0}`
       }
       if (validity.stepMismatch) {
-        return `El valor debe ser un múltiplo de ${field.step}`
+        return `El valor debe ser un múltiplo de ${(field as HTMLInputElement).step || 1}`
       }
       if (validity.badInput) {
         return 'El valor ingresado no es válido'

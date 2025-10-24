@@ -47,9 +47,9 @@ export default function AppointmentBooking({
         setFormData(prev => ({ ...prev, time: '' }))
       }
     }
-  }, [formData.date, isTimeSlotAvailable])
+  }, [formData.date, formData.time, timeSlots, isTimeSlotAvailable])
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
   }

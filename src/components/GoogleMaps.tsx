@@ -66,28 +66,6 @@ export default function GoogleMaps({
     return `$${price.toLocaleString()}`
   }
 
-  useEffect(() => {
-    // Cargar Google Maps API
-    const loadGoogleMaps = () => {
-      if (window.google) {
-        initMap()
-        return
-      }
-
-      const script = document.createElement('script')
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`
-      script.async = true
-      script.defer = true
-      script.onload = () => {
-        window.initMap = initMap
-        initMap()
-      }
-      document.head.appendChild(script)
-    }
-
-    loadGoogleMaps()
-  }, [])
-
   const initMap = () => {
     if (!mapRef.current || window.google) return
 
@@ -181,10 +159,32 @@ export default function GoogleMaps({
   }
 
   useEffect(() => {
+    // Cargar Google Maps API
+    const loadGoogleMaps = () => {
+      if (window.google) {
+        initMap()
+        return
+      }
+
+      const script = document.createElement('script')
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`
+      script.async = true
+      script.defer = true
+      script.onload = () => {
+        window.initMap = initMap
+        initMap()
+      }
+      document.head.appendChild(script)
+    }
+
+    loadGoogleMaps()
+  }, [initMap])
+
+  useEffect(() => {
     if (map && isLoaded) {
       createMarkers(map)
     }
-  }, [properties, map, isLoaded])
+  }, [properties, map, isLoaded, createMarkers])
 
   useEffect(() => {
     if (selectedProperty && map) {
@@ -194,7 +194,7 @@ export default function GoogleMaps({
       map.setCenter(coords)
       map.setZoom(15)
     }
-  }, [selectedProperty, map])
+  }, [selectedProperty, map, cordobaCenter, zoneCoordinates])
 
   if (!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) {
     return (

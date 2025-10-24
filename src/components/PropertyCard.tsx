@@ -6,7 +6,6 @@ import FavoriteButton from './FavoriteButton'
 import CompareButton from './CompareButton'
 import AppointmentBooking from './AppointmentBooking'
 import ReviewSummary from './ReviewSummary'
-import AnimatedElement from './AnimatedElement'
 import { useAnalytics } from '@/hooks/useAnalytics'
 import { useFadeInUp } from '@/hooks/useAnimation'
 import styles from './PropertyCard.module.css'
@@ -60,13 +59,9 @@ export default function PropertyCard({ property }: PropertyCardProps) {
   }
 
   return (
-    <AnimatedElement
-      ref={elementRef}
+    <div
+      ref={elementRef as any}
       className={`${styles.propertyCard} ${property.featured ? styles.featured : ''}`}
-      trigger="onScroll"
-      animation="fadeInUp"
-      duration="0.5s"
-      easing="ease-out"
     >
       {property.featured && (
         <div className={styles.featuredBadge}>
@@ -241,6 +236,6 @@ export default function PropertyCard({ property }: PropertyCardProps) {
           </div>
         </div>
       )}
-    </AnimatedElement>
+    </div>
   )
 }

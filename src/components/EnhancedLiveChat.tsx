@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { useChat } from '@/hooks/useChat'
-import styles from './LiveChat.module.css'
+import styles from './EnhancedLiveChat.module.css'
 
 export default function EnhancedLiveChat() {
   const [isOpen, setIsOpen] = useState(false)

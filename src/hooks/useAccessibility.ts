@@ -323,7 +323,7 @@ export function useKeyboardNavigation(items: HTMLElement[], orientation: 'horizo
       document.addEventListener('keydown', handleKeyDown)
       return () => document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [handleKeyDown])
+  }, [handleKeyDown, items.length])
 
   useEffect(() => {
     if (items[activeIndex]) {
