@@ -1,0 +1,119 @@
+.compareButton {
+  background: var(--white);
+  border: 2px solid #e0e0e0;
+  border-radius: 25px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: var(--transition);
+  font-weight: 500;
+  color: var(--text-dark);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+}
+
+.compareButton:hover:not(.disabled) {
+  border-color: var(--secondary-color);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.compareButton.active {
+  background: var(--secondary-color);
+  border-color: var(--secondary-color);
+  color: var(--white);
+}
+
+.compareButton.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.compareButton.animate {
+  animation: comparePulse 0.3s ease-in-out;
+}
+
+@keyframes comparePulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.compareIcon {
+  font-size: 1.2rem;
+  transition: var(--transition);
+}
+
+.compareText {
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--text-dark);
+  color: var(--white);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: var(--transition);
+  margin-bottom: 5px;
+}
+
+.compareButton:hover .tooltip {
+  opacity: 1;
+}
+
+.tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: var(--text-dark);
+}
+
+/* Sizes */
+.small {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+}
+
+.small .compareIcon {
+  font-size: 1rem;
+}
+
+.medium {
+  padding: 8px 16px;
+  font-size: 0.9rem;
+}
+
+.large {
+  padding: 12px 20px;
+  font-size: 1rem;
+}
+
+.large .compareIcon {
+  font-size: 1.4rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .compareButton {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+  
+  .compareText {
+    display: none;
+  }
+}

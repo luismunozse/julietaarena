@@ -1,0 +1,376 @@
+.pageContainer {
+  min-height: 100vh;
+  padding-top: 80px;
+  background: var(--bg-light);
+}
+
+.articleHeader {
+  background: var(--white);
+  padding: 40px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.breadcrumb {
+  font-size: 0.9rem;
+  color: var(--text-light);
+  margin-bottom: 20px;
+}
+
+.breadcrumb a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.articleMeta {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+  color: var(--text-light);
+}
+
+.category {
+  background: var(--primary-color);
+  color: var(--white);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+.readTime {
+  color: var(--text-light);
+}
+
+.date {
+  color: var(--text-light);
+}
+
+.articleTitle {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 20px;
+  line-height: 1.2;
+}
+
+.articleExcerpt {
+  font-size: 1.3rem;
+  color: var(--text-light);
+  margin-bottom: 30px;
+  line-height: 1.6;
+}
+
+.authorInfo {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.authorAvatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.authorDetails h4 {
+  margin: 0;
+  color: var(--text-dark);
+  font-size: 1.1rem;
+}
+
+.authorDetails p {
+  margin: 0;
+  color: var(--text-light);
+  font-size: 0.9rem;
+}
+
+.articleImage {
+  margin: 40px 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+.image {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.articleContent {
+  background: var(--white);
+  padding: 60px;
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 40px;
+}
+
+.articleContent h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 40px 0 20px 0;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--primary-color);
+}
+
+.articleContent h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 30px 0 15px 0;
+}
+
+.articleContent p {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: var(--text-dark);
+  margin-bottom: 20px;
+}
+
+.articleContent ul,
+.articleContent ol {
+  margin: 20px 0;
+  padding-left: 30px;
+}
+
+.articleContent li {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: var(--text-dark);
+  margin-bottom: 10px;
+}
+
+.tipBox {
+  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+  border-left: 4px solid var(--primary-color);
+  padding: 25px;
+  margin: 30px 0;
+  border-radius: 8px;
+}
+
+.tipBox h4 {
+  margin: 0 0 15px 0;
+  color: var(--primary-color);
+  font-size: 1.2rem;
+}
+
+.tipBox p {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text-dark);
+}
+
+.costsTable {
+  background: var(--bg-light);
+  border-radius: 8px;
+  padding: 20px;
+  margin: 30px 0;
+}
+
+.costItem {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.costItem:last-child {
+  border-bottom: none;
+}
+
+.costItem span:first-child {
+  font-weight: 500;
+  color: var(--text-dark);
+}
+
+.costItem span:last-child {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.ctaBox {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+  color: var(--white);
+  padding: 40px;
+  border-radius: 12px;
+  text-align: center;
+  margin: 40px 0;
+}
+
+.ctaBox h3 {
+  margin: 0 0 15px 0;
+  font-size: 1.5rem;
+}
+
+.ctaBox p {
+  margin: 0 0 25px 0;
+  font-size: 1.1rem;
+  opacity: 0.9;
+}
+
+.articleFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30px 0;
+  border-top: 1px solid var(--border-light);
+  margin-bottom: 40px;
+}
+
+.tags {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.tagLabel {
+  font-weight: 500;
+  color: var(--text-dark);
+}
+
+.tag {
+  background: var(--bg-light);
+  color: var(--text-dark);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+.shareButtons {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.shareButtons span {
+  font-weight: 500;
+  color: var(--text-dark);
+}
+
+.shareBtn {
+  background: var(--primary-color);
+  color: var(--white);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.shareBtn:hover {
+  background: var(--secondary-color);
+  transform: translateY(-2px);
+}
+
+.relatedPosts {
+  background: var(--white);
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+}
+
+.relatedPosts h3 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.relatedGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.relatedPost {
+  text-align: center;
+}
+
+.relatedImage {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+
+.relatedPost h4 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 10px;
+}
+
+.relatedPost p {
+  color: var(--text-light);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .pageContainer {
+    padding-top: 70px;
+  }
+  
+  .articleContent {
+    padding: 30px 20px;
+  }
+  
+  .articleTitle {
+    font-size: 2.2rem;
+  }
+  
+  .articleExcerpt {
+    font-size: 1.1rem;
+  }
+  
+  .articleMeta {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .articleFooter {
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+  }
+  
+  .relatedPosts {
+    padding: 30px 20px;
+  }
+  
+  .ctaBox {
+    padding: 30px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .articleTitle {
+    font-size: 1.8rem;
+  }
+  
+  .articleContent h2 {
+    font-size: 1.5rem;
+  }
+  
+  .articleContent h3 {
+    font-size: 1.3rem;
+  }
+}

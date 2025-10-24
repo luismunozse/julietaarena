@@ -1,0 +1,169 @@
+.recommendationsContainer {
+  margin: 40px 0;
+  padding: 0 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.title {
+  margin: 0;
+  color: var(--text-dark);
+  font-size: 1.8rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.badge {
+  background: var(--primary-color);
+  color: var(--white);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.toggleBtn {
+  background: var(--bg-light);
+  color: var(--text-dark);
+  border: 2px solid var(--border-light);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.toggleBtn:hover {
+  background: var(--primary-color);
+  color: var(--white);
+  border-color: var(--primary-color);
+}
+
+.recommendationsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin-bottom: 30px;
+}
+
+.recommendationItem {
+  position: relative;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.recommendationItem:hover {
+  transform: translateY(-4px);
+}
+
+.scoreBadge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(44, 95, 125, 0.9);
+  color: var(--white);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  z-index: 2;
+  backdrop-filter: blur(10px);
+}
+
+.reasons {
+  margin-top: 16px;
+  padding: 16px;
+  background: var(--bg-light);
+  border-radius: 12px;
+  border: 1px solid var(--border-light);
+}
+
+.reasons h4 {
+  margin: 0 0 12px 0;
+  color: var(--text-dark);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.reasons ul {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--text-light);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.reasons li {
+  margin-bottom: 6px;
+}
+
+.loadMore {
+  text-align: center;
+  margin-top: 30px;
+}
+
+.loadMoreBtn {
+  background: var(--primary-color);
+  color: var(--white);
+  border: none;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.loadMoreBtn:hover {
+  background: var(--accent-color);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .recommendationsContainer {
+    padding: 0 10px;
+  }
+  
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .title {
+    font-size: 1.5rem;
+  }
+  
+  .recommendationsGrid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .scoreBadge {
+    font-size: 0.7rem;
+    padding: 4px 8px;
+  }
+  
+  .reasons {
+    padding: 12px;
+  }
+  
+  .reasons h4 {
+    font-size: 0.9rem;
+  }
+  
+  .reasons ul {
+    font-size: 0.8rem;
+  }
+}

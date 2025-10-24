@@ -32,6 +32,13 @@
   box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
 }
 
+.favoriteButton {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+}
+
 .imageContainer {
   position: relative;
   height: 250px;
@@ -253,9 +260,12 @@
 
 .propertyActions {
   display: flex;
-  gap: 12px;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
+.appointmentBtn,
+.reviewsBtn,
 .contactBtn,
 .whatsappBtn {
   flex: 1;
@@ -270,6 +280,27 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
+  min-width: 120px;
+}
+
+.appointmentBtn {
+  background: var(--secondary-color);
+  color: white;
+}
+
+.appointmentBtn:hover {
+  background: #d4a574;
+  transform: translateY(-2px);
+}
+
+.reviewsBtn {
+  background: #ff9800;
+  color: white;
+}
+
+.reviewsBtn:hover {
+  background: #f57c00;
+  transform: translateY(-2px);
 }
 
 .contactBtn {
@@ -290,6 +321,12 @@
 .whatsappBtn:hover {
   background: #20ba5a;
   transform: translateY(-2px);
+}
+
+.propertyComparison {
+  margin-top: 15px;
+  display: flex;
+  justify-content: center;
 }
 
 /* Responsive */
@@ -340,5 +377,95 @@
   .contactBtn,
   .whatsappBtn {
     padding: 14px 16px;
+  }
+}
+
+/* Modal de reseñas */
+.reviewsOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.reviewsModal {
+  background: var(--white);
+  border-radius: 16px;
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-xl);
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reviewsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 24px 0 24px;
+  border-bottom: 1px solid var(--border-light);
+  margin-bottom: 0;
+}
+
+.reviewsHeader h2 {
+  margin: 0;
+  color: var(--text-dark);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text-light);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+.closeBtn:hover {
+  background: var(--bg-light);
+  color: var(--text-dark);
+}
+
+/* Responsive para modal de reseñas */
+@media (max-width: 768px) {
+  .reviewsOverlay {
+    padding: 10px;
+  }
+  
+  .reviewsModal {
+    max-height: 95vh;
+  }
+  
+  .reviewsHeader {
+    padding-left: 16px;
+    padding-right: 16px;
   }
 }

@@ -1,23 +1,27 @@
-import Header from '@/components/Header'
 import Hero from '@/components/Hero'
 import Services from '@/components/Services'
 import About from '@/components/About'
+import Testimonials from '@/components/Testimonials'
 import Contact from '@/components/Contact'
-import Footer from '@/components/Footer'
 import WhatsAppButton from '@/components/WhatsAppButton'
+import EnhancedLiveChat from '@/components/EnhancedLiveChat'
+import ComparisonFloatingButton from '@/components/ComparisonFloatingButton'
+import NotificationPrompt from '@/components/NotificationPrompt'
 
 export default function Home() {
   return (
     <>
-      <Header />
       <main>
         <Hero />
         <Services />
         <About />
+        <Testimonials />
         <Contact />
       </main>
-      <Footer />
       <WhatsAppButton />
+      <EnhancedLiveChat />
+      <ComparisonFloatingButton />
+      <NotificationPrompt />
     </>
   )
 }

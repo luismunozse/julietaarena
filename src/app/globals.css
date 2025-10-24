@@ -20,14 +20,33 @@
 
 html {
   scroll-behavior: smooth;
+  color-scheme: light !important;
 }
 
 body {
   font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  color: var(--text-dark);
+  color: var(--text-dark) !important;
   line-height: 1.6;
-  background-color: var(--white);
+  background-color: var(--white) !important;
   overflow-x: hidden;
+}
+
+/* Forzar modo claro */
+* {
+  color-scheme: light !important;
+}
+
+/* Asegurar que no hay estilos de modo oscuro */
+html[data-theme="dark"],
+html.dark,
+.dark {
+  color-scheme: light !important;
+}
+
+html[data-theme="dark"] *,
+html.dark *,
+.dark * {
+  color-scheme: light !important;
 }
 
 .container {

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import styles from './Header.module.css'
 
 export default function Header() {
@@ -28,10 +29,10 @@ export default function Header() {
   return (
     <header className={`${styles.header} ${isScrolled ? styles.scrolled : ''}`}>
       <nav className={`${styles.nav} container`}>
-        <div className={styles.navLogo}>
+        <Link href="/" className={styles.navLogo}>
           <h2>Julieta Arena</h2>
           <p className={styles.navSubtitle}>Martillera Pública</p>
-        </div>
+        </Link>
 
         <div className={`${styles.navMenu} ${isMobileMenuOpen ? styles.active : ''}`}>
           <ul className={styles.navList}>
@@ -40,24 +41,30 @@ export default function Header() {
                 Inicio
               </a>
             </li>
-            <li className={styles.navItem}>
+            <li className={`${styles.navItem} ${styles.dropdownItem}`}>
               <a href="#servicios" className={styles.navLink} onClick={(e) => handleNavClick(e, '#servicios')}>
                 Servicios
               </a>
-            </li>
-            <li className={styles.navItem}>
-              <a href="/propiedades" className={styles.navLink}>
-                Propiedades
-              </a>
-            </li>
-            <li className={styles.navItem}>
-              <a href="/asesoramiento-legal" className={styles.navLink}>
-                Asesoramiento Legal
-              </a>
+              <div className={styles.dropdown}>
+                <a href="/propiedades" className={styles.dropdownLink}>
+                  Propiedades
+                </a>
+                <a href="/asesoramiento-legal" className={styles.dropdownLink}>
+                  Asesoramiento Legal
+                </a>
+                <a href="/remates-judiciales" className={styles.dropdownLink}>
+                  Remates Judiciales
+                </a>
+              </div>
             </li>
             <li className={styles.navItem}>
               <a href="#sobre-mi" className={styles.navLink} onClick={(e) => handleNavClick(e, '#sobre-mi')}>
                 Sobre Mí
+              </a>
+            </li>
+            <li className={styles.navItem}>
+              <a href="/blog" className={styles.navLink}>
+                Blog
               </a>
             </li>
             <li className={styles.navItem}>

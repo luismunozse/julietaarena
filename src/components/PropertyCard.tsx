@@ -1,7 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Property } from '@/data/properties'
+import FavoriteButton from './FavoriteButton'
+import CompareButton from './CompareButton'
+import AppointmentBooking from './AppointmentBooking'
+import ReviewSummary from './ReviewSummary'
+import AnimatedElement from './AnimatedElement'
+import { useAnalytics } from '@/hooks/useAnalytics'
+import { useFadeInUp } from '@/hooks/useAnimation'
 import styles from './PropertyCard.module.css'
 
 interface PropertyCardProps {
@@ -10,6 +17,15 @@ interface PropertyCardProps {
 
 export default function PropertyCard({ property }: PropertyCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [showAppointmentBooking, setShowAppointmentBooking] = useState(false)
+  const [showReviews, setShowReviews] = useState(false)
+  const analytics = useAnalytics()
+  const { elementRef, isVisible } = useFadeInUp({ trigger: 'onScroll' })
+
+  // Track property view
+  useEffect(() => {
+    analytics.trackPropertyView(property.id, property.title)
+  }, [property.id, property.title, analytics])
 
   const formatPrice = (price: number): string => {
     return new Intl.NumberFormat('es-AR', {
@@ -44,12 +60,23 @@ export default function PropertyCard({ property }: PropertyCardProps) {
   }
 
   return (
-    <div className={`${styles.propertyCard} ${property.featured ? styles.featured : ''}`}>
+    <AnimatedElement
+      ref={elementRef}
+      className={`${styles.propertyCard} ${property.featured ? styles.featured : ''}`}
+      trigger="onScroll"
+      animation="fadeInUp"
+      duration="0.5s"
+      easing="ease-out"
+    >
       {property.featured && (
         <div className={styles.featuredBadge}>
           <span>⭐ Destacada</span>
         </div>
       )}
+      
+      <div className={styles.favoriteButton}>
+        <FavoriteButton propertyId={property.id} size="small" />
+      </div>
       
       <div className={styles.imageContainer}>
         <img 
@@ -150,14 +177,70 @@ export default function PropertyCard({ property }: PropertyCardProps) {
         </div>
 
         <div className={styles.propertyActions}>
-          <button className={styles.contactBtn}>
+          <button 
+            className={styles.appointmentBtn}
+            onClick={() => {
+              analytics.trackClick('appointment_button', 'property_card', { propertyId: property.id })
+              setShowAppointmentBooking(true)
+            }}
+          >
+            📅 Agendar Visita
+          </button>
+          <button 
+            className={styles.reviewsBtn}
+            onClick={() => {
+              analytics.trackClick('reviews_button', 'property_card', { propertyId: property.id })
+              setShowReviews(true)
+            }}
+          >
+            ⭐ Reseñas
+          </button>
+          <button 
+            className={styles.contactBtn}
+            onClick={() => analytics.trackContact('phone', `property_${property.id}`)}
+          >
             📞 Consultar
           </button>
-          <button className={styles.whatsappBtn}>
+          <button 
+            className={styles.whatsappBtn}
+            onClick={() => analytics.trackContact('whatsapp', `property_${property.id}`)}
+          >
             💬 WhatsApp
           </button>
         </div>
+
+        <div className={styles.propertyComparison}>
+          <CompareButton property={property} size="small" showText={true} />
+        </div>
       </div>
-    </div>
+
+      {showAppointmentBooking && (
+        <AppointmentBooking
+          property={property}
+          onClose={() => setShowAppointmentBooking(false)}
+          onSuccess={(appointmentId) => {
+            console.log('Cita agendada:', appointmentId)
+            setShowAppointmentBooking(false)
+          }}
+        />
+      )}
+
+      {showReviews && (
+        <div className={styles.reviewsOverlay}>
+          <div className={styles.reviewsModal}>
+            <div className={styles.reviewsHeader}>
+              <h2>Reseñas de {property.title}</h2>
+              <button 
+                onClick={() => setShowReviews(false)}
+                className={styles.closeBtn}
+              >
+                ✕
+              </button>
+            </div>
+            <ReviewSummary property={property} />
+          </div>
+        </div>
+      )}
+    </AnimatedElement>
   )
 }

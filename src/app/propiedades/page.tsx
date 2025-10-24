@@ -1,4 +1,7 @@
 import Properties from '@/components/Properties'
+import PropertyMap from '@/components/PropertyMap'
+import Recommendations from '@/components/Recommendations'
+import { properties } from '@/data/properties'
 import styles from './page.module.css'
 
 export const metadata = {
@@ -24,6 +27,15 @@ export default function PropiedadesPage() {
       <div className={styles.searchSection}>
         <Properties />
       </div>
+
+      <PropertyMap />
+      
+      <Recommendations 
+        properties={properties}
+        title="Propiedades que podrían interesarte"
+        showReasons={true}
+        maxItems={6}
+      />
     </main>
   )
 }

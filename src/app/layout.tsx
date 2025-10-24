@@ -1,7 +1,14 @@
 import type { Metadata } from 'next'
 import { Poppins } from 'next/font/google'
 import './globals.css'
+import '../styles/accessibility.css'
 import StructuredData from '@/components/StructuredData'
+import { AuthProvider } from '@/components/AuthProvider'
+import Header from '@/components/Header'
+import Footer from '@/components/Footer'
+import GoogleAnalytics from '@/components/GoogleAnalytics'
+import FacebookPixel from '@/components/FacebookPixel'
+import AnalyticsProvider from '@/components/AnalyticsProvider'
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -70,7 +77,39 @@ export default function RootLayout({
       <head>
         <StructuredData />
       </head>
-      <body className={poppins.className}>{children}</body>
+      <body className={poppins.className}>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // Forzar modo claro agresivamente
+              document.documentElement.style.colorScheme = 'light';
+              document.documentElement.classList.remove('dark');
+              document.documentElement.classList.add('light');
+              document.documentElement.setAttribute('data-theme', 'light');
+              
+              // Aplicar estilos directamente
+              document.documentElement.style.backgroundColor = '#ffffff';
+              document.body.style.backgroundColor = '#ffffff';
+              document.body.style.color = '#2d3436';
+              
+              // Remover cualquier clase de modo oscuro
+              document.querySelectorAll('*').forEach(el => {
+                el.classList.remove('dark');
+                el.classList.add('light');
+              });
+            `,
+          }}
+        />
+        <GoogleAnalytics measurementId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || ''} />
+        <FacebookPixel pixelId={process.env.NEXT_PUBLIC_FB_PIXEL_ID || ''} />
+        <AnalyticsProvider>
+          <AuthProvider>
+            <Header />
+            {children}
+            <Footer />
+          </AuthProvider>
+        </AnalyticsProvider>
+      </body>
     </html>
   )
 }

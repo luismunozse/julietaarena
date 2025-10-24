@@ -1,0 +1,170 @@
+.mapContainer {
+  position: relative;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+.map {
+  width: 100%;
+  height: 100%;
+}
+
+.mapLoading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--bg-light);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.loadingSpinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e0e0e0;
+  border-top: 4px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 15px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.mapLoading p {
+  color: var(--text-light);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.mapError {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background: var(--bg-light);
+  color: var(--text-light);
+  text-align: center;
+  padding: 20px;
+}
+
+.mapError h3 {
+  margin: 0 0 10px 0;
+  color: var(--text-dark);
+}
+
+.mapError p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* Estilos para InfoWindow */
+.infoWindow {
+  max-width: 300px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.infoImage {
+  width: 100%;
+  height: 150px;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.infoImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.infoContent h3 {
+  margin: 0 0 8px 0;
+  color: var(--text-dark);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.infoLocation {
+  margin: 0 0 8px 0;
+  color: var(--text-light);
+  font-size: 0.9rem;
+}
+
+.infoPrice {
+  margin: 0 0 10px 0;
+  color: var(--primary-color);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.infoDetails {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  font-size: 0.8rem;
+  color: var(--text-light);
+}
+
+.infoDetails span {
+  background: var(--bg-light);
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.infoButton {
+  background: var(--primary-color);
+  color: var(--white);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  width: 100%;
+}
+
+.infoButton:hover {
+  background: var(--accent-color);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .infoWindow {
+    max-width: 250px;
+  }
+  
+  .infoImage {
+    height: 120px;
+  }
+  
+  .infoContent h3 {
+    font-size: 0.9rem;
+  }
+  
+  .infoPrice {
+    font-size: 1rem;
+  }
+  
+  .infoDetails {
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  
+  .infoDetails span {
+    font-size: 0.7rem;
+    padding: 3px 6px;
+  }
+}
