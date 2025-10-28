@@ -1,4 +1,6 @@
+import { Suspense } from 'react'
 import PropertiesResults from '@/components/PropertiesResults'
+import SkeletonLoader from '@/components/SkeletonLoader'
 
 export const metadata = {
   title: 'Resultados de Búsqueda | Julieta Arena - Martillera Pública',
@@ -8,7 +10,9 @@ export const metadata = {
 export default function ResultadoPage() {
   return (
     <main>
-      <PropertiesResults />
+      <Suspense fallback={<SkeletonLoader type="card" count={6} />}>
+        <PropertiesResults />
+      </Suspense>
     </main>
   )
 }

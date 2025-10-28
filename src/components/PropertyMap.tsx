@@ -3,7 +3,12 @@
 import { useState, useEffect, useRef } from 'react'
 import GoogleMaps from './GoogleMaps'
 import styles from './PropertyMap.module.css'
-import { properties, Property } from '@/data/properties'
+import { properties as defaultProperties, Property } from '@/data/properties'
+
+interface PropertyMapProps {
+  properties?: Property[]
+  height?: string
+}
 
 interface MapMarker {
   id: string
@@ -29,7 +34,7 @@ const zoneCoordinates: { [key: string]: { lat: number; lng: number } } = {
   'Torre Empresarial': { lat: -31.4150, lng: -64.1850 }
 }
 
-export default function PropertyMap() {
+export default function PropertyMap({ properties = defaultProperties, height = '600px' }: PropertyMapProps) {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null)
   const [mapMarkers, setMapMarkers] = useState<MapMarker[]>([])
   const [filterType, setFilterType] = useState<string>('all')
@@ -54,7 +59,7 @@ export default function PropertyMap() {
     })
     
     setMapMarkers(markers)
-  }, [])
+  }, [properties])
 
   const filteredMarkers = mapMarkers.filter(marker => {
     const property = marker.property
@@ -133,12 +138,12 @@ export default function PropertyMap() {
             </div>
           </div>
 
-          <div className={styles.mapWrapper}>
+          <div className={styles.mapWrapper} style={{ height }}>
             <GoogleMaps
               properties={filteredMarkers.map(marker => marker.property)}
               selectedProperty={selectedProperty}
               onPropertySelect={setSelectedProperty}
-              height="500px"
+              height={height}
             />
 
             <div className={styles.propertyList}>
