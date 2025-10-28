@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { properties, Property, getPropertiesForSale, getPropertiesForRent } from '@/data/properties'
 import PropertyCard from './PropertyCard'
@@ -9,6 +9,7 @@ import PropertyMap from './PropertyMap'
 import SkeletonLoader from './SkeletonLoader'
 import EmptyState from './EmptyState'
 import { useAnalytics } from '@/hooks/useAnalytics'
+import { useUXMetrics } from '@/hooks/useUXMetrics'
 import styles from './PropertiesResults.module.css'
 
 type ViewMode = 'grid' | 'list' | 'map'
@@ -24,10 +25,19 @@ export default function PropertiesResults() {
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
   const [isLoading, setIsLoading] = useState(true)
   const analytics = useAnalytics()
+  const loadingStartTime = useRef<number>(Date.now())
+
+  // Track UX metrics
+  const { trackCustomMetric, trackEmptyState, trackLoadingState } = useUXMetrics({
+    componentName: 'PropertiesResults',
+    trackLoadTime: true,
+    trackScrollDepth: true
+  })
 
   // Leer parámetros de la URL al cargar
   useEffect(() => {
     setIsLoading(true)
+    loadingStartTime.current = Date.now()
     
     const operation = searchParams.get('operation')
     const type = searchParams.get('type')
@@ -49,11 +59,13 @@ export default function PropertiesResults() {
 
     // Simular carga de datos (en una app real, esto sería una llamada API)
     const timer = setTimeout(() => {
+      const loadingDuration = Date.now() - loadingStartTime.current
+      trackLoadingState(loadingDuration)
       setIsLoading(false)
     }, 800)
 
     return () => clearTimeout(timer)
-  }, [searchParams])
+  }, [searchParams, trackLoadingState])
 
   const types = [
     { value: 'all', label: 'Todos los tipos' },
@@ -254,13 +266,19 @@ export default function PropertiesResults() {
             )}
           </>
         ) : (
-          <EmptyState
-            icon="🔍"
-            title="No se encontraron propiedades"
-            description="Intenta ajustar tus criterios de búsqueda o explora otras opciones disponibles."
-            actionLabel="Hacer una nueva búsqueda"
-            onAction={() => router.push('/propiedades')}
-          />
+          <>
+            {(() => {
+              trackEmptyState(`No results for: ${searchTerm || 'unknown'} - Type: ${selectedType} - Operation: ${activeTab}`)
+              return null
+            })()}
+            <EmptyState
+              icon="🔍"
+              title="No se encontraron propiedades"
+              description="Intenta ajustar tus criterios de búsqueda o explora otras opciones disponibles."
+              actionLabel="Hacer una nueva búsqueda"
+              onAction={() => router.push('/propiedades')}
+            />
+          </>
         )}
       </div>
     </div>

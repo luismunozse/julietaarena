@@ -61,7 +61,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
   return (
     <div
       ref={elementRef as any}
-      className={`${styles.propertyCard} ${property.featured ? styles.featured : ''}`}
+      className={`${styles.propertyCard} ${property.featured ? styles.featured : ''} hover-lift`}
     >
       {property.featured && (
         <div className={styles.featuredBadge}>
@@ -173,7 +173,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
 
         <div className={styles.propertyActions}>
           <button 
-            className={styles.appointmentBtn}
+            className={`${styles.appointmentBtn} button-press`}
             onClick={() => {
               analytics.trackClick('appointment_button', 'property_card', { propertyId: property.id })
               setShowAppointmentBooking(true)
@@ -182,7 +182,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
             📅 Agendar Visita
           </button>
           <button 
-            className={styles.reviewsBtn}
+            className={`${styles.reviewsBtn} button-press`}
             onClick={() => {
               analytics.trackClick('reviews_button', 'property_card', { propertyId: property.id })
               setShowReviews(true)
@@ -191,13 +191,13 @@ export default function PropertyCard({ property }: PropertyCardProps) {
             ⭐ Reseñas
           </button>
           <button 
-            className={styles.contactBtn}
+            className={`${styles.contactBtn} button-press ripple`}
             onClick={() => analytics.trackContact('phone', `property_${property.id}`)}
           >
             📞 Consultar
           </button>
           <button 
-            className={styles.whatsappBtn}
+            className={`${styles.whatsappBtn} button-press ripple`}
             onClick={() => analytics.trackContact('whatsapp', `property_${property.id}`)}
           >
             💬 WhatsApp

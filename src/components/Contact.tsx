@@ -2,7 +2,8 @@
 
 import { useState, FormEvent } from 'react'
 import styles from './Contact.module.css'
-import { sendContactEmail, ContactFormData } from '@/services/emailService'
+import { emailService } from '@/services/emailService'
+import { useToast } from '@/components/ToastContainer'
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -12,49 +13,42 @@ export default function Contact() {
     service: '',
     message: '',
   })
-  const [formStatus, setFormStatus] = useState<{ type: 'success' | 'error' | '', message: string }>({
-    type: '',
-    message: '',
-  })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { success, error: showError } = useToast()
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsSubmitting(true)
     
     try {
+      // Construir mensaje completo con servicio
+      const fullMessage = `Servicio de interés: ${formData.service}\n\n${formData.message}`
+      
       // Enviar email usando EmailJS
-      await sendContactEmail(formData as ContactFormData)
-      
-      setFormStatus({
-        type: 'success',
-        message: '¡Mensaje enviado con éxito! Me pondré en contacto contigo pronto.',
+      const result = await emailService.sendContactForm({
+        from_name: formData.name,
+        from_email: formData.email,
+        phone: formData.phone,
+        message: fullMessage,
       })
       
-      // Limpiar formulario
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        service: '',
-        message: '',
-      })
-
-      // Limpiar mensaje después de 5 segundos
-      setTimeout(() => {
-        setFormStatus({ type: '', message: '' })
-      }, 5000)
-    } catch (error) {
-      console.error('Error al enviar formulario:', error)
-      setFormStatus({
-        type: 'error',
-        message: 'Hubo un error al enviar el mensaje. Por favor, intenta nuevamente o contacta directamente por teléfono.',
-      })
-      
-      // Limpiar mensaje de error después de 7 segundos
-      setTimeout(() => {
-        setFormStatus({ type: '', message: '' })
-      }, 7000)
+      if (result.success) {
+        success(result.message, 5000)
+        
+        // Limpiar formulario
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          service: '',
+          message: '',
+        })
+      } else {
+        showError(result.message, 7000)
+      }
+    } catch (err) {
+      console.error('Error al enviar formulario:', err)
+      showError('Error inesperado al enviar el mensaje. Por favor, contactanos por WhatsApp.', 7000)
     } finally {
       setIsSubmitting(false)
     }
@@ -208,17 +202,18 @@ export default function Contact() {
 
             <button 
               type="submit" 
-              className="btn btn-primary btn-submit"
+              className="btn btn-primary btn-submit button-press ripple"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Enviando...' : 'Enviar Mensaje'}
+              {isSubmitting ? (
+                <>
+                  <span className="spinner"></span>
+                  Enviando...
+                </>
+              ) : (
+                'Enviar Mensaje'
+              )}
             </button>
-            
-            {formStatus.message && (
-              <div className={`${styles.formMessage} ${styles[formStatus.type]}`}>
-                {formStatus.message}
-              </div>
-            )}
           </form>
         </div>
       </div>

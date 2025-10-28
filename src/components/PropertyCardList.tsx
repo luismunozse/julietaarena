@@ -1,7 +1,9 @@
 'use client'
 
+import { useState } from 'react'
 import { Property } from '@/data/properties'
 import FavoriteButton from './FavoriteButton'
+import { useSwipe } from '@/hooks/useSwipe'
 import styles from './PropertyCardList.module.css'
 
 interface PropertyCardListProps {
@@ -9,6 +11,27 @@ interface PropertyCardListProps {
 }
 
 export default function PropertyCardList({ property }: PropertyCardListProps) {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => 
+      prev === property.images.length - 1 ? 0 : prev + 1
+    )
+  }
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => 
+      prev === 0 ? property.images.length - 1 : prev - 1
+    )
+  }
+
+  // Swipe gestures para navegación de imágenes
+  const swipeHandlers = useSwipe({
+    onSwipeLeft: nextImage,
+    onSwipeRight: prevImage,
+    minSwipeDistance: 50
+  })
+
   const formatPrice = (price: number): string => {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
@@ -30,11 +53,11 @@ export default function PropertyCardList({ property }: PropertyCardListProps) {
   }
 
   return (
-    <div className={styles.propertyCardList}>
-      {/* Imagen */}
-      <div className={styles.imageContainer}>
+    <div className={`${styles.propertyCardList} hover-lift`}>
+      {/* Imagen con swipe */}
+      <div className={styles.imageContainer} {...swipeHandlers}>
         <img 
-          src={property.images[0]} 
+          src={property.images[currentImageIndex]} 
           alt={property.title}
           className={styles.propertyImage}
         />

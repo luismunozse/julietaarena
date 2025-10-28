@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { emailService } from '@/services/emailService'
+import { useToast } from '@/components/ToastContainer'
 import styles from './VenderForm.module.css'
 
 interface FormErrors {
@@ -14,6 +16,7 @@ interface FormErrors {
 
 export default function VenderForm() {
   const router = useRouter()
+  const { success, error: showError } = useToast()
   const [formData, setFormData] = useState({
     nombre: '',
     email: '',
@@ -25,7 +28,6 @@ export default function VenderForm() {
   const [errors, setErrors] = useState<FormErrors>({})
   const [touched, setTouched] = useState<{[key: string]: boolean}>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
 
   const tiposPropiedad = [
     'Casa',
@@ -184,40 +186,48 @@ export default function VenderForm() {
       if (firstErrorField) {
         firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' })
       }
+      showError('Por favor, corrige los errores en el formulario', 4000)
       return
     }
 
     setIsSubmitting(true)
 
     try {
-      // Aquí iría la lógica de envío (EmailJS, API, etc.)
-      // Simulamos un delay
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      console.log('Datos del formulario:', formData)
-      
-      setSubmitStatus('success')
-      
-      // Limpiar formulario y errores
-      setFormData({
-        nombre: '',
-        email: '',
-        telefono: '',
-        localidad: '',
-        tipoPropiedad: '',
-        comentarios: ''
+      // Enviar formulario usando EmailJS
+      const result = await emailService.sendVenderForm({
+        from_name: formData.nombre,
+        from_email: formData.email,
+        phone: formData.telefono,
+        locality: formData.localidad,
+        property_type: formData.tipoPropiedad,
+        comments: formData.comentarios
       })
-      setErrors({})
-      setTouched({})
-
-      // Redirigir después de 3 segundos
-      setTimeout(() => {
-        router.push('/')
-      }, 3000)
       
-    } catch (error) {
-      console.error('Error al enviar formulario:', error)
-      setSubmitStatus('error')
+      if (result.success) {
+        success(result.message, 5000)
+        
+        // Limpiar formulario
+        setFormData({
+          nombre: '',
+          email: '',
+          telefono: '',
+          localidad: '',
+          tipoPropiedad: '',
+          comentarios: ''
+        })
+        setErrors({})
+        setTouched({})
+
+        // Redirigir a home después de 3 segundos
+        setTimeout(() => {
+          router.push('/')
+        }, 3000)
+      } else {
+        showError(result.message, 7000)
+      }
+    } catch (err) {
+      console.error('Error al enviar formulario:', err)
+      showError('Error inesperado al enviar la solicitud. Por favor, contactanos por WhatsApp.', 7000)
     } finally {
       setIsSubmitting(false)
     }
@@ -279,15 +289,7 @@ export default function VenderForm() {
       {/* Lado Derecho - Formulario */}
       <div className={styles.formSection}>
         <div className={styles.formContainer}>
-          {submitStatus === 'success' ? (
-            <div className={styles.successMessage}>
-              <div className={styles.successIcon}>✓</div>
-              <h2>¡Formulario enviado con éxito!</h2>
-              <p>Nos pondremos en contacto contigo a la brevedad.</p>
-              <p className={styles.redirectMessage}>Redirigiendo...</p>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className={styles.form}>
+          <form onSubmit={handleSubmit} className={styles.form}>
               <h2 className={styles.formTitle}>Completá tus datos</h2>
 
               {/* Nombre y Apellido */}
@@ -414,27 +416,26 @@ export default function VenderForm() {
                 />
               </div>
 
-              {/* Mensaje de error */}
-              {submitStatus === 'error' && (
-                <div className={styles.errorMessage}>
-                  Hubo un error al enviar el formulario. Por favor, intentá nuevamente.
-                </div>
-              )}
-
               {/* Botón de envío */}
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className={styles.submitButton}
+                className={`${styles.submitButton} button-press ripple`}
               >
-                {isSubmitting ? 'Enviando...' : 'Enviar consulta'}
+                {isSubmitting ? (
+                  <>
+                    <span className="spinner"></span>
+                    Enviando...
+                  </>
+                ) : (
+                  'Enviar consulta'
+                )}
               </button>
 
               <p className={styles.privacyNote}>
                 Al enviar este formulario, aceptás nuestra política de privacidad y el tratamiento de tus datos personales.
               </p>
             </form>
-          )}
         </div>
       </div>
     </div>

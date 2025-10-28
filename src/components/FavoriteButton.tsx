@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useFavorites } from '@/hooks/useFavorites'
+import { useToast } from '@/components/ToastContainer'
 import styles from './FavoriteButton.module.css'
 
 interface FavoriteButtonProps {
@@ -16,11 +17,22 @@ export default function FavoriteButton({
   showText = false 
 }: FavoriteButtonProps) {
   const { isFavorite, toggleFavorite } = useFavorites()
+  const { success, info } = useToast()
   const [isAnimating, setIsAnimating] = useState(false)
 
   const handleClick = () => {
+    const wasFavorite = isFavorite(propertyId)
+    
+    // Optimistic UI: animación inmediata
     setIsAnimating(true)
     toggleFavorite(propertyId)
+    
+    // Mostrar toast con feedback
+    if (wasFavorite) {
+      info('Propiedad removida de favoritos', 3000)
+    } else {
+      success('¡Propiedad agregada a favoritos!', 3000)
+    }
     
     // Reset animation after a short delay
     setTimeout(() => setIsAnimating(false), 300)

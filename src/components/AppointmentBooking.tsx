@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { Property } from '@/data/properties'
 import { AppointmentFormData } from '@/types/appointment'
 import { useAppointments } from '@/hooks/useAppointments'
+import { emailService } from '@/services/emailService'
+import { useToast } from '@/components/ToastContainer'
 import styles from './AppointmentBooking.module.css'
 
 interface AppointmentBookingProps {
@@ -18,6 +20,7 @@ export default function AppointmentBooking({
   onSuccess 
 }: AppointmentBookingProps) {
   const { createAppointment, isTimeSlotAvailable } = useAppointments()
+  const { success, error: showError } = useToast()
   const [formData, setFormData] = useState<AppointmentFormData>({
     propertyId: property.id,
     clientName: '',
@@ -59,15 +62,36 @@ export default function AppointmentBooking({
     setIsSubmitting(true)
 
     try {
+      // Crear cita localmente
       const appointment = createAppointment(formData)
       
-      // Simular envío de email de confirmación
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Enviar email de confirmación usando EmailJS
+      const result = await emailService.sendAppointmentForm({
+        from_name: formData.clientName,
+        from_email: formData.clientEmail,
+        phone: formData.clientPhone,
+        property_title: property.title,
+        property_id: property.id,
+        date: new Date(formData.date).toLocaleDateString('es-AR', { 
+          weekday: 'long', 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric' 
+        }),
+        time: formData.time,
+        comments: formData.notes
+      })
       
-      onSuccess?.(appointment.id)
-      onClose()
-    } catch (error) {
-      console.error('Error creating appointment:', error)
+      if (result.success) {
+        success(result.message, 5000)
+        onSuccess?.(appointment.id)
+        onClose()
+      } else {
+        showError(result.message, 7000)
+      }
+    } catch (err) {
+      console.error('Error creating appointment:', err)
+      showError('Error inesperado al agendar la visita. Por favor, contactanos por WhatsApp.', 7000)
     } finally {
       setIsSubmitting(false)
     }

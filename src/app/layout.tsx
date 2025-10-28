@@ -2,8 +2,10 @@ import type { Metadata } from 'next'
 import { Poppins } from 'next/font/google'
 import './globals.css'
 import '../styles/accessibility.css'
+import '../styles/microinteractions.css'
 import StructuredData from '@/components/StructuredData'
 import { AuthProvider } from '@/components/AuthProvider'
+import { ToastProvider } from '@/components/ToastContainer'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import GoogleAnalytics from '@/components/GoogleAnalytics'
@@ -95,13 +97,15 @@ export default function RootLayout({
         />
         <GoogleAnalytics measurementId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || ''} />
         <FacebookPixel pixelId={process.env.NEXT_PUBLIC_FB_PIXEL_ID || ''} />
-        <AnalyticsProvider>
-          <AuthProvider>
-            <Header />
-            {children}
-            <Footer />
-          </AuthProvider>
-        </AnalyticsProvider>
+        <ToastProvider>
+          <AnalyticsProvider>
+            <AuthProvider>
+              <Header />
+              {children}
+              <Footer />
+            </AuthProvider>
+          </AnalyticsProvider>
+        </ToastProvider>
       </body>
     </html>
   )

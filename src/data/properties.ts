@@ -21,13 +21,8 @@ export interface Property {
   operation: 'venta' | 'alquiler'
 }
 
-export const properties: Property[] = [
-  // Las propiedades se cargan dinámicamente o desde un API
-  // Agregar propiedades reales aquí
-]
-
-// Array temporal vacío - reemplazar con datos reales:
-/*
+// Array temporal con propiedades de ejemplo - REEMPLAZAR CON DATOS REALES
+// Ver: AGREGAR_PROPIEDADES.md para instrucciones detalladas
 export const properties: Property[] = [
   {
     id: 'prop-001',
@@ -320,7 +315,6 @@ export const properties: Property[] = [
     operation: 'alquiler'
   }
 ]
-*/
 
 export const getFeaturedProperties = (): Property[] => {
   return properties.filter(prop => prop.featured && prop.status === 'disponible')
