@@ -1,0 +1,188 @@
+/* Animación de shimmer */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.skeletonBase {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0%,
+    #e0e0e0 20%,
+    #f0f0f0 40%,
+    #f0f0f0 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite linear;
+  border-radius: 8px;
+}
+
+/* Grid de tarjetas */
+.skeletonGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+@media (max-width: 1200px) {
+  .skeletonGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .skeletonGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+/* Tarjeta skeleton */
+.skeletonCard {
+  background: var(--white);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.skeletonImage {
+  width: 100%;
+  height: 240px;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0%,
+    #e0e0e0 20%,
+    #f0f0f0 40%,
+    #f0f0f0 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite linear;
+}
+
+.skeletonCardContent {
+  padding: 20px;
+}
+
+.skeletonTitle {
+  width: 80%;
+  height: 24px;
+  margin-bottom: 12px;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0%,
+    #e0e0e0 20%,
+    #f0f0f0 40%,
+    #f0f0f0 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite linear;
+  border-radius: 6px;
+}
+
+.skeletonText {
+  width: 100%;
+  height: 16px;
+  margin-bottom: 8px;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0%,
+    #e0e0e0 20%,
+    #f0f0f0 40%,
+    #f0f0f0 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite linear;
+  border-radius: 4px;
+}
+
+.skeletonPrice {
+  width: 50%;
+  height: 28px;
+  margin-top: 16px;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0%,
+    #e0e0e0 20%,
+    #f0f0f0 40%,
+    #f0f0f0 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite linear;
+  border-radius: 6px;
+}
+
+/* Lista skeleton */
+.skeletonList {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.skeletonListItem {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 24px;
+  background: var(--white);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+@media (max-width: 992px) {
+  .skeletonListItem {
+    grid-template-columns: 1fr;
+  }
+}
+
+.skeletonListItem .skeletonImage {
+  height: 200px;
+  border-radius: 12px;
+}
+
+.skeletonContent {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.skeletonFeatures {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.skeletonBadge {
+  width: 80px;
+  height: 32px;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0%,
+    #e0e0e0 20%,
+    #f0f0f0 40%,
+    #f0f0f0 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite linear;
+  border-radius: 8px;
+}
+
+/* Reducir animación si el usuario prefiere menos movimiento */
+@media (prefers-reduced-motion: reduce) {
+  .skeletonBase,
+  .skeletonImage,
+  .skeletonTitle,
+  .skeletonText,
+  .skeletonPrice,
+  .skeletonBadge {
+    animation: none;
+    background: #f0f0f0;
+  }
+}
+

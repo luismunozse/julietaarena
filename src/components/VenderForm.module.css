@@ -1,0 +1,379 @@
+.venderContainer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 100vh;
+}
+
+/* Sección de Información (Izquierda) */
+.infoSection {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+  color: var(--white);
+  padding: 80px 60px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.infoSection::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)"/></svg>');
+  opacity: 0.3;
+}
+
+.infoContent {
+  position: relative;
+  z-index: 2;
+  max-width: 500px;
+}
+
+.mainTitle {
+  font-size: clamp(2.5rem, 5vw, 3.5rem);
+  font-weight: 700;
+  margin: 0 0 24px 0;
+  line-height: 1.1;
+}
+
+.description {
+  font-size: 1.15rem;
+  line-height: 1.7;
+  margin-bottom: 40px;
+  opacity: 0.95;
+}
+
+.benefitsList {
+  margin-bottom: 40px;
+}
+
+.benefit {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  align-items: flex-start;
+}
+
+.benefitIcon {
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.benefit h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+}
+
+.benefit p {
+  font-size: 0.95rem;
+  margin: 0;
+  opacity: 0.9;
+}
+
+.contactInfo {
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+
+.contactInfo p {
+  margin: 8px 0;
+  font-size: 0.95rem;
+}
+
+.contactInfo strong {
+  font-size: 1.05rem;
+}
+
+/* Sección del Formulario (Derecha) */
+.formSection {
+  background: var(--light-bg);
+  padding: 80px 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+}
+
+.formContainer {
+  width: 100%;
+  max-width: 500px;
+}
+
+.form {
+  background: var(--white);
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: var(--shadow-lg);
+}
+
+.formTitle {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin: 0 0 32px 0;
+  text-align: center;
+}
+
+.formGroup {
+  margin-bottom: 24px;
+}
+
+.label {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 8px;
+}
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid rgba(44, 95, 125, 0.2);
+  border-radius: 10px;
+  font-size: 1rem;
+  color: var(--text-dark);
+  background: var(--white);
+  transition: var(--transition);
+  font-family: inherit;
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(44, 95, 125, 0.1);
+}
+
+.input::placeholder,
+.textarea::placeholder {
+  color: var(--text-light);
+}
+
+/* Estados de error */
+.inputError {
+  border-color: #ef5350 !important;
+  background: #ffebee;
+}
+
+.inputError:focus {
+  border-color: #ef5350 !important;
+  box-shadow: 0 0 0 3px rgba(239, 83, 80, 0.1) !important;
+}
+
+.errorText {
+  display: block;
+  font-size: 0.85rem;
+  color: #c62828;
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+.select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%232c5f7d' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  padding-right: 40px;
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.hint {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-light);
+  margin-top: 6px;
+}
+
+.submitButton {
+  width: 100%;
+  padding: 16px 32px;
+  background: var(--primary-color);
+  color: var(--white);
+  border: none;
+  border-radius: 10px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: var(--shadow-sm);
+  margin-top: 8px;
+}
+
+.submitButton:hover:not(:disabled) {
+  background: var(--accent-color);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.submitButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.privacyNote {
+  font-size: 0.85rem;
+  color: var(--text-light);
+  text-align: center;
+  margin: 16px 0 0 0;
+  line-height: 1.5;
+}
+
+/* Mensajes de éxito y error */
+.successMessage {
+  background: var(--white);
+  padding: 60px 40px;
+  border-radius: 20px;
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+}
+
+.successIcon {
+  width: 80px;
+  height: 80px;
+  background: #4caf50;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  margin: 0 auto 24px;
+  animation: scaleIn 0.5s ease;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+.successMessage h2 {
+  font-size: 1.8rem;
+  color: var(--primary-color);
+  margin: 0 0 12px 0;
+}
+
+.successMessage p {
+  font-size: 1.1rem;
+  color: var(--text-light);
+  margin: 0 0 8px 0;
+}
+
+.redirectMessage {
+  font-size: 0.95rem;
+  color: var(--text-light);
+  font-style: italic;
+  margin-top: 20px;
+}
+
+.errorMessage {
+  padding: 12px 16px;
+  background: #ffebee;
+  border: 2px solid #ef5350;
+  border-radius: 8px;
+  color: #c62828;
+  font-size: 0.95rem;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .venderContainer {
+    grid-template-columns: 1fr;
+  }
+
+  .infoSection {
+    padding: 60px 40px;
+    min-height: auto;
+  }
+
+  .infoContent {
+    max-width: 100%;
+  }
+
+  .formSection {
+    padding: 60px 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .infoSection {
+    padding: 40px 24px;
+  }
+
+  .formSection {
+    padding: 40px 24px;
+  }
+
+  .form {
+    padding: 32px 24px;
+  }
+
+  .mainTitle {
+    font-size: 2rem;
+  }
+
+  .description {
+    font-size: 1rem;
+  }
+
+  .benefit {
+    gap: 12px;
+  }
+
+  .benefitIcon {
+    width: 28px;
+    height: 28px;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .infoSection {
+    padding: 32px 20px;
+  }
+
+  .formSection {
+    padding: 32px 20px;
+  }
+
+  .form {
+    padding: 24px 20px;
+  }
+
+  .formTitle {
+    font-size: 1.5rem;
+  }
+
+  .submitButton {
+    padding: 14px 24px;
+  }
+}
+

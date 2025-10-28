@@ -1,8 +1,14 @@
 
 .servicesGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+  gap: clamp(20px, 3vw, 30px);
+}
+
+@media (min-width: 1200px) {
+  .servicesGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 .serviceCard {
@@ -21,16 +27,21 @@
 }
 
 .serviceIcon {
-  width: 80px;
-  height: 80px;
+  width: clamp(60px, 8vw, 80px);
+  height: clamp(60px, 8vw, 80px);
   background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
   border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 24px;
+  margin-bottom: clamp(16px, 3vw, 24px);
   color: var(--white);
   transition: var(--transition);
+}
+
+.serviceIcon svg {
+  width: clamp(28px, 3.5vw, 40px);
+  height: clamp(28px, 3.5vw, 40px);
 }
 
 .serviceCard:hover .serviceIcon {
@@ -39,35 +50,25 @@
 }
 
 .serviceTitle {
-  font-size: 1.4rem;
+  font-size: clamp(1.1rem, 2vw + 0.5rem, 1.4rem);
   font-weight: 600;
   color: var(--primary-color);
-  margin-bottom: 16px;
+  margin-bottom: clamp(12px, 2vw, 16px);
 }
 
 .serviceDescription {
-  font-size: 1rem;
+  font-size: clamp(0.9rem, 1.5vw + 0.3rem, 1rem);
   line-height: 1.7;
   color: var(--text-light);
 }
 
 @media (max-width: 768px) {
   .servicesGrid {
-    grid-template-columns: 1fr;
     gap: 20px;
   }
 
   .serviceCard {
     padding: 30px 24px;
-  }
-
-  .serviceIcon {
-    width: 70px;
-    height: 70px;
-  }
-
-  .serviceTitle {
-    font-size: 1.25rem;
   }
 }
 

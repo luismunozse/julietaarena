@@ -5,7 +5,7 @@
 
 .heroSection {
   background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-  padding: 80px 0;
+  padding: clamp(60px, 10vw, 100px) 0;
   color: white;
   position: relative;
   overflow: hidden;
@@ -29,19 +29,20 @@
 }
 
 .heroTitle {
-  font-size: 3.5rem;
+  font-size: clamp(2rem, 5vw + 1rem, 3.5rem);
   font-weight: 700;
-  margin-bottom: 24px;
+  margin-bottom: clamp(16px, 3vw, 24px);
   line-height: 1.2;
 }
 
 .heroSubtitle {
-  font-size: 1.3rem;
-  margin-bottom: 48px;
+  font-size: clamp(1rem, 2vw + 0.5rem, 1.3rem);
+  margin-bottom: clamp(32px, 5vw, 48px);
   opacity: 0.9;
   max-width: 600px;
   margin-left: auto;
   margin-right: auto;
+  padding: 0 20px;
   line-height: 1.6;
 }
 
@@ -54,31 +55,6 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-  .heroSection {
-    padding: 60px 0;
-  }
-
-  .heroTitle {
-    font-size: 2.5rem;
-  }
-
-  .heroSubtitle {
-    font-size: 1.1rem;
-    margin-bottom: 40px;
-  }
-
-  .heroStats {
-    gap: 40px;
-  }
-
-  .statNumber {
-    font-size: 2rem;
-  }
-
-  .statLabel {
-    font-size: 0.9rem;
-  }
-
   .searchSection {
     margin-top: -30px;
   }
@@ -86,34 +62,10 @@
 
 @media (max-width: 480px) {
   .heroSection {
-    padding: 50px 0;
+    padding-top: 80px;
   }
-
-  .heroTitle {
-    font-size: 2rem;
-  }
-
-  .heroSubtitle {
-    font-size: 1rem;
-    margin-bottom: 30px;
-  }
-
-  .heroStats {
-    gap: 30px;
-    flex-direction: column;
-  }
-
-  .stat {
-    flex-direction: row;
-    gap: 12px;
-  }
-
-  .statNumber {
-    font-size: 1.8rem;
-  }
-
-  .statLabel {
-    text-align: left;
-    max-width: none;
+  
+  .searchSection {
+    margin-top: -40px;
   }
 }

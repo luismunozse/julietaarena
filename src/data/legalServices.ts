@@ -13,6 +13,13 @@ export interface LegalService {
 }
 
 export const legalServices: LegalService[] = [
+  // Los servicios legales se cargan dinámicamente o desde un CMS
+  // Agregar servicios reales aquí
+]
+
+// Array temporal vacío - reemplazar con datos reales:
+/*
+export const legalServices: LegalService[] = [
   {
     id: 'redaccion-contratos',
     title: 'Redacciones de Contratos',
@@ -222,6 +229,7 @@ export const legalServices: LegalService[] = [
     ]
   }
 ]
+*/
 
 export const getLegalServiceById = (id: string): LegalService | undefined => {
   return legalServices.find(service => service.id === id)

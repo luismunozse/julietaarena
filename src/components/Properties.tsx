@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { properties, Property, getPropertiesForSale, getPropertiesForRent } from '@/data/properties'
 import PropertyCard from './PropertyCard'
 import MapPlaceholder from './MapPlaceholder'
@@ -8,6 +9,7 @@ import { useAnalytics } from '@/hooks/useAnalytics'
 import styles from './Properties.module.css'
 
 export default function Properties() {
+  const searchParams = useSearchParams()
   const [activeTab, setActiveTab] = useState<'venta' | 'alquiler'>('venta')
   const [selectedType, setSelectedType] = useState<string>('all')
   const [selectedLocation, setSelectedLocation] = useState<string>('all')
@@ -19,6 +21,32 @@ export default function Properties() {
   const [features, setFeatures] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const analytics = useAnalytics()
+
+  // Leer parámetros de la URL al cargar
+  useEffect(() => {
+    const operation = searchParams.get('operation')
+    const type = searchParams.get('type')
+    const location = searchParams.get('location')
+    const featured = searchParams.get('featured')
+
+    if (operation === 'venta' || operation === 'alquiler') {
+      setActiveTab(operation)
+    }
+
+    if (type && type !== 'all') {
+      setSelectedType(type)
+    }
+
+    if (location) {
+      setSelectedLocation(location)
+      setSearchTerm(location)
+    }
+
+    if (featured === 'true') {
+      // Mostrar solo propiedades destacadas
+      // Esto se manejará en el filtrado
+    }
+  }, [searchParams])
 
   const types = ['all', 'casa', 'departamento', 'terreno', 'local', 'oficina']
   const locations = ['all', 'Villa Allende', 'Nueva Córdoba', 'Villa Carlos Paz', 'Centro', 'Barrio Norte', 'Torre Empresarial', 'Barrio Jardín', 'Barrio Güemes']
@@ -49,7 +77,12 @@ export default function Properties() {
   }, [activeTab, priceRange])
 
   const filteredProperties = useMemo(() => {
+    const featured = searchParams.get('featured')
+    
     return currentProperties.filter(property => {
+      // Filtro por destacadas (si viene en URL)
+      if (featured === 'true' && !property.featured) return false
+      
       // Filtro por tipo
       if (selectedType !== 'all' && property.type !== selectedType) return false
       
@@ -100,7 +133,7 @@ export default function Properties() {
       
       return property.status === 'disponible'
     })
-  }, [currentProperties, selectedType, selectedLocation, currentPriceRange, areaRange, bedrooms, bathrooms, yearBuilt, features, searchTerm])
+  }, [currentProperties, selectedType, selectedLocation, currentPriceRange, areaRange, bedrooms, bathrooms, yearBuilt, features, searchTerm, searchParams])
 
   // Track search events
   useEffect(() => {
@@ -157,6 +190,70 @@ export default function Properties() {
               🔑 En Alquiler
             </button>
           </div>
+        </div>
+
+        {/* Filtros Horizontales Rápidos */}
+        <div className={styles.quickFilters}>
+          <select
+            value={selectedType}
+            onChange={(e) => setSelectedType(e.target.value)}
+            className={styles.quickFilterSelect}
+          >
+            {types.map(type => (
+              <option key={type} value={type}>
+                {typeLabels[type]}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={selectedLocation}
+            onChange={(e) => setSelectedLocation(e.target.value)}
+            className={styles.quickFilterSelect}
+          >
+            <option value="all">Todas las ubicaciones</option>
+            {locations.filter(loc => loc !== 'all').map(location => (
+              <option key={location} value={location}>
+                {location}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={bedrooms}
+            onChange={(e) => setBedrooms(e.target.value)}
+            className={styles.quickFilterSelect}
+          >
+            <option value="all">Cualquier habitación</option>
+            {bedroomOptions.filter(opt => opt !== 'all').map(option => (
+              <option key={option} value={option}>
+                {option === '5+' ? '5+ hab.' : `${option} hab.`}
+              </option>
+            ))}
+          </select>
+
+          <button
+            className={styles.advancedFiltersBtn}
+            onClick={() => {
+              const sidebar = document.querySelector(`.${styles.sidebarFilters}`)
+              sidebar?.classList.toggle(styles.visible)
+            }}
+          >
+            🔍 Filtros Avanzados
+          </button>
+
+          {(selectedType !== 'all' || selectedLocation !== 'all' || bedrooms !== 'all') && (
+            <button 
+              onClick={() => {
+                setSelectedType('all')
+                setSelectedLocation('all')
+                setBedrooms('all')
+              }}
+              className={styles.clearQuickFiltersBtn}
+            >
+              ✕ Limpiar
+            </button>
+          )}
         </div>
 
         {/* Layout con Sidebar */}

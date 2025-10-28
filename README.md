@@ -6,6 +6,7 @@ Sitio web profesional para Julieta Arena, Martillera Pública en Córdoba, Argen
 
 - ✅ **Next.js 14** con App Router
 - ✅ **TypeScript** para tipado seguro
+- ✅ **Google Places Autocomplete** - búsqueda inteligente de ubicaciones en Argentina
 - ✅ **SEO Optimizado** con metadata dinámica
 - ✅ **Responsive Design** - funciona en todos los dispositivos
 - ✅ **Performance Optimizada** - Core Web Vitals optimizados
@@ -32,7 +33,24 @@ yarn install
 pnpm install
 ```
 
-2. **Ejecutar en modo desarrollo:**
+2. **Configurar variables de entorno:**
+
+Crea un archivo `.env.local` en la raíz del proyecto (puedes basarte en `.env.example`):
+
+```bash
+# Google Maps API Key (requerido para búsqueda de ubicaciones)
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=tu_api_key_aqui
+```
+
+**Para obtener tu API Key de Google Maps:**
+1. Ve a [Google Cloud Console](https://console.cloud.google.com/)
+2. Crea un nuevo proyecto o selecciona uno existente
+3. Habilita "Places API" y "Maps JavaScript API"
+4. Ve a "Credenciales" y crea una API key
+5. Restringe la key por dominio para producción
+6. Copia el valor en tu archivo `.env.local`
+
+3. **Ejecutar en modo desarrollo:**
 
 ```bash
 npm run dev
@@ -42,7 +60,7 @@ yarn dev
 pnpm dev
 ```
 
-3. **Abrir en el navegador:**
+4. **Abrir en el navegador:**
 
 Visita [http://localhost:3000](http://localhost:3000)
 
@@ -211,10 +229,55 @@ Para personalizar la información de contacto, buscar y reemplazar:
 - `Córdoba, Argentina` - Ubicación
 - Enlaces de redes sociales en Footer
 
+## 📍 Google Places Autocomplete
+
+El sitio incluye un buscador inteligente de ubicaciones que utiliza Google Places API para autocompletar ciudades y localidades de Argentina.
+
+### Características
+
+- ✅ Autocompletado en tiempo real
+- ✅ Restricción a ubicaciones de Argentina
+- ✅ Solo ciudades y localidades (no direcciones específicas)
+- ✅ Captura de coordenadas geográficas
+- ✅ Estados de carga y manejo de errores
+- ✅ Placeholder dinámico según estado
+- ✅ Integración responsive
+
+### Configuración
+
+1. **Obtener API Key** (ver sección de Instalación arriba)
+2. **Configurar restricciones** en Google Cloud Console:
+   - Restringir por dominio web
+   - Habilitar solo Places API y Maps JavaScript API
+   - Establecer cuota diaria (recomendado: 1000-5000 requests/día)
+
+### Costos
+
+Con el crédito mensual gratuito de Google Cloud ($200 USD):
+- Autocomplete: ~$2.83 USD por 1000 requests
+- **~70,000 búsquedas mensuales gratis**
+- Para sitios inmobiliarios pequeños/medianos es más que suficiente
+
+### Personalización
+
+El componente `SearchHero` puede personalizarse en:
+- `src/components/SearchHero.tsx` - Lógica
+- `src/components/SearchHero.module.css` - Estilos
+
+Configuración del autocomplete:
+```typescript
+const autocomplete = new google.maps.places.Autocomplete(inputRef.current, {
+  componentRestrictions: { country: 'ar' }, // Solo Argentina
+  fields: ['address_components', 'geometry', 'name', 'formatted_address'],
+  types: ['(cities)'] // Solo ciudades y localidades
+})
+```
+
 ## 🛠️ Tecnologías Utilizadas
 
 - **Next.js 14** - Framework React
 - **TypeScript** - Tipado estático
+- **Google Places API** - Autocompletado de ubicaciones
 - **CSS Modules** - Estilos encapsulados
 - **Google Fonts** - Tipografía Poppins
 - **React Hooks** - Estado y efectos

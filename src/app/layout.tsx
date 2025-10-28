@@ -81,22 +81,15 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              // Forzar modo claro agresivamente
-              document.documentElement.style.colorScheme = 'light';
-              document.documentElement.classList.remove('dark');
-              document.documentElement.classList.add('light');
-              document.documentElement.setAttribute('data-theme', 'light');
-              
-              // Aplicar estilos directamente
-              document.documentElement.style.backgroundColor = '#ffffff';
-              document.body.style.backgroundColor = '#ffffff';
-              document.body.style.color = '#2d3436';
-              
-              // Remover cualquier clase de modo oscuro
-              document.querySelectorAll('*').forEach(el => {
-                el.classList.remove('dark');
-                el.classList.add('light');
-              });
+              // Forzar modo claro - versión optimizada
+              if (document.documentElement) {
+                document.documentElement.style.colorScheme = 'light';
+                document.documentElement.setAttribute('data-theme', 'light');
+              }
+              if (document.body) {
+                document.body.style.backgroundColor = '#ffffff';
+                document.body.style.color = '#2d3436';
+              }
             `,
           }}
         />

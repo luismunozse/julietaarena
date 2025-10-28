@@ -1,0 +1,340 @@
+.resultsPage {
+  min-height: 100vh;
+  background: var(--light-bg);
+  padding-bottom: 60px;
+}
+
+/* Hero Header */
+.heroHeader {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+  color: var(--white);
+  padding: clamp(80px, 10vw, 120px) 0 clamp(40px, 5vw, 60px) 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.heroHeader::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)"/></svg>');
+  opacity: 0.3;
+}
+
+.heroHeader .container {
+  position: relative;
+  z-index: 2;
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: var(--white);
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  margin-bottom: 24px;
+  backdrop-filter: blur(10px);
+}
+
+.backButton:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateX(-4px);
+}
+
+.pageTitle {
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 700;
+  margin: 0 0 12px 0;
+  color: var(--white);
+  text-shadow: 2px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.searchInfo {
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  margin: 0;
+  opacity: 0.95;
+}
+
+.searchInfo strong {
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+/* Tabs */
+.tabsContainer {
+  margin: -30px 0 40px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.tabs {
+  display: flex;
+  background: var(--white);
+  border-radius: 16px;
+  padding: 8px;
+  box-shadow: var(--shadow-md);
+  border: 1px solid rgba(44, 95, 125, 0.1);
+}
+
+.tab {
+  padding: 16px 32px;
+  border: none;
+  background: transparent;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-light);
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tab:hover {
+  color: var(--primary-color);
+  background: rgba(44, 95, 125, 0.1);
+}
+
+.tab.active {
+  background: var(--primary-color);
+  color: var(--white);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Filtros Rápidos */
+.quickFilters {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 40px;
+  padding: 20px;
+  background: var(--white);
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filterSelect {
+  flex: 1;
+  min-width: 200px;
+  padding: 14px 18px;
+  border: 2px solid rgba(44, 95, 125, 0.2);
+  border-radius: 10px;
+  font-size: 0.95rem;
+  color: var(--text-dark);
+  background: var(--white);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.filterSelect:hover {
+  border-color: var(--primary-color);
+}
+
+.filterSelect:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(44, 95, 125, 0.1);
+}
+
+.resultsCount {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  white-space: nowrap;
+  padding: 14px 20px;
+  background: rgba(44, 95, 125, 0.1);
+  border-radius: 10px;
+}
+
+/* Botones de Modo de Vista */
+.viewModeButtons {
+  display: flex;
+  gap: 8px;
+  background: var(--light-bg);
+  padding: 6px;
+  border-radius: 10px;
+}
+
+.viewModeBtn {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--text-light);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.viewModeBtn:hover {
+  background: rgba(44, 95, 125, 0.1);
+  color: var(--primary-color);
+}
+
+.viewModeBtn.active {
+  background: var(--primary-color);
+  color: var(--white);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Vista en Lista */
+.propertiesList {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+/* Vista en Mapa */
+.mapView {
+  width: 100%;
+  min-height: 600px;
+  background: var(--white);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 40px;
+}
+
+/* Grid de Propiedades */
+.propertiesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+@media (max-width: 1200px) {
+  .propertiesGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .propertiesGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+/* Sin Resultados */
+.noResults {
+  text-align: center;
+  padding: 80px 20px;
+  background: var(--white);
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 40px;
+}
+
+.noResultsIcon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+  opacity: 0.5;
+}
+
+.noResults h3 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 12px;
+}
+
+.noResults p {
+  font-size: 1.1rem;
+  color: var(--text-light);
+  margin: 0 0 30px 0;
+}
+
+.newSearchButton {
+  padding: 14px 32px;
+  background: var(--primary-color);
+  color: var(--white);
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: var(--shadow-sm);
+}
+
+.newSearchButton:hover {
+  background: var(--accent-color);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .heroHeader {
+    padding: 100px 0 40px 0;
+  }
+
+  .tabsContainer {
+    margin: -20px 0 30px 0;
+  }
+
+  .tabs {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .tab {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .quickFilters {
+    flex-direction: column;
+    padding: 16px;
+  }
+
+  .filterSelect {
+    width: 100%;
+    min-width: 100%;
+  }
+
+  .resultsCount {
+    width: 100%;
+    text-align: center;
+  }
+
+  .viewModeButtons {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .pageTitle {
+    font-size: 1.8rem;
+  }
+
+  .searchInfo {
+    font-size: 0.95rem;
+  }
+
+  .backButton {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+  }
+}
+

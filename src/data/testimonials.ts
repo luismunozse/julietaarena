@@ -10,6 +10,13 @@ export interface Testimonial {
 }
 
 export const testimonials: Testimonial[] = [
+  // Los testimonios se cargan dinámicamente o desde una base de datos
+  // Agregar testimonios reales aquí
+]
+
+// Array temporal vacío - reemplazar con datos reales:
+/*
+export const testimonials: Testimonial[] = [
   {
     id: 'test-001',
     name: 'María González',
@@ -71,6 +78,7 @@ export const testimonials: Testimonial[] = [
     verified: true
   }
 ]
+*/
 
 export const getFeaturedTestimonials = (): Testimonial[] => {
   return testimonials.filter(testimonial => testimonial.verified).slice(0, 6)
