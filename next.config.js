@@ -16,6 +16,19 @@ const nextConfig = {
       },
     ],
   },
+  // Configuración para reducir warnings de webpack en desarrollo
+  webpack: (config, { dev, isServer }) => {
+    // En desarrollo, solo aplicar optimizaciones cuando sea seguro
+    if (dev && !isServer) {
+      // Configuración específica para cliente en desarrollo
+      config.optimization = {
+        ...config.optimization,
+        removeAvailableModules: false,
+        removeEmptyChunks: false,
+      }
+    }
+    return config
+  },
 }
 
 module.exports = nextConfig

@@ -1,0 +1,296 @@
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: sticky;
+  top: 200px;
+  height: fit-content;
+}
+
+.contactCard {
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.contactHeader {
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 20px;
+}
+
+.agentInfo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.agentAvatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.agentAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatarPlaceholder {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.agentDetails {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.agentName {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin: 0;
+}
+
+.agentTitle {
+  font-size: 0.875rem;
+  color: var(--text-light);
+  margin: 0;
+}
+
+.verifiedBadge {
+  display: inline-block;
+  font-size: 0.75rem;
+  color: var(--primary-color);
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.quickActions {
+  display: flex;
+  gap: 12px;
+}
+
+.actionBtn {
+  flex: 1;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.whatsappBtn {
+  background: #25D366;
+  color: var(--white);
+}
+
+.whatsappBtn:hover {
+  background: #20ba58;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+}
+
+.phoneBtn {
+  background: var(--primary-color);
+  color: var(--white);
+}
+
+.phoneBtn:hover {
+  background: #235a7a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(44, 95, 125, 0.4);
+}
+
+.divider {
+  position: relative;
+  text-align: center;
+  margin: 20px 0;
+}
+
+.divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #e5e5e5;
+}
+
+.divider span {
+  position: relative;
+  background: var(--white);
+  padding: 0 12px;
+  color: var(--text-light);
+  font-size: 0.875rem;
+}
+
+.contactForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.input,
+.textarea {
+  padding: 12px 16px;
+  border: 2px solid #e5e5e5;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: all var(--transition);
+  background: var(--white);
+}
+
+.input:focus,
+.textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(44, 95, 125, 0.1);
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.submitBtn {
+  width: 100%;
+  padding: 16px;
+  background: var(--secondary-color);
+  color: var(--text-dark);
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: #e8b86d;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(232, 184, 109, 0.4);
+}
+
+.submitBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.appointmentBtn {
+  width: 100%;
+  padding: 16px;
+  background: var(--primary-color);
+  color: var(--white);
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.appointmentBtn:hover {
+  background: #235a7a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(44, 95, 125, 0.4);
+}
+
+.responsibleInfo {
+  background: var(--bg-light);
+  padding: 16px 20px;
+  border-radius: 8px;
+  border-left: 4px solid var(--primary-color);
+}
+
+.responsibleText {
+  font-size: 0.875rem;
+  color: var(--text-dark);
+  margin: 0;
+  line-height: 1.6;
+}
+
+.responsibleText strong {
+  color: var(--primary-color);
+  font-weight: 700;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .sidebar {
+    position: relative;
+    top: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .contactCard {
+    padding: 20px;
+  }
+
+  .quickActions {
+    flex-direction: column;
+  }
+
+  .agentInfo {
+    gap: 12px;
+  }
+
+  .agentAvatar {
+    width: 50px;
+    height: 50px;
+  }
+
+  .avatarPlaceholder {
+    font-size: 1.25rem;
+  }
+
+  .agentName {
+    font-size: 1.125rem;
+  }
+}
+
+
+

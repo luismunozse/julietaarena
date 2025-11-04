@@ -8,6 +8,10 @@
   position: relative;
 }
 
+.propertyCard.clickable {
+  cursor: pointer;
+}
+
 .propertyCard:hover {
   transform: translateY(-8px);
   box-shadow: var(--shadow-lg);

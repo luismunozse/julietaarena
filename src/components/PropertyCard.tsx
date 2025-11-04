@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Property } from '@/data/properties'
 import FavoriteButton from './FavoriteButton'
 import CompareButton from './CompareButton'
@@ -15,6 +16,7 @@ interface PropertyCardProps {
 }
 
 export default function PropertyCard({ property }: PropertyCardProps) {
+  const router = useRouter()
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [showAppointmentBooking, setShowAppointmentBooking] = useState(false)
   const [showReviews, setShowReviews] = useState(false)
@@ -58,10 +60,20 @@ export default function PropertyCard({ property }: PropertyCardProps) {
     )
   }
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Solo navegar si no se clickeó un botón o enlace
+    if ((e.target as HTMLElement).closest('button') || (e.target as HTMLElement).closest('a')) {
+      return
+    }
+    router.push(`/propiedades/${property.id}`)
+    analytics.trackClick('property_card', 'property_list', { propertyId: property.id })
+  }
+
   return (
     <div
       ref={elementRef as any}
-      className={`${styles.propertyCard} ${property.featured ? styles.featured : ''} hover-lift`}
+      className={`${styles.propertyCard} ${property.featured ? styles.featured : ''} hover-lift ${styles.clickable}`}
+      onClick={handleCardClick}
     >
       {property.featured && (
         <div className={styles.featuredBadge}>

@@ -39,7 +39,7 @@ Next.js PWA está buscando un Service Worker que no existía
 
 ---
 
-### ⚠️ Warning 3: Webpack Cache (NORMAL)
+### ⚠️ Warning 3: Webpack Cache (MEJORADO)
 
 **Warning original:**
 ```
@@ -52,13 +52,24 @@ Webpack está intentando usar cache que no existe en la primera ejecución
 **¿Es un problema?**
 ❌ NO - Es completamente normal en desarrollo
 
+**Soluciones aplicadas:**
+✅ Configuración de webpack mejorada en `next.config.js`
+✅ Scripts de limpieza agregados: `npm run clean` y `npm run dev:clean`
+
 **Explicación:**
 - Es un warning de optimización
 - Solo aparece en modo `npm run dev`
 - No afecta el funcionamiento del sitio
 - Se resolverá automáticamente en producción
 
-**Solución:** Ninguna necesaria - es comportamiento esperado
+**Cómo usar los nuevos scripts:**
+```bash
+# Limpiar cache manualmente
+npm run clean
+
+# Limpiar y reiniciar servidor
+npm run dev:clean
+```
 
 ---
 
@@ -70,7 +81,7 @@ Webpack está intentando usar cache que no existe en la primera ejecución
 |------------|--------|-------|
 | PWA Manifest | ✅ | Usando iconos temporales |
 | Service Worker | ✅ | Archivo básico creado |
-| Webpack | ✅ | Warnings normales |
+| Webpack | ✅ | Configuración mejorada |
 | Páginas | ✅ | Todas renderizando |
 | Formularios | ✅ | EmailJS configurado |
 | Propiedades | ✅ | 10 ejemplos activados |

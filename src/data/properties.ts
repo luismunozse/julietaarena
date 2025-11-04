@@ -8,6 +8,7 @@ export interface Property {
   bedrooms?: number
   bathrooms?: number
   area: number
+  coveredArea?: number // Área cubierta
   images: string[]
   features: string[]
   status: 'disponible' | 'reservado' | 'vendido'
@@ -19,6 +20,16 @@ export interface Property {
   orientation?: string
   expenses?: number
   operation: 'venta' | 'alquiler'
+  broker?: {
+    name: string
+    phone: string
+    email: string
+    avatar?: string
+  }
+  coordinates?: {
+    lat: number
+    lng: number
+  }
 }
 
 // Array temporal con propiedades de ejemplo - REEMPLAZAR CON DATOS REALES
