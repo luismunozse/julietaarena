@@ -9,19 +9,19 @@ export default function manifest(): MetadataRoute.Manifest {
     display: 'standalone',
     background_color: '#ffffff',
     theme_color: '#2c5f7d',
-    // Temporal: usando data URL. Para PWA completo, crear iconos reales y colocarlos en /public/
     icons: [
       {
-        src: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+        src: '/icon-192.png',
         sizes: '192x192',
         type: 'image/png',
+        purpose: 'any maskable',
       },
       {
-        src: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+        src: '/icon-512.png',
         sizes: '512x512',
         type: 'image/png',
+        purpose: 'any maskable',
       },
     ],
   }
 }
-

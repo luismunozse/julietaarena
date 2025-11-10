@@ -55,14 +55,6 @@
   font-weight: 500;
 }
 
-.title {
-  font-size: clamp(1.5rem, 4vw + 1rem, 2.5rem);
-  font-weight: 700;
-  color: var(--text-dark);
-  margin: 0 0 12px 0;
-  line-height: 1.2;
-}
-
 .subtitle {
   display: flex;
   align-items: center;
@@ -89,19 +81,12 @@
   font-size: clamp(0.875rem, 2vw, 1rem);
 }
 
-.price {
+.highlightTitle {
   font-size: clamp(1.5rem, 4vw + 1rem, 2.5rem);
   font-weight: 700;
-  color: var(--primary-color);
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-}
-
-.pricePeriod {
-  font-size: clamp(1rem, 2vw, 1.25rem);
-  font-weight: 500;
-  color: var(--text-light);
+  color: var(--text-dark);
+  margin: 8px 0 0;
+  line-height: 1.2;
 }
 
 .headerActions {
@@ -286,7 +271,6 @@
     padding: 20px;
   }
 }
-
 
 
 

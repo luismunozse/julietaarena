@@ -11,6 +11,15 @@ interface PropertySidebarProps {
   property: Property
 }
 
+const formatPrice = (price: number, currency: 'ARS' | 'USD' = 'USD'): string => {
+  return new Intl.NumberFormat('es-AR', {
+    style: 'currency',
+    currency: currency,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(price)
+}
+
 export default function PropertySidebar({ property }: PropertySidebarProps) {
   const [contactFormData, setContactFormData] = useState({
     name: '',
@@ -24,15 +33,6 @@ export default function PropertySidebar({ property }: PropertySidebarProps) {
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
-
-    const formatPrice = (price: number, currency: 'ARS' | 'USD' = 'USD'): string => {
-      return new Intl.NumberFormat('es-AR', {
-        style: 'currency',
-        currency: currency,
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      }).format(price)
-    }
 
     try {
       // Guardar la consulta en Supabase
@@ -81,6 +81,21 @@ export default function PropertySidebar({ property }: PropertySidebarProps) {
 
   return (
     <div className={styles.sidebar}>
+      <div className={styles.priceCard}>
+        <span className={styles.priceLabel}>Precio</span>
+        <p className={styles.priceValue}>
+          {formatPrice(property.price, property.currency)}
+          {property.operation === 'alquiler' && (
+            <span className={styles.pricePeriod}>/mes</span>
+          )}
+        </p>
+        {property.expenses && (
+          <p className={styles.priceExpenses}>
+            + {formatPrice(property.expenses, property.currency)} expensas
+          </p>
+        )}
+      </div>
+
       {/* Card de contacto */}
       <div className={styles.contactCard}>
         <div className={styles.contactHeader}>

@@ -33,15 +33,6 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
     analytics.trackContact('phone', `property_detail_${property.id}`)
   }
 
-  const formatPrice = (price: number): string => {
-    return new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: property.currency || 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(price)
-  }
-
   const getOperationLabel = (): string => {
     return property.operation === 'venta' ? 'Venta' : 'Alquiler'
   }
@@ -74,15 +65,12 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
               <span className={styles.breadcrumbSeparator}>/</span>
               <span className={styles.breadcrumbCurrent}>{getTypeLabel()}</span>
             </div>
-            <h1 className={styles.title}>{property.title}</h1>
             <div className={styles.subtitle}>
               <span className={styles.operation}>{getOperationLabel()}</span>
               <span className={styles.separator}>•</span>
               <span className={styles.location}>📍 {property.location}</span>
             </div>
-            <div className={styles.price}>{formatPrice(property.price)}
-              {property.operation === 'alquiler' && <span className={styles.pricePeriod}>/mes</span>}
-            </div>
+            <h1 className={styles.highlightTitle}>{property.title}</h1>
           </div>
           <div className={styles.headerActions}>
             <FavoriteButton propertyId={property.id} size="large" />
@@ -199,7 +187,5 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
     </div>
   )
 }
-
-
 
 
