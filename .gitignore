@@ -28,6 +28,9 @@ yarn-error.log*
 .env*.local
 .env
 
+# SQL scripts with sensitive data
+SETUP_EMAIL_NOTIFICATIONS.sql
+
 # vercel
 .vercel
 

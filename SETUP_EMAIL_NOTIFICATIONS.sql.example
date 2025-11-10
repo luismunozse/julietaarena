@@ -6,6 +6,12 @@
 -- - RESEND_API_KEY: Tu API key de Resend
 -- - ADMIN_EMAIL: Email donde recibirás las notificaciones
 
+-- INSTRUCCIONES:
+-- 1. Copia este archivo a SETUP_EMAIL_NOTIFICATIONS.sql
+-- 2. Reemplaza YOUR_PROJECT_REF con tu Project Reference ID de Supabase
+-- 3. Reemplaza YOUR_SUPABASE_ANON_KEY con tu Anon Key de Supabase
+-- 4. Ejecuta el script en el SQL Editor de Supabase Dashboard
+
 -- ============================================
 -- TRIGGER PARA CONSULTAS DE PROPIEDADES
 -- ============================================
