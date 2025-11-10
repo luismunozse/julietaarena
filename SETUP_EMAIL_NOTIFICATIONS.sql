@@ -17,11 +17,11 @@ DECLARE
   function_url TEXT;
   supabase_anon_key TEXT;
 BEGIN
-  -- URL de tu proyecto Supabase (reemplaza con tu URL real)
-  function_url := 'https://YOUR_PROJECT_REF.supabase.co/functions/v1/send-inquiry-notification';
+  -- URL de tu proyecto Supabase
+  function_url := 'https://hrpkcdzgbpzzatusmqyq.supabase.co/functions/v1/send-inquiry-notification';
 
-  -- Anon key de Supabase (reemplaza con tu anon key real)
-  supabase_anon_key := 'YOUR_SUPABASE_ANON_KEY';
+  -- Anon key de Supabase
+  supabase_anon_key := 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhycGtjZHpnYnB6emF0dXNtcXlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1NzQwNjksImV4cCI6MjA3ODE1MDA2OX0.nh0pCBKi464KgifOilDbsEjAkgpWBFkT8GViIdpqIcM';
 
   -- Llamar a la Edge Function de forma asíncrona usando pg_net
   PERFORM
@@ -59,11 +59,11 @@ DECLARE
   function_url TEXT;
   supabase_anon_key TEXT;
 BEGIN
-  -- URL de tu proyecto Supabase (reemplaza con tu URL real)
-  function_url := 'https://YOUR_PROJECT_REF.supabase.co/functions/v1/send-inquiry-notification';
+  -- URL de tu proyecto Supabase
+  function_url := 'https://hrpkcdzgbpzzatusmqyq.supabase.co/functions/v1/send-inquiry-notification';
 
-  -- Anon key de Supabase (reemplaza con tu anon key real)
-  supabase_anon_key := 'YOUR_SUPABASE_ANON_KEY';
+  -- Anon key de Supabase
+  supabase_anon_key := 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhycGtjZHpnYnB6emF0dXNtcXlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1NzQwNjksImV4cCI6MjA3ODE1MDA2OX0.nh0pCBKi464KgifOilDbsEjAkgpWBFkT8GViIdpqIcM';
 
   -- Llamar a la Edge Function de forma asíncrona usando pg_net
   PERFORM

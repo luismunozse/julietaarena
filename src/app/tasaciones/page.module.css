@@ -1,0 +1,90 @@
+.page {
+  background: #f8fafc;
+}
+
+.hero {
+  padding: 80px 0;
+  background: linear-gradient(120deg, rgba(44, 95, 125, 0.95), rgba(5, 150, 105, 0.85));
+  color: #fff;
+}
+
+.heroContent {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 40px;
+  align-items: center;
+}
+
+.heroText h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  margin: 12px 0 16px;
+}
+
+.heroText p {
+  line-height: 1.6;
+}
+
+.heroList {
+  margin: 20px 0 0;
+  padding-left: 18px;
+  line-height: 1.5;
+}
+
+.kicker {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+}
+
+.heroCard {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 30px;
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.heroBadge {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: 18px;
+}
+
+.heroBadge span {
+  display: inline-block;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.formSection {
+  padding: 70px 0 110px;
+}
+
+.sectionHeader {
+  max-width: 720px;
+  text-align: center;
+  margin: 0 auto 40px;
+}
+
+.sectionHeader h2 {
+  font-size: 2.4rem;
+  margin-bottom: 12px;
+}
+
+.sectionHeader p {
+  color: var(--text-light);
+  line-height: 1.6;
+}
+
+@media (max-width: 640px) {
+  .hero {
+    padding: 60px 0;
+  }
+
+  .heroCard {
+    padding: 22px;
+  }
+}

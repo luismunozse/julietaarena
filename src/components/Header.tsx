@@ -91,6 +91,9 @@ export default function Header() {
                 <a href="/remates-judiciales" className={styles.dropdownLink}>
                   Remates Judiciales
                 </a>
+                <a href="/tasaciones" className={styles.dropdownLink}>
+                  Tasaciones
+                </a>
               </div>
             </li>
             <li className={styles.navItem}>
@@ -123,4 +126,3 @@ export default function Header() {
     </header>
   )
 }
-
