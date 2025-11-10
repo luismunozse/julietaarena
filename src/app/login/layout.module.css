@@ -1,0 +1,13 @@
+/* Wrapper que cubre toda la pantalla y oculta header/footer */
+.loginLayoutWrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, #2c5f7d 0%, #1a4158 100%);
+  z-index: 9999;
+  overflow-y: auto;
+}

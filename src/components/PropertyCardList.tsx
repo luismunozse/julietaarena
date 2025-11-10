@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { Property } from '@/data/properties'
 import FavoriteButton from './FavoriteButton'
 import { useSwipe } from '@/hooks/useSwipe'
@@ -32,10 +33,10 @@ export default function PropertyCardList({ property }: PropertyCardListProps) {
     minSwipeDistance: 50
   })
 
-  const formatPrice = (price: number): string => {
+  const formatPrice = (price: number, currency: 'ARS' | 'USD' = 'USD'): string => {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
-      currency: 'ARS',
+      currency: currency,
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(price)
@@ -47,7 +48,8 @@ export default function PropertyCardList({ property }: PropertyCardListProps) {
       'departamento': 'Departamento',
       'terreno': 'Terreno',
       'local': 'Local Comercial',
-      'oficina': 'Oficina'
+      'oficina': 'Oficina',
+      'cochera': 'Cochera'
     }
     return types[type] || type
   }
@@ -56,9 +58,11 @@ export default function PropertyCardList({ property }: PropertyCardListProps) {
     <div className={`${styles.propertyCardList} hover-lift`}>
       {/* Imagen con swipe */}
       <div className={styles.imageContainer} {...swipeHandlers}>
-        <img 
+        <Image 
           src={property.images[currentImageIndex]} 
           alt={property.title}
+          fill
+          sizes="(max-width: 768px) 100vw, 300px"
           className={styles.propertyImage}
         />
         <div className={styles.favoriteButton}>
@@ -77,7 +81,7 @@ export default function PropertyCardList({ property }: PropertyCardListProps) {
             <p className={styles.propertyLocation}>📍 {property.location}</p>
           </div>
           <div className={styles.priceSection}>
-            <span className={styles.price}>{formatPrice(property.price)}</span>
+            <span className={styles.price}>{formatPrice(property.price, property.currency)}</span>
             <span className={styles.priceLabel}>
               {property.operation === 'venta' ? 'Venta' : 'Alquiler'}
             </span>
@@ -126,4 +130,3 @@ export default function PropertyCardList({ property }: PropertyCardListProps) {
     </div>
   )
 }
-

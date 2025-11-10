@@ -2,7 +2,7 @@
 
 import { useState, FormEvent } from 'react'
 import styles from './Contact.module.css'
-import { emailService } from '@/services/emailService'
+import { supabase } from '@/lib/supabaseClient'
 import { useToast } from '@/components/ToastContainer'
 
 export default function Contact() {
@@ -19,33 +19,39 @@ export default function Contact() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsSubmitting(true)
-    
+
     try {
-      // Construir mensaje completo con servicio
-      const fullMessage = `Servicio de interés: ${formData.service}\n\n${formData.message}`
-      
-      // Enviar email usando EmailJS
-      const result = await emailService.sendContactForm({
-        from_name: formData.name,
-        from_email: formData.email,
-        phone: formData.phone,
-        message: fullMessage,
-      })
-      
-      if (result.success) {
-        success(result.message, 5000)
-        
-        // Limpiar formulario
-        setFormData({
-          name: '',
-          email: '',
-          phone: '',
-          service: '',
-          message: '',
-        })
-      } else {
-        showError(result.message, 7000)
+      // Guardar la consulta en Supabase
+      const { data, error } = await supabase
+        .from('contact_inquiries')
+        .insert([
+          {
+            customer_name: formData.name,
+            customer_email: formData.email,
+            customer_phone: formData.phone,
+            service: formData.service,
+            message: formData.message,
+            status: 'nueva'
+          }
+        ])
+        .select()
+
+      if (error) {
+        console.error('Error al guardar consulta:', error)
+        showError('Error al enviar el mensaje. Por favor, contactanos por WhatsApp.', 7000)
+        return
       }
+
+      success('¡Mensaje enviado correctamente! Te contactaremos pronto.', 5000)
+
+      // Limpiar formulario
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        service: '',
+        message: '',
+      })
     } catch (err) {
       console.error('Error al enviar formulario:', err)
       showError('Error inesperado al enviar el mensaje. Por favor, contactanos por WhatsApp.', 7000)

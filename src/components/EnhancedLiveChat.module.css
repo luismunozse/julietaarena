@@ -173,6 +173,13 @@
   border-radius: 4px;
 }
 
+.messageImage {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
 /* Chat Input */
 .chatInput {
   padding: 15px;
@@ -308,4 +315,3 @@
     right: 15px;
   }
 }
-

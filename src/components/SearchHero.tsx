@@ -58,11 +58,22 @@ export default function SearchHero() {
     // Función para cargar el script de Google Maps
     const loadGoogleMapsScript = () => {
       return new Promise<void>((resolve, reject) => {
-        if (window.google && window.google.maps) {
+        // Si ya está cargado, resolver inmediatamente
+        if (window.google && window.google.maps && window.google.maps.places) {
           resolve()
           return
         }
 
+        // Verificar si ya existe un script en proceso de carga
+        const existingScript = document.querySelector('script[src*="maps.googleapis.com"]')
+        if (existingScript) {
+          // Si existe, esperar a que cargue
+          existingScript.addEventListener('load', () => resolve())
+          existingScript.addEventListener('error', () => reject(new Error('Failed to load Google Maps')))
+          return
+        }
+
+        // Crear nuevo script solo si no existe
         const script = document.createElement('script')
         script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&language=es`
         script.async = true

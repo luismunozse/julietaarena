@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { Property } from '@/data/properties'
 import { useReviews } from '@/hooks/useReviews'
 import ReviewForm from './ReviewForm'
@@ -112,9 +113,11 @@ export default function ReviewSummary({ property }: ReviewSummaryProps) {
               <div key={review.id} className={styles.reviewItem}>
                 <div className={styles.reviewHeader}>
                   <div className={styles.reviewerInfo}>
-                    <img 
+                    <Image 
                       src={review.userAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(review.userName)}&background=2c5f7d&color=fff`}
                       alt={review.userName}
+                      width={40}
+                      height={40}
                       className={styles.reviewerAvatar}
                     />
                     <div>

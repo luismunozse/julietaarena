@@ -14,6 +14,18 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'ui-avatars.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'hrpkcdzgbpzzatusmqyq.supabase.co',
+        port: '',
+        pathname: '/storage/v1/object/public/**',
+      },
     ],
   },
   // Configuración para reducir warnings de webpack en desarrollo
@@ -32,4 +44,3 @@ const nextConfig = {
 }
 
 module.exports = nextConfig
-

@@ -2,14 +2,16 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { properties, Property, getPropertiesForSale, getPropertiesForRent } from '@/data/properties'
+import { Property } from '@/data/properties'
 import PropertyCard from './PropertyCard'
 import MapPlaceholder from './MapPlaceholder'
 import { useAnalytics } from '@/hooks/useAnalytics'
+import { useProperties } from '@/hooks/useProperties'
 import styles from './Properties.module.css'
 
 export default function Properties() {
   const searchParams = useSearchParams()
+  const { properties, isLoading } = useProperties()
   const [activeTab, setActiveTab] = useState<'venta' | 'alquiler'>('venta')
   const [selectedType, setSelectedType] = useState<string>('all')
   const [selectedLocation, setSelectedLocation] = useState<string>('all')
@@ -48,7 +50,7 @@ export default function Properties() {
     }
   }, [searchParams])
 
-  const types = ['all', 'casa', 'departamento', 'terreno', 'local', 'oficina']
+  const types = ['all', 'casa', 'departamento', 'terreno', 'local', 'oficina', 'cochera']
   const locations = ['all', 'Villa Allende', 'Nueva Córdoba', 'Villa Carlos Paz', 'Centro', 'Barrio Norte', 'Torre Empresarial', 'Barrio Jardín', 'Barrio Güemes']
   const bedroomOptions = ['all', '1', '2', '3', '4', '5+']
   const bathroomOptions = ['all', '1', '2', '3', '4+']
@@ -65,10 +67,16 @@ export default function Properties() {
     'departamento': 'Departamentos',
     'terreno': 'Terrenos',
     'local': 'Locales',
-    'oficina': 'Oficinas'
+    'oficina': 'Oficinas',
+    'cochera': 'Cocheras'
   }
 
-  const currentProperties = activeTab === 'venta' ? getPropertiesForSale() : getPropertiesForRent()
+  // Filtrar propiedades por operación
+  const currentProperties = useMemo(() => {
+    return properties.filter(prop => 
+      prop.operation === activeTab && prop.status === 'disponible'
+    )
+  }, [properties, activeTab])
 
   // Ajustar rango de precios según la pestaña activa
   const currentPriceRange = useMemo(() => {
@@ -77,6 +85,8 @@ export default function Properties() {
   }, [activeTab, priceRange])
 
   const filteredProperties = useMemo(() => {
+    if (isLoading) return []
+    
     const featured = searchParams.get('featured')
     
     return currentProperties.filter(property => {
@@ -133,7 +143,7 @@ export default function Properties() {
       
       return property.status === 'disponible'
     })
-  }, [currentProperties, selectedType, selectedLocation, currentPriceRange, areaRange, bedrooms, bathrooms, yearBuilt, features, searchTerm, searchParams])
+  }, [currentProperties, selectedType, selectedLocation, currentPriceRange, areaRange, bedrooms, bathrooms, yearBuilt, features, searchTerm, searchParams, isLoading])
 
   // Track search events
   useEffect(() => {
@@ -154,21 +164,12 @@ export default function Properties() {
   const featuredProperties = properties.filter(prop => prop.featured && prop.status === 'disponible')
 
   const formatPrice = (price: number): string => {
-    if (activeTab === 'alquiler') {
-      return new Intl.NumberFormat('es-AR', {
-        style: 'currency',
-        currency: 'ARS',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      }).format(price)
-    } else {
-      return new Intl.NumberFormat('es-AR', {
-        style: 'currency',
-        currency: 'ARS',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      }).format(price)
-    }
+    // Formato sin moneda específica para el filtro (aplica a todas las propiedades)
+    return new Intl.NumberFormat('es-AR', {
+      style: 'decimal',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(price)
   }
 
   return (

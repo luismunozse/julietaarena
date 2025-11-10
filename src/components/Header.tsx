@@ -2,11 +2,14 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { usePathname, useRouter } from 'next/navigation'
 import styles from './Header.module.css'
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const pathname = usePathname()
+  const router = useRouter()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -29,12 +32,33 @@ export default function Header() {
     }
   }, [isMobileMenuOpen])
 
+  // Manejar scroll cuando se carga la página con un hash
+  useEffect(() => {
+    if (pathname === '/' && window.location.hash) {
+      // Pequeño delay para asegurar que el DOM esté listo
+      setTimeout(() => {
+        const id = window.location.hash
+        const element = document.querySelector(id)
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' })
+        }
+      }, 100)
+    }
+  }, [pathname])
+
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
     e.preventDefault()
-    const element = document.querySelector(id)
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' })
-      setIsMobileMenuOpen(false)
+    setIsMobileMenuOpen(false)
+
+    // Si estamos en la página principal, hacer scroll directo
+    if (pathname === '/') {
+      const element = document.querySelector(id)
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' })
+      }
+    } else {
+      // Si estamos en otra página, redirigir a la página principal con el hash
+      router.push(`/${id}`)
     }
   }
 

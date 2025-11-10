@@ -36,7 +36,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
   const formatPrice = (price: number): string => {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
-      currency: 'ARS',
+      currency: property.currency || 'USD',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(price)
@@ -53,6 +53,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
       'terreno': 'Terreno',
       'local': 'Local Comercial',
       'oficina': 'Oficina',
+      'cochera': 'Cochera'
     }
     return labels[property.type] || property.type
   }
@@ -198,6 +199,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
     </div>
   )
 }
+
 
 
 

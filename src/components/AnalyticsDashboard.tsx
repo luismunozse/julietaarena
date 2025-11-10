@@ -103,7 +103,7 @@ export default function AnalyticsDashboard() {
           <div className={styles.statIcon}>📊</div>
           <div className={styles.statContent}>
             <h3>Eventos Totales</h3>
-            <p className={styles.statNumber}>{formatNumber(data.totalEvents)}</p>
+            <p className={styles.statNumber}>{formatNumber(data.totalEvents || 0)}</p>
           </div>
         </div>
 
@@ -111,7 +111,7 @@ export default function AnalyticsDashboard() {
           <div className={styles.statIcon}>👁️</div>
           <div className={styles.statContent}>
             <h3>Vistas de Página</h3>
-            <p className={styles.statNumber}>{formatNumber(data.totalPageViews)}</p>
+            <p className={styles.statNumber}>{formatNumber(data.totalPageViews || 0)}</p>
           </div>
         </div>
 
@@ -120,7 +120,7 @@ export default function AnalyticsDashboard() {
           <div className={styles.statContent}>
             <h3>Propiedades Vistas</h3>
             <p className={styles.statNumber}>
-              {formatNumber(data.events.filter(e => e.category === 'property').length)}
+              {formatNumber((data.events || []).filter(e => e.category === 'property').length)}
             </p>
           </div>
         </div>
@@ -130,7 +130,7 @@ export default function AnalyticsDashboard() {
           <div className={styles.statContent}>
             <h3>Contactos</h3>
             <p className={styles.statNumber}>
-              {formatNumber(data.events.filter(e => e.category === 'contact').length)}
+              {formatNumber((data.events || []).filter(e => e.category === 'contact').length)}
             </p>
           </div>
         </div>
@@ -140,24 +140,36 @@ export default function AnalyticsDashboard() {
         <div className={styles.section}>
           <h2>Páginas Más Visitadas</h2>
           <div className={styles.list}>
-            {data.popularPages.slice(0, 10).map((page, index) => (
-              <div key={index} className={styles.listItem}>
-                <span className={styles.listLabel}>{page.page}</span>
-                <span className={styles.listValue}>{formatNumber(page.views)} vistas</span>
+            {(data.popularPages || []).slice(0, 10).length > 0 ? (
+              (data.popularPages || []).slice(0, 10).map((page, index) => (
+                <div key={index} className={styles.listItem}>
+                  <span className={styles.listLabel}>{page.page}</span>
+                  <span className={styles.listValue}>{formatNumber(page.views)} vistas</span>
+                </div>
+              ))
+            ) : (
+              <div className={styles.emptyState}>
+                <p>No hay datos de páginas visitadas aún</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
 
         <div className={styles.section}>
           <h2>Eventos Más Frecuentes</h2>
           <div className={styles.list}>
-            {data.popularEvents.slice(0, 10).map((event, index) => (
-              <div key={index} className={styles.listItem}>
-                <span className={styles.listLabel}>{event.event}</span>
-                <span className={styles.listValue}>{formatNumber(event.count)} veces</span>
+            {(data.popularEvents || []).slice(0, 10).length > 0 ? (
+              (data.popularEvents || []).slice(0, 10).map((event, index) => (
+                <div key={index} className={styles.listItem}>
+                  <span className={styles.listLabel}>{event.event}</span>
+                  <span className={styles.listValue}>{formatNumber(event.count)} veces</span>
+                </div>
+              ))
+            ) : (
+              <div className={styles.emptyState}>
+                <p>No hay datos de eventos aún</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>
@@ -165,40 +177,56 @@ export default function AnalyticsDashboard() {
       <div className={styles.section}>
         <h2>Eventos Recientes</h2>
         <div className={styles.eventsTable}>
-          <div className={styles.tableHeader}>
-            <span>Evento</span>
-            <span>Categoría</span>
-            <span>Acción</span>
-            <span>Fecha</span>
-          </div>
-          {data.events.slice(-20).reverse().map((event, index) => (
-            <div key={index} className={styles.tableRow}>
-              <span className={styles.eventName}>{event.event}</span>
-              <span className={styles.eventCategory}>{event.category}</span>
-              <span className={styles.eventAction}>{event.action}</span>
-              <span className={styles.eventDate}>{formatDate(event.timestamp)}</span>
+          {(data.events || []).length > 0 ? (
+            <>
+              <div className={styles.tableHeader}>
+                <span>Evento</span>
+                <span>Categoría</span>
+                <span>Acción</span>
+                <span>Fecha</span>
+              </div>
+              {(data.events || []).slice(-20).reverse().map((event, index) => (
+                <div key={index} className={styles.tableRow}>
+                  <span className={styles.eventName}>{event.event}</span>
+                  <span className={styles.eventCategory}>{event.category}</span>
+                  <span className={styles.eventAction}>{event.action}</span>
+                  <span className={styles.eventDate}>{formatDate(event.timestamp)}</span>
+                </div>
+              ))}
+            </>
+          ) : (
+            <div className={styles.emptyState}>
+              <p>No hay eventos registrados aún</p>
             </div>
-          ))}
+          )}
         </div>
       </div>
 
       <div className={styles.section}>
         <h2>Vistas de Página Recientes</h2>
         <div className={styles.eventsTable}>
-          <div className={styles.tableHeader}>
-            <span>Página</span>
-            <span>Título</span>
-            <span>URL</span>
-            <span>Fecha</span>
-          </div>
-          {data.pageViews.slice(-20).reverse().map((pageView, index) => (
-            <div key={index} className={styles.tableRow}>
-              <span className={styles.eventName}>{pageView.page}</span>
-              <span className={styles.eventCategory}>{pageView.title}</span>
-              <span className={styles.eventAction}>{pageView.url}</span>
-              <span className={styles.eventDate}>{formatDate(pageView.timestamp)}</span>
+          {(data.pageViews || []).length > 0 ? (
+            <>
+              <div className={styles.tableHeader}>
+                <span>Página</span>
+                <span>Título</span>
+                <span>URL</span>
+                <span>Fecha</span>
+              </div>
+              {(data.pageViews || []).slice(-20).reverse().map((pageView, index) => (
+                <div key={index} className={styles.tableRow}>
+                  <span className={styles.eventName}>{pageView.page}</span>
+                  <span className={styles.eventCategory}>{pageView.title}</span>
+                  <span className={styles.eventAction}>{pageView.url}</span>
+                  <span className={styles.eventDate}>{formatDate(pageView.timestamp)}</span>
+                </div>
+              ))}
+            </>
+          ) : (
+            <div className={styles.emptyState}>
+              <p>No hay vistas de página registradas aún</p>
             </div>
-          ))}
+          )}
         </div>
       </div>
     </div>

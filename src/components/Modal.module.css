@@ -1,0 +1,229 @@
+/* Overlay del modal */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 1rem;
+  animation: fadeIn 0.2s ease-out;
+  backdrop-filter: blur(4px);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Contenido del modal */
+.modalContent {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease-out;
+  text-align: center;
+  position: relative;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Icono del modal */
+.modalIcon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  margin: 0 auto 1.5rem;
+  animation: bounce 0.5s ease-out;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.iconConfirm {
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+}
+
+.iconSuccess {
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+}
+
+.iconError {
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+}
+
+.iconInfo {
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+}
+
+/* Título del modal */
+.modalTitle {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1a4158;
+  margin: 0 0 1rem 0;
+  letter-spacing: -0.5px;
+}
+
+/* Mensaje del modal */
+.modalMessage {
+  font-size: 1.05rem;
+  color: #555;
+  margin: 0 0 2rem 0;
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+/* Acciones del modal */
+.modalActions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Botón de cancelar */
+.cancelButton {
+  background: white;
+  color: #555;
+  border: 2px solid #d0d0d0;
+  padding: 0.9rem 2rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 140px;
+  font-family: inherit;
+}
+
+.cancelButton:hover {
+  background: #f5f5f5;
+  border-color: #aaa;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.cancelButton:active {
+  transform: translateY(0);
+}
+
+/* Botón de confirmar */
+.confirmButton {
+  background: linear-gradient(135deg, #2c5f7d 0%, #1a4158 100%);
+  color: white;
+  border: none;
+  padding: 0.9rem 2rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 140px;
+  box-shadow: 0 6px 20px rgba(44, 95, 125, 0.35);
+  font-family: inherit;
+}
+
+.confirmButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(44, 95, 125, 0.45);
+  background: linear-gradient(135deg, #2c5f7d 0%, #234960 100%);
+}
+
+.confirmButton:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 15px rgba(44, 95, 125, 0.35);
+}
+
+/* Botón de error */
+.errorButton {
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+  box-shadow: 0 6px 20px rgba(244, 67, 54, 0.35);
+}
+
+.errorButton:hover {
+  background: linear-gradient(135deg, #f44336 0%, #c62828 100%);
+  box-shadow: 0 8px 25px rgba(244, 67, 54, 0.45);
+}
+
+.errorButton:active {
+  box-shadow: 0 4px 15px rgba(244, 67, 54, 0.35);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .modalContent {
+    padding: 1.5rem;
+  }
+
+  .modalIcon {
+    width: 60px;
+    height: 60px;
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .modalTitle {
+    font-size: 1.4rem;
+  }
+
+  .modalMessage {
+    font-size: 0.95rem;
+  }
+
+  .modalActions {
+    flex-direction: column-reverse;
+    gap: 0.75rem;
+  }
+
+  .cancelButton,
+  .confirmButton {
+    width: 100%;
+    min-width: auto;
+  }
+}
+
+/* Soporte para reducción de movimiento */
+@media (prefers-reduced-motion: reduce) {
+  .modalOverlay,
+  .modalContent,
+  .modalIcon {
+    animation: none;
+  }
+
+  .cancelButton,
+  .confirmButton {
+    transition: none;
+  }
+}

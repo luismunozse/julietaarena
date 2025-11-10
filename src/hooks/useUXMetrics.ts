@@ -37,7 +37,6 @@ export function useUXMetrics({
       })
     }
 
-    console.log(`[UX Metrics] ${componentName} loaded in ${loadTime}ms`)
   }, [componentName, trackLoadTime])
 
   // Track interaction time
@@ -63,7 +62,6 @@ export function useUXMetrics({
           })
         }
 
-        console.log(`[UX Metrics] ${componentName} interaction time: ${interactionTime}ms`)
         interactionStart.current = null
       }
     }
@@ -105,7 +103,6 @@ export function useUXMetrics({
             })
           }
 
-          console.log(`[UX Metrics] ${componentName} scroll depth: ${scrollPercentage}%`)
         }
       }
     }
@@ -119,8 +116,9 @@ export function useUXMetrics({
 
   // Track time on page (cleanup on unmount)
   useEffect(() => {
+    const mountStartedAt = mountTime.current
     return () => {
-      const timeOnPage = Date.now() - mountTime.current
+      const timeOnPage = Date.now() - mountStartedAt
 
       if (typeof window !== 'undefined' && (window as any).gtag) {
         (window as any).gtag('event', 'ux_metric_time_on_component', {
@@ -131,7 +129,6 @@ export function useUXMetrics({
         })
       }
 
-      console.log(`[UX Metrics] ${componentName} time on page: ${timeOnPage}ms`)
     }
   }, [componentName])
 
@@ -147,7 +144,6 @@ export function useUXMetrics({
       })
     }
 
-    console.log(`[UX Metrics] ${componentName} custom metric: ${metricName} = ${value}`)
   }
 
   const trackEmptyState = (reason: string) => {
@@ -160,7 +156,6 @@ export function useUXMetrics({
       })
     }
 
-    console.log(`[UX Metrics] ${componentName} empty state: ${reason}`)
   }
 
   const trackLoadingState = (duration: number) => {
@@ -173,7 +168,6 @@ export function useUXMetrics({
       })
     }
 
-    console.log(`[UX Metrics] ${componentName} loading duration: ${duration}ms`)
   }
 
   return {
@@ -182,4 +176,3 @@ export function useUXMetrics({
     trackLoadingState
   }
 }
-

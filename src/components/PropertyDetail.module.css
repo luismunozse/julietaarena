@@ -7,9 +7,6 @@
   background: var(--white);
   border-bottom: 1px solid #e5e5e5;
   padding: 20px 0;
-  position: sticky;
-  top: 80px;
-  z-index: 100;
 }
 
 .headerContent {
@@ -289,6 +286,8 @@
     padding: 20px;
   }
 }
+
+
 
 
 

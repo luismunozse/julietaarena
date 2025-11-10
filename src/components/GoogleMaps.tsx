@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Property } from '@/data/properties'
 import styles from './GoogleMaps.module.css'
 
@@ -18,6 +18,21 @@ declare global {
   }
 }
 
+const CORDOBA_CENTER = { lat: -31.4201, lng: -64.1888 }
+
+const ZONE_COORDINATES: Record<string, { lat: number; lng: number }> = {
+  'Villa Allende': { lat: -31.3000, lng: -64.3000 },
+  'Nueva Córdoba': { lat: -31.4200, lng: -64.1900 },
+  'Carlos Paz': { lat: -31.4240, lng: -64.4978 },
+  'Centro': { lat: -31.4201, lng: -64.1888 },
+  'Barrio Norte': { lat: -31.4000, lng: -64.1800 },
+  'Barrio Jardín': { lat: -31.4100, lng: -64.2000 },
+  'Barrio Güemes': { lat: -31.4300, lng: -64.2000 },
+  'Torre Empresarial': { lat: -31.4150, lng: -64.1850 }
+}
+
+const sanitizeUrl = (url: string) => url.replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+
 export default function GoogleMaps({ 
   properties, 
   selectedProperty, 
@@ -26,23 +41,8 @@ export default function GoogleMaps({
 }: GoogleMapsProps) {
   const mapRef = useRef<HTMLDivElement>(null)
   const [map, setMap] = useState<any>(null)
-  const [markers, setMarkers] = useState<any[]>([])
+  const markersRef = useRef<any[]>([])
   const [isLoaded, setIsLoaded] = useState(false)
-
-  // Coordenadas de Córdoba
-  const cordobaCenter = { lat: -31.4201, lng: -64.1888 }
-
-  // Coordenadas aproximadas para diferentes zonas
-  const zoneCoordinates: { [key: string]: { lat: number; lng: number } } = {
-    'Villa Allende': { lat: -31.3000, lng: -64.3000 },
-    'Nueva Córdoba': { lat: -31.4200, lng: -64.1900 },
-    'Carlos Paz': { lat: -31.4240, lng: -64.4978 },
-    'Centro': { lat: -31.4201, lng: -64.1888 },
-    'Barrio Norte': { lat: -31.4000, lng: -64.1800 },
-    'Barrio Jardín': { lat: -31.4100, lng: -64.2000 },
-    'Barrio Güemes': { lat: -31.4300, lng: -64.2000 },
-    'Torre Empresarial': { lat: -31.4150, lng: -64.1850 }
-  }
 
   const getPropertyIcon = (property: Property) => {
     const icons = {
@@ -50,7 +50,8 @@ export default function GoogleMaps({
       departamento: '🏢',
       terreno: '🏞️',
       local: '🏪',
-      oficina: '🏢'
+      oficina: '🏢',
+      cochera: '🅿️'
     }
     return icons[property.type] || '🏠'
   }
@@ -66,39 +67,17 @@ export default function GoogleMaps({
     return `$${price.toLocaleString()}`
   }
 
-  const initMap = () => {
-    if (!mapRef.current || window.google) return
-
-    const mapInstance = new window.google.maps.Map(mapRef.current, {
-      center: cordobaCenter,
-      zoom: 12,
-      styles: [
-        {
-          featureType: 'poi',
-          elementType: 'labels',
-          stylers: [{ visibility: 'off' }]
-        }
-      ]
-    })
-
-    setMap(mapInstance)
-    setIsLoaded(true)
-    createMarkers(mapInstance)
-  }
-
-  const createMarkers = (mapInstance: any) => {
+  const createMarkers = useCallback((mapInstance: any) => {
     if (!mapInstance) return
 
-    // Limpiar marcadores existentes
-    markers.forEach(marker => marker.setMap(null))
+    markersRef.current.forEach(marker => marker.setMap(null))
 
     const newMarkers = properties.map(property => {
       const location = property.location.split(',')[0].trim()
-      const coords = zoneCoordinates[location] || cordobaCenter
-      
-      // Agregar pequeña variación para evitar superposición
+      const coords = ZONE_COORDINATES[location] || CORDOBA_CENTER
       const lat = coords.lat + (Math.random() - 0.5) * 0.01
       const lng = coords.lng + (Math.random() - 0.5) * 0.01
+      const imageUrl = property.images[0] ? sanitizeUrl(property.images[0]) : ''
 
       const marker = new window.google.maps.Marker({
         position: { lat, lng },
@@ -117,9 +96,7 @@ export default function GoogleMaps({
       const infoWindow = new window.google.maps.InfoWindow({
         content: `
           <div class="${styles.infoWindow}">
-            <div class="${styles.infoImage}">
-              <img src="${property.images[0]}" alt="${property.title}" />
-            </div>
+            <div class="${styles.infoImage}" ${imageUrl ? `style="background-image:url('${imageUrl}')"` : ''}></div>
             <div class="${styles.infoContent}">
               <h3>${property.title}</h3>
               <p class="${styles.infoLocation}">📍 ${property.location}</p>
@@ -147,54 +124,78 @@ export default function GoogleMaps({
       return marker
     })
 
-    setMarkers(newMarkers)
+    markersRef.current = newMarkers
 
-    // Exponer función global para el botón
     ;(window as any).selectProperty = (propertyId: string) => {
       const property = properties.find(p => p.id === propertyId)
       if (property && onPropertySelect) {
         onPropertySelect(property)
       }
     }
-  }
+  }, [onPropertySelect, properties])
+
+  const initMap = useCallback(() => {
+    if (!mapRef.current || !window.google?.maps) return
+
+    const mapInstance = new window.google.maps.Map(mapRef.current, {
+      center: CORDOBA_CENTER,
+      zoom: 12,
+      styles: [
+        {
+          featureType: 'poi',
+          elementType: 'labels',
+          stylers: [{ visibility: 'off' }]
+        }
+      ]
+    })
+
+    setMap(mapInstance)
+    setIsLoaded(true)
+    createMarkers(mapInstance)
+  }, [createMarkers])
 
   useEffect(() => {
-    // Cargar Google Maps API
-    const loadGoogleMaps = () => {
-      if (window.google) {
-        initMap()
-        return
-      }
-
-      const script = document.createElement('script')
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`
-      script.async = true
-      script.defer = true
-      script.onload = () => {
-        window.initMap = initMap
-        initMap()
-      }
-      document.head.appendChild(script)
+    if (window.google?.maps) {
+      initMap()
+      return
     }
 
-    loadGoogleMaps()
+    const scriptId = 'google-maps-script'
+    const existingScript = document.getElementById(scriptId) as HTMLScriptElement | null
+
+    if (existingScript) {
+      existingScript.addEventListener('load', initMap)
+      return () => existingScript.removeEventListener('load', initMap)
+    }
+
+    const script = document.createElement('script')
+    script.id = scriptId
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`
+    script.async = true
+    script.defer = true
+    script.addEventListener('load', initMap)
+    document.head.appendChild(script)
+
+    return () => {
+      script.removeEventListener('load', initMap)
+    }
   }, [initMap])
 
   useEffect(() => {
-    if (map && isLoaded) {
+    if (map) {
       createMarkers(map)
     }
-  }, [properties, map, isLoaded, createMarkers])
+  }, [map, createMarkers, properties])
 
   useEffect(() => {
     if (selectedProperty && map) {
       const location = selectedProperty.location.split(',')[0].trim()
-      const coords = zoneCoordinates[location] || cordobaCenter
+      const coords = ZONE_COORDINATES[location] || CORDOBA_CENTER
       
       map.setCenter(coords)
       map.setZoom(15)
     }
-  }, [selectedProperty, map, cordobaCenter, zoneCoordinates])
+  }, [selectedProperty, map])
 
   if (!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) {
     return (

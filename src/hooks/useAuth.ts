@@ -1,10 +1,9 @@
 'use client'
 
 import { useState, useEffect, createContext, useContext } from 'react'
+import type { Session, User as SupabaseUser } from '@supabase/supabase-js'
+import { supabase } from '@/lib/supabaseClient'
 import { User, UserSession, LoginCredentials, RegisterData, UserPreferences } from '@/types/user'
-
-const AUTH_SESSION_KEY = 'julieta-arena-auth-session'
-const USERS_KEY = 'julieta-arena-users'
 
 interface AuthContextType {
   user: User | null
@@ -12,13 +11,52 @@ interface AuthContextType {
   isLoading: boolean
   login: (credentials: LoginCredentials) => Promise<boolean>
   register: (data: RegisterData) => Promise<boolean>
-  logout: () => void
+  logout: () => Promise<void>
   updateProfile: (updates: Partial<User>) => Promise<boolean>
   updatePreferences: (preferences: Partial<UserPreferences>) => Promise<boolean>
   isAuthenticated: boolean
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined)
+
+const defaultPreferences: UserPreferences = {
+  theme: 'auto',
+  language: 'es',
+  notifications: {
+    email: true,
+    push: false,
+    sms: false
+  },
+  searchFilters: {
+    priceRange: { min: 0, max: 1000000 },
+    propertyTypes: [],
+    locations: [],
+    features: []
+  }
+}
+
+const clonePreferences = (prefs?: UserPreferences): UserPreferences =>
+  JSON.parse(JSON.stringify(prefs ?? defaultPreferences))
+
+const mapSupabaseUserToLocalUser = (authUser: SupabaseUser): User => {
+  const metadata = authUser.user_metadata || {}
+
+  return {
+    id: authUser.id,
+    email: authUser.email || '',
+    name: metadata.name || authUser.email || 'Usuario',
+    phone: metadata.phone,
+    avatar:
+      metadata.avatar ||
+      `https://ui-avatars.com/api/?name=${encodeURIComponent(metadata.name || authUser.email || 'Usuario')}&background=2c5f7d&color=fff`,
+    preferences: clonePreferences(metadata.preferences),
+    favorites: metadata.favorites || [],
+    appointments: metadata.appointments || [],
+    createdAt: authUser.created_at,
+    lastLogin: new Date().toISOString(),
+    isVerified: Boolean(authUser.email_confirmed_at)
+  }
+}
 
 export function useAuth() {
   const context = useContext(AuthContext)
@@ -34,192 +72,179 @@ export function useAuthProvider() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Cargar sesión existente
-    const stored = localStorage.getItem(AUTH_SESSION_KEY)
-    if (stored) {
-      try {
-        const sessionData: UserSession = JSON.parse(stored)
-        if (new Date(sessionData.expiresAt) > new Date()) {
-          setSession(sessionData)
-          setUser(sessionData.user)
-        } else {
-          localStorage.removeItem(AUTH_SESSION_KEY)
-        }
-      } catch (error) {
-        console.error('Error loading auth session:', error)
-        localStorage.removeItem(AUTH_SESSION_KEY)
+    let isMounted = true
+
+    const applySession = (supabaseSession: Session | null) => {
+      if (!supabaseSession) {
+        setUser(null)
+        setSession(null)
+        return
       }
+
+      const mappedUser = mapSupabaseUserToLocalUser(supabaseSession.user)
+      setUser(mappedUser)
+      setSession({
+        user: mappedUser,
+        token: supabaseSession.access_token,
+        expiresAt: supabaseSession.expires_at
+          ? new Date(supabaseSession.expires_at * 1000).toISOString()
+          : new Date(Date.now() + (supabaseSession.expires_in || 3600) * 1000).toISOString()
+      })
     }
-    setIsLoading(false)
+
+    const syncSession = async () => {
+      const { data, error } = await supabase.auth.getSession()
+      if (!isMounted) return
+
+      if (error) {
+        console.error('Error fetching Supabase session:', error.message)
+        setUser(null)
+        setSession(null)
+      } else {
+        applySession(data.session ?? null)
+      }
+
+      setIsLoading(false)
+    }
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      applySession(newSession)
+    })
+
+    void syncSession()
+
+    return () => {
+      isMounted = false
+      listener.subscription.unsubscribe()
+    }
   }, [])
 
-  const generateToken = () => {
-    return Math.random().toString(36).substring(2) + Date.now().toString(36)
-  }
-
-  const createUser = (data: RegisterData): User => {
-    const defaultPreferences: UserPreferences = {
-      theme: 'auto',
-      language: 'es',
-      notifications: {
-        email: true,
-        push: false,
-        sms: false
-      },
-      searchFilters: {
-        priceRange: { min: 0, max: 1000000 },
-        propertyTypes: [],
-        locations: [],
-        features: []
-      }
-    }
-
-    return {
-      id: `user-${Date.now()}`,
-      email: data.email,
-      name: data.name,
-      phone: data.phone,
-      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name)}&background=2c5f7d&color=fff`,
-      preferences: defaultPreferences,
-      favorites: [],
-      appointments: [],
-      createdAt: new Date().toISOString(),
-      lastLogin: new Date().toISOString(),
-      isVerified: false
-    }
-  }
-
-  const saveUsers = (users: User[]) => {
-    localStorage.setItem(USERS_KEY, JSON.stringify(users))
-  }
-
-  const getUsers = (): User[] => {
-    const stored = localStorage.getItem(USERS_KEY)
-    return stored ? JSON.parse(stored) : []
-  }
-
-  const saveSession = (sessionData: UserSession) => {
-    setSession(sessionData)
-    localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(sessionData))
-  }
-
   const login = async (credentials: LoginCredentials): Promise<boolean> => {
-    try {
-      const users = getUsers()
-      const user = users.find(u => u.email === credentials.email)
-      
-      if (!user) {
-        return false
-      }
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: credentials.email,
+      password: credentials.password
+    })
 
-      // En una app real, aquí se validaría la contraseña con el servidor
-      // Por ahora, simulamos que cualquier contraseña es válida
-      
-      const sessionData: UserSession = {
-        user: {
-          ...user,
-          lastLogin: new Date().toISOString()
-        },
-        token: generateToken(),
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // 7 días
-      }
-
-      // Actualizar usuario en la lista
-      const updatedUsers = users.map(u => 
-        u.id === user.id ? sessionData.user : u
-      )
-      saveUsers(updatedUsers)
-
-      saveSession(sessionData)
-      setUser(sessionData.user)
-      
-      return true
-    } catch (error) {
-      console.error('Login error:', error)
+    if (error) {
+      console.error('Login error:', error.message)
       return false
     }
+
+    if (data.session) {
+      const mappedUser = mapSupabaseUserToLocalUser(data.session.user)
+      setUser(mappedUser)
+      setSession({
+        user: mappedUser,
+        token: data.session.access_token,
+        expiresAt: data.session.expires_at
+          ? new Date(data.session.expires_at * 1000).toISOString()
+          : new Date(Date.now() + (data.session.expires_in || 3600) * 1000).toISOString()
+      })
+    }
+
+    return true
   }
 
   const register = async (data: RegisterData): Promise<boolean> => {
-    try {
-      const users = getUsers()
-      
-      // Verificar si el email ya existe
-      if (users.some(u => u.email === data.email)) {
-        return false
+    const { data: signUpData, error } = await supabase.auth.signUp({
+      email: data.email,
+      password: data.password,
+      options: {
+        data: {
+          name: data.name,
+          phone: data.phone,
+          preferences: defaultPreferences
+        }
       }
+    })
 
-      const newUser = createUser(data)
-      const updatedUsers = [...users, newUser]
-      saveUsers(updatedUsers)
-
-      // Auto-login después del registro
-      const sessionData: UserSession = {
-        user: newUser,
-        token: generateToken(),
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-      }
-
-      saveSession(sessionData)
-      setUser(newUser)
-      
-      return true
-    } catch (error) {
-      console.error('Register error:', error)
+    if (error) {
+      console.error('Register error:', error.message)
       return false
     }
+
+    if (signUpData.session) {
+      const mappedUser = mapSupabaseUserToLocalUser(signUpData.session.user)
+      setUser(mappedUser)
+      setSession({
+        user: mappedUser,
+        token: signUpData.session.access_token,
+        expiresAt: signUpData.session.expires_at
+          ? new Date(signUpData.session.expires_at * 1000).toISOString()
+          : new Date(Date.now() + (signUpData.session.expires_in || 3600) * 1000).toISOString()
+      })
+    } else {
+      // Sign up may require email verification
+      setUser(null)
+      setSession(null)
+    }
+
+    return true
   }
 
-  const logout = () => {
+  const logout = async () => {
+    const { error } = await supabase.auth.signOut()
+    if (error) {
+      console.error('Logout error:', error.message)
+    }
     setUser(null)
     setSession(null)
-    localStorage.removeItem(AUTH_SESSION_KEY)
   }
 
   const updateProfile = async (updates: Partial<User>): Promise<boolean> => {
     if (!user || !session) return false
 
-    try {
-      const updatedUser = { ...user, ...updates }
-      const users = getUsers()
-      const updatedUsers = users.map(u => 
-        u.id === user.id ? updatedUser : u
-      )
-      saveUsers(updatedUsers)
+    const { error, data } = await supabase.auth.updateUser({
+      data: {
+        ...user,
+        ...updates,
+        preferences: user.preferences
+      }
+    })
 
-      const updatedSession = { ...session, user: updatedUser }
-      saveSession(updatedSession)
-      setUser(updatedUser)
-      
-      return true
-    } catch (error) {
-      console.error('Update profile error:', error)
+    if (error) {
+      console.error('Update profile error:', error.message)
       return false
     }
+
+    if (data.user) {
+      const mappedUser = mapSupabaseUserToLocalUser(data.user)
+      setUser(mappedUser)
+      setSession({ ...session, user: mappedUser })
+    }
+
+    return true
   }
 
   const updatePreferences = async (preferences: Partial<UserPreferences>): Promise<boolean> => {
     if (!user || !session) return false
 
-    try {
-      const updatedPreferences = { ...user.preferences, ...preferences }
-      const updatedUser = { ...user, preferences: updatedPreferences }
-      
-      const users = getUsers()
-      const updatedUsers = users.map(u => 
-        u.id === user.id ? updatedUser : u
-      )
-      saveUsers(updatedUsers)
+    const mergedPreferences = { ...user.preferences, ...preferences }
+    const { error, data } = await supabase.auth.updateUser({
+      data: {
+        ...user,
+        preferences: mergedPreferences
+      }
+    })
 
-      const updatedSession = { ...session, user: updatedUser }
-      saveSession(updatedSession)
-      setUser(updatedUser)
-      
-      return true
-    } catch (error) {
-      console.error('Update preferences error:', error)
+    if (error) {
+      console.error('Update preferences error:', error.message)
       return false
     }
+
+    if (data.user) {
+      const mappedUser = mapSupabaseUserToLocalUser({
+        ...data.user,
+        user_metadata: {
+          ...data.user.user_metadata,
+          preferences: mergedPreferences
+        }
+      } as SupabaseUser)
+      setUser(mappedUser)
+      setSession({ ...session, user: mappedUser })
+    }
+
+    return true
   }
 
   return {

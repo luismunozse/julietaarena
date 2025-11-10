@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Property } from '@/data/properties'
 import FavoriteButton from './FavoriteButton'
@@ -31,7 +32,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
   const formatPrice = (price: number): string => {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
-      currency: 'ARS',
+      currency: property.currency || 'USD',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(price)
@@ -43,7 +44,8 @@ export default function PropertyCard({ property }: PropertyCardProps) {
       'departamento': 'Departamento',
       'terreno': 'Terreno',
       'local': 'Local Comercial',
-      'oficina': 'Oficina'
+      'oficina': 'Oficina',
+      'cochera': 'Cochera'
     }
     return types[type] || type
   }
@@ -86,9 +88,11 @@ export default function PropertyCard({ property }: PropertyCardProps) {
       </div>
       
       <div className={styles.imageContainer}>
-        <img 
-          src={property.images[currentImageIndex]} 
+        <Image 
+          src={property.images[currentImageIndex]}
           alt={property.title}
+          fill
+          sizes="(max-width: 768px) 100vw, 33vw"
           className={styles.propertyImage}
         />
         
@@ -226,7 +230,6 @@ export default function PropertyCard({ property }: PropertyCardProps) {
           property={property}
           onClose={() => setShowAppointmentBooking(false)}
           onSuccess={(appointmentId) => {
-            console.log('Cita agendada:', appointmentId)
             setShowAppointmentBooking(false)
           }}
         />

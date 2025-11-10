@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import Image from 'next/image'
 import { useChat } from '@/hooks/useChat'
 import styles from './EnhancedLiveChat.module.css'
 
@@ -116,10 +117,14 @@ export default function EnhancedLiveChat() {
                 <div className={styles.messageContent}>
                   {message.type === 'image' && message.metadata?.fileName && (
                     <div className={styles.fileMessage}>
-                      <img 
-                        src={message.text} 
+                      <Image 
+                        src={message.text}
                         alt={message.metadata.fileName}
+                        width={320}
+                        height={200}
                         className={styles.messageImage}
+                        unoptimized
+                        style={{ width: '100%', height: 'auto' }}
                       />
                       <p className={styles.fileName}>{message.metadata.fileName}</p>
                     </div>

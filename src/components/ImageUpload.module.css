@@ -1,0 +1,278 @@
+.container {
+  width: 100%;
+}
+
+.dropZone {
+  border: 3px dashed #e0e0e0;
+  border-radius: 12px;
+  padding: 3rem 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #fafafa;
+  position: relative;
+  overflow: hidden;
+}
+
+.dropZone:hover {
+  border-color: #2c5f7d;
+  background: #f0f7ff;
+}
+
+.dropZone.dragging {
+  border-color: #2c5f7d;
+  background: #e8f4ff;
+  transform: scale(1.02);
+}
+
+.dropZone.uploading {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.dropZoneContent {
+  pointer-events: none;
+}
+
+.uploadIcon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.uploadText {
+  font-size: 1.1rem;
+  color: #333;
+  margin: 0.5rem 0;
+}
+
+.uploadHint {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0.25rem 0;
+}
+
+.hiddenInput {
+  display: none;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e0e0e0;
+  border-top-color: #2c5f7d;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.urlOption {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f9f9f9;
+  border-radius: 8px;
+}
+
+.urlOption details {
+  cursor: pointer;
+}
+
+.urlOption summary {
+  font-weight: 600;
+  color: #2c5f7d;
+  padding: 0.5rem;
+  user-select: none;
+}
+
+.urlOption summary:hover {
+  color: #1a4158;
+}
+
+.urlInput {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.urlInput input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.urlInput input:focus {
+  outline: none;
+  border-color: #2c5f7d;
+}
+
+.urlInput small {
+  color: #666;
+  font-size: 0.85rem;
+}
+
+.error {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #ffebee;
+  border: 1px solid #ffcdd2;
+  border-radius: 8px;
+  color: #c62828;
+  font-size: 0.9rem;
+}
+
+.imagesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.imagePreview {
+  position: relative;
+  width: 100%;
+  padding-bottom: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid #e0e0e0;
+  background: #f5f5f5;
+  cursor: move;
+  transition: all 0.3s ease;
+}
+
+.imagePreview:hover {
+  border-color: #2c5f7d;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(44, 95, 125, 0.2);
+}
+
+.imagePreviewDragging {
+  opacity: 0.6;
+  border-color: #2c5f7d;
+  transform: scale(0.97);
+}
+
+.imagePreviewDropTarget {
+  border-color: #ffb74d;
+  box-shadow: 0 0 0 3px rgba(255, 183, 77, 0.35);
+}
+
+.imagePreview:hover .imageOverlay {
+  opacity: 1;
+}
+
+.previewImage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.imageOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7) 0%, transparent 50%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 0.5rem;
+}
+
+.imageNumber {
+  background: rgba(44, 95, 125, 0.9);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.imageActions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.moveButton,
+.removeButton {
+  background: rgba(255, 255, 255, 0.95);
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  color: #333;
+}
+
+.moveButton:hover {
+  background: #2c5f7d;
+  color: white;
+  transform: scale(1.1);
+}
+
+.removeButton {
+  background: rgba(211, 47, 47, 0.95);
+  color: white;
+}
+
+.removeButton:hover {
+  background: rgba(183, 28, 28, 1);
+  transform: scale(1.1);
+}
+
+.info {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f5f5f5;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.reorderHint {
+  margin-top: 0.5rem;
+  color: #2c5f7d;
+  font-size: 0.85rem;
+}
+
+.warning {
+  color: #f57c00;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .dropZone {
+    padding: 2rem 1rem;
+  }
+
+  .uploadIcon {
+    font-size: 2.5rem;
+  }
+
+  .imagesGrid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .imageActions {
+    flex-direction: column;
+  }
+}

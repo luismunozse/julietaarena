@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 'use client'
 
 import Script from 'next/script'
@@ -50,6 +51,7 @@ export default function FacebookPixel({ pixelId }: FacebookPixelProps) {
           height="1"
           width="1"
           style={{ display: 'none' }}
+          alt=""
           src={`https://www.facebook.com/tr?id=${pixelId}&ev=PageView&noscript=1`}
         />
       </noscript>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { Property } from '@/data/properties'
 import { usePropertyComparator } from '@/hooks/usePropertyComparator'
 import styles from './PropertyComparison.module.css'
@@ -13,10 +14,10 @@ export default function PropertyComparison({ onClose }: PropertyComparisonProps)
   const { comparisonProperties, removeFromComparison, clearComparison } = usePropertyComparator()
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null)
 
-  const formatPrice = (price: number): string => {
+  const formatPrice = (price: number, currency: 'ARS' | 'USD' = 'USD'): string => {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
-      currency: 'ARS',
+      currency: currency,
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(price)
@@ -28,23 +29,29 @@ export default function PropertyComparison({ onClose }: PropertyComparisonProps)
       'departamento': 'Departamento',
       'terreno': 'Terreno',
       'local': 'Local Comercial',
-      'oficina': 'Oficina'
+      'oficina': 'Oficina',
+      'cochera': 'Cochera'
     }
     return types[type] || type
   }
 
   const getComparisonData = () => {
     const data = [
-      { label: 'Precio', key: 'price', format: (value: number) => formatPrice(value) },
-      { label: 'Tipo', key: 'type', format: (value: string) => getTypeLabel(value) },
-      { label: 'Ubicación', key: 'location', format: (value: string) => value },
-      { label: 'Área', key: 'area', format: (value: number) => `${value} m²` },
-      { label: 'Dormitorios', key: 'bedrooms', format: (value: number) => value || 'N/A' },
-      { label: 'Baños', key: 'bathrooms', format: (value: number) => value || 'N/A' },
-      { label: 'Cocheras', key: 'parking', format: (value: number) => value || 'N/A' },
-      { label: 'Año', key: 'yearBuilt', format: (value: number) => value || 'N/A' },
-      { label: 'Expensas', key: 'expenses', format: (value: number) => value ? formatPrice(value) : 'N/A' },
-      { label: 'Estado', key: 'status', format: (value: string) => value === 'disponible' ? 'Disponible' : value },
+      { label: 'Precio', key: 'price', format: (property: Property) => formatPrice(property.price, property.currency) },
+      { label: 'Tipo', key: 'type', format: (property: Property) => getTypeLabel(property.type) },
+      { label: 'Ubicación', key: 'location', format: (property: Property) => property.location },
+      { label: 'Área', key: 'area', format: (property: Property) => {
+        // Formatear con decimales solo si es necesario
+        const value = property.area
+        const formatted = value % 1 === 0 ? value.toString() : value.toFixed(2).replace(/\.?0+$/, '')
+        return `${formatted} m²`
+      }},
+      { label: 'Dormitorios', key: 'bedrooms', format: (property: Property) => property.bedrooms || 'N/A' },
+      { label: 'Baños', key: 'bathrooms', format: (property: Property) => property.bathrooms || 'N/A' },
+      { label: 'Cocheras', key: 'parking', format: (property: Property) => property.parking || 'N/A' },
+      { label: 'Año', key: 'yearBuilt', format: (property: Property) => property.yearBuilt || 'N/A' },
+      { label: 'Expensas', key: 'expenses', format: (property: Property) => property.expenses ? formatPrice(property.expenses, property.currency) : 'N/A' },
+      { label: 'Estado', key: 'status', format: (property: Property) => property.status === 'disponible' ? 'Disponible' : property.status },
     ]
 
     return data
@@ -84,9 +91,12 @@ export default function PropertyComparison({ onClose }: PropertyComparisonProps)
               <div key={property.id} className={styles.propertyColumn}>
                 <div className={styles.propertyCard}>
                   <div className={styles.propertyImage}>
-                    <img 
+                    <Image 
                       src={property.images[0]} 
                       alt={property.title}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 250px"
+                      className={styles.propertyImageContent}
                     />
                     <button 
                       className={styles.removeBtn}
@@ -110,7 +120,7 @@ export default function PropertyComparison({ onClose }: PropertyComparisonProps)
                 </div>
                 {comparisonProperties.map((property) => (
                   <div key={property.id} className={styles.rowValue}>
-                    {String(property[row.key as keyof Property] || '')}
+                    {String(row.format(property))}
                   </div>
                 ))}
               </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { animations, durations, easings, presets } from '@/lib/animations'
 
 export interface UseAnimationOptions {
@@ -33,7 +33,7 @@ export function useAnimation(options: UseAnimationOptions = {}) {
   const [isAnimating, setIsAnimating] = useState(false)
   const [hasAnimated, setHasAnimated] = useState(false)
 
-  const startAnimation = () => {
+  const startAnimation = useCallback(() => {
     if (elementRef.current && (!once || !hasAnimated)) {
       setIsAnimating(true)
       setHasAnimated(true)
@@ -51,22 +51,22 @@ export function useAnimation(options: UseAnimationOptions = {}) {
         setIsAnimating(false)
       }, animationDuration)
     }
-  }
+  }, [animation, delay, duration, easing, fillMode, hasAnimated, once])
 
-  const stopAnimation = () => {
+  const stopAnimation = useCallback(() => {
     if (elementRef.current) {
       elementRef.current.style.animationName = 'none'
       setIsAnimating(false)
     }
-  }
+  }, [])
 
-  const resetAnimation = () => {
+  const resetAnimation = useCallback(() => {
     if (elementRef.current) {
       elementRef.current.style.animationName = 'none'
       setIsAnimating(false)
       setHasAnimated(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
     const element = elementRef.current
@@ -124,7 +124,7 @@ export function useAnimation(options: UseAnimationOptions = {}) {
         element.removeEventListener('click', handleClick)
       }
     }
-  }, [trigger, threshold, rootMargin, once, startAnimation])
+  }, [trigger, threshold, rootMargin, once, startAnimation, stopAnimation])
 
   return {
     elementRef,

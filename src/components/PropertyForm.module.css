@@ -53,9 +53,155 @@
   border-color: #2c5f7d;
 }
 
+.errorInput {
+  border-color: #d32f2f !important;
+}
+
+.errorInput:focus {
+  border-color: #d32f2f !important;
+  box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1);
+}
+
+.errorMessage {
+  display: block;
+  color: #d32f2f;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  font-weight: 500;
+}
+
+.charCount {
+  display: block;
+  color: #666;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+.fieldHint {
+  display: block;
+  color: #666;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+
+.sectionDescription {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.errorMessage {
+  display: block;
+  color: #d32f2f;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+  font-weight: 500;
+}
+
+.charCount {
+  display: block;
+  color: #666;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.priceRow {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.currencySelect {
+  flex: 0 0 180px;
+  min-width: 180px;
+}
+
+.currencySelect select {
+  width: 100%;
+  height: 48px;
+  padding: 0.75rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: white;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+.currencySelect select:focus {
+  outline: none;
+  border-color: #2c5f7d;
+}
+
+.currencySelect select:hover {
+  border-color: #b0b0b0;
+}
+
+.labelHint {
+  font-weight: 400;
+  font-size: 0.85rem;
+  color: #2c5f7d;
+  font-style: italic;
+}
+
+.priceFormatted {
+  display: block;
+  color: #2c5f7d;
+  font-size: 0.9rem;
+  margin-top: 0.25rem;
+  font-weight: 600;
+}
+
+.sectionDescription {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
 .field textarea {
   resize: vertical;
   min-height: 100px;
+}
+
+.priceInput {
+  flex: 1;
+  display: flex;
+  align-items: stretch;
+  gap: 0.75rem;
+}
+
+.currencyBadge {
+  padding: 0.75rem 1rem;
+  border: 2px solid #d7e4f2;
+  border-radius: 8px;
+  background: #f2f7fc;
+  color: #2c5f7d;
+  font-weight: 600;
+  min-width: 72px;
+  min-height: 48px;
+  text-align: center;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.priceInput input {
+  flex: 1;
+  padding: 0.75rem;
+  min-height: 48px;
+}
+
+.priceFormatted {
+  display: block;
+  color: #2c5f7d;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  font-weight: 600;
 }
 
 .row {
@@ -256,4 +402,73 @@
   }
 }
 
+/* Indicador de borrador guardado */
+.draftNotice {
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+  border: 2px solid #ffc107;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.2);
+}
 
+.draftInfo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.draftInfo span {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #856404;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.clearDraftButton {
+  background: white;
+  color: #856404;
+  border: 2px solid #ffc107;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.clearDraftButton:hover {
+  background: #ffc107;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(255, 193, 7, 0.3);
+}
+
+@media (max-width: 768px) {
+  .draftInfo {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .clearDraftButton {
+    width: 100%;
+  }
+
+  .priceRow {
+    flex-direction: column;
+  }
+
+  .currencySelect {
+    flex: 1 1 100%;
+    min-width: 100%;
+  }
+
+  .priceInput {
+    width: 100%;
+  }
+}

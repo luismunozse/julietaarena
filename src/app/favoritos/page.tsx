@@ -2,19 +2,21 @@
 
 import { useState, useEffect } from 'react'
 import { useFavorites } from '@/hooks/useFavorites'
-import { properties, Property } from '@/data/properties'
+import { Property } from '@/data/properties'
+import { useProperties } from '@/hooks/useProperties'
 import PropertyCard from '@/components/PropertyCard'
 import FavoriteButton from '@/components/FavoriteButton'
 import styles from './page.module.css'
 
 export default function FavoritosPage() {
   const { favorites, clearFavorites } = useFavorites()
+  const { properties } = useProperties()
   const [favoriteProperties, setFavoriteProperties] = useState<Property[]>([])
 
   useEffect(() => {
     const favoriteProps = properties.filter(prop => favorites.includes(prop.id))
     setFavoriteProperties(favoriteProps)
-  }, [favorites])
+  }, [favorites, properties])
 
   if (favoriteProperties.length === 0) {
     return (

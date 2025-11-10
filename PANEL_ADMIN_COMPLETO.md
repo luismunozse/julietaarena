@@ -272,3 +272,5 @@ El panel está **completamente funcional** y listo para agregar, editar y elimin
 **Recuerda:** Debes estar autenticado para acceder al panel.
 
 
+
+

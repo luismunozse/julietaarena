@@ -1,4 +1,5 @@
 import SearchHero from '@/components/SearchHero'
+import FeaturedProperties from '@/components/FeaturedProperties'
 import styles from './page.module.css'
 
 export const metadata = {
@@ -11,6 +12,7 @@ export default function PropiedadesPage() {
   return (
     <main className={styles.pageContainer}>
       <SearchHero />
+      <FeaturedProperties />
     </main>
   )
 }

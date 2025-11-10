@@ -29,8 +29,9 @@ class Analytics {
     // Check if we're in browser environment
     if (typeof window === 'undefined') return
 
-    // Enable analytics in production or when explicitly enabled
-    this.isEnabled = process.env.NODE_ENV === 'production' || 
+    // Enable analytics in production, development, or when explicitly enabled
+    this.isEnabled = process.env.NODE_ENV === 'production' ||
+                    process.env.NODE_ENV === 'development' ||
                     localStorage.getItem('analytics_enabled') === 'true'
 
     // Load existing data from localStorage
@@ -94,7 +95,6 @@ class Analytics {
     // Send to external analytics (Google Analytics, etc.)
     this.sendToExternalAnalytics(eventWithTimestamp)
 
-    console.log('Analytics Event:', eventWithTimestamp)
   }
 
   // Track page views
@@ -115,7 +115,6 @@ class Analytics {
     // Send to external analytics
     this.sendPageViewToExternalAnalytics(pageView)
 
-    console.log('Page View:', pageView)
   }
 
   // Track user interactions
@@ -264,12 +263,10 @@ class Analytics {
     return {
       events: this.events,
       pageViews: this.pageViews,
-      summary: {
-        totalEvents: this.events.length,
-        totalPageViews: this.pageViews.length,
-        popularPages: this.getPopularPages(),
-        popularEvents: this.getPopularEvents()
-      }
+      totalEvents: this.events.length,
+      totalPageViews: this.pageViews.length,
+      popularPages: this.getPopularPages(),
+      popularEvents: this.getPopularEvents()
     }
   }
 

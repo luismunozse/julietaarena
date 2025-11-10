@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { useSwipe } from '@/hooks/useSwipe'
 import styles from './PropertyImageGallery.module.css'
 
@@ -60,11 +61,13 @@ export default function PropertyImageGallery({ images, title }: PropertyImageGal
           className={styles.mainImageContainer} 
           {...swipeHandlers}
         >
-          <img 
+          <Image 
             src={currentImage} 
             alt={`${title} - Imagen ${currentIndex + 1}`}
+            fill
+            sizes="(max-width: 768px) 100vw, 800px"
             className={styles.mainImage}
-            loading="eager"
+            priority
           />
           
           {/* Indicador de imagen */}
@@ -114,7 +117,13 @@ export default function PropertyImageGallery({ images, title }: PropertyImageGal
                 onClick={() => goToImage(index)}
                 aria-label={`Ver imagen ${index + 1}`}
               >
-                <img src={image} alt={`${title} - Miniatura ${index + 1}`} />
+                <Image
+                  src={image}
+                  alt={`${title} - Miniatura ${index + 1}`}
+                  width={100}
+                  height={80}
+                  className={styles.thumbnailImage}
+                />
               </button>
             ))}
           </div>
@@ -132,10 +141,14 @@ export default function PropertyImageGallery({ images, title }: PropertyImageGal
             >
               ✕
             </button>
-            <img 
+            <Image 
               src={currentImage} 
               alt={`${title} - Imagen ${currentIndex + 1}`}
+              width={1600}
+              height={900}
               className={styles.fullscreenImage}
+              sizes="100vw"
+              style={{ width: '100%', height: 'auto' }}
             />
             {totalImages > 1 && (
               <>
@@ -164,6 +177,7 @@ export default function PropertyImageGallery({ images, title }: PropertyImageGal
     </>
   )
 }
+
 
 
 

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import GoogleMaps from './GoogleMaps'
 import styles from './PropertyMap.module.css'
-import { properties as defaultProperties, Property } from '@/data/properties'
+import { Property } from '@/data/properties'
 
 interface PropertyMapProps {
   properties?: Property[]
@@ -34,7 +34,7 @@ const zoneCoordinates: { [key: string]: { lat: number; lng: number } } = {
   'Torre Empresarial': { lat: -31.4150, lng: -64.1850 }
 }
 
-export default function PropertyMap({ properties = defaultProperties, height = '600px' }: PropertyMapProps) {
+export default function PropertyMap({ properties = [], height = '600px' }: PropertyMapProps) {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null)
   const [mapMarkers, setMapMarkers] = useState<MapMarker[]>([])
   const [filterType, setFilterType] = useState<string>('all')
@@ -81,7 +81,8 @@ export default function PropertyMap({ properties = defaultProperties, height = '
       departamento: '🏢',
       terreno: '🏞️',
       local: '🏪',
-      oficina: '🏢'
+      oficina: '🏢',
+      cochera: '🅿️'
     }
     return icons[property.type] || '🏠'
   }
@@ -120,6 +121,7 @@ export default function PropertyMap({ properties = defaultProperties, height = '
                 <option value="terreno">Terrenos</option>
                 <option value="local">Locales</option>
                 <option value="oficina">Oficinas</option>
+                <option value="cochera">Cocheras</option>
               </select>
             </div>
 

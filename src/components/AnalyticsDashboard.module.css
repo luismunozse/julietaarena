@@ -241,6 +241,19 @@
   font-family: monospace;
 }
 
+.emptyState {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--text-light);
+  background: var(--white);
+  border-radius: 8px;
+}
+
+.emptyState p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .dashboard {

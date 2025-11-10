@@ -6,8 +6,7 @@ import '../styles/microinteractions.css'
 import StructuredData from '@/components/StructuredData'
 import { AuthProvider } from '@/components/AuthProvider'
 import { ToastProvider } from '@/components/ToastContainer'
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
+import ConditionalLayout from '@/components/ConditionalLayout'
 import GoogleAnalytics from '@/components/GoogleAnalytics'
 import FacebookPixel from '@/components/FacebookPixel'
 import AnalyticsProvider from '@/components/AnalyticsProvider'
@@ -92,6 +91,19 @@ export default function RootLayout({
                 document.body.style.backgroundColor = '#ffffff';
                 document.body.style.color = '#2d3436';
               }
+
+              // Desregistrar service workers problemáticos
+              if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                  for(let registration of registrations) {
+                    if (registration.active && registration.active.scriptURL.includes('notifications-sw')) {
+                      registration.unregister().then(function(success) {
+                        if (success) window.location.reload();
+                      });
+                    }
+                  }
+                });
+              }
             `,
           }}
         />
@@ -100,9 +112,9 @@ export default function RootLayout({
         <ToastProvider>
           <AnalyticsProvider>
             <AuthProvider>
-              <Header />
-              {children}
-              <Footer />
+              <ConditionalLayout>
+                {children}
+              </ConditionalLayout>
             </AuthProvider>
           </AnalyticsProvider>
         </ToastProvider>
@@ -110,4 +122,3 @@ export default function RootLayout({
     </html>
   )
 }
-

@@ -40,10 +40,11 @@
   justify-content: center;
 }
 
-.agentAvatar img {
+.agentAvatarImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 50%;
 }
 
 .avatarPlaceholder {
@@ -83,21 +84,26 @@
 .quickActions {
   display: flex;
   gap: 12px;
+  justify-content: center;
 }
 
 .actionBtn {
-  flex: 1;
-  padding: 14px 20px;
+  width: 56px;
+  height: 56px;
+  padding: 0;
   border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
+  border-radius: 50%;
   cursor: pointer;
   transition: all var(--transition);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.actionBtn svg {
+  width: 24px;
+  height: 24px;
 }
 
 .whatsappBtn {
@@ -107,8 +113,12 @@
 
 .whatsappBtn:hover {
   background: #20ba58;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 16px rgba(37, 211, 102, 0.4);
+}
+
+.whatsappBtn:active {
+  transform: translateY(0) scale(0.98);
 }
 
 .phoneBtn {
@@ -118,8 +128,12 @@
 
 .phoneBtn:hover {
   background: #235a7a;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(44, 95, 125, 0.4);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 16px rgba(44, 95, 125, 0.4);
+}
+
+.phoneBtn:active {
+  transform: translateY(0) scale(0.98);
 }
 
 .divider {
@@ -215,29 +229,6 @@
   cursor: not-allowed;
 }
 
-.appointmentBtn {
-  width: 100%;
-  padding: 16px;
-  background: var(--primary-color);
-  color: var(--white);
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all var(--transition);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.appointmentBtn:hover {
-  background: #235a7a;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(44, 95, 125, 0.4);
-}
-
 .responsibleInfo {
   background: var(--bg-light);
   padding: 16px 20px;
@@ -291,6 +282,7 @@
     font-size: 1.125rem;
   }
 }
+
 
 
 
