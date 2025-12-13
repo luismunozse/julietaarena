@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { useFavorites } from '@/hooks/useFavorites'
 import { Property } from '@/data/properties'
 import { useProperties } from '@/hooks/useProperties'
@@ -38,9 +39,9 @@ export default function FavoritosPage() {
               <div className={styles.emptyIcon}>❤️</div>
               <h2>No tienes propiedades favoritas</h2>
               <p>Explora nuestras propiedades y agrega las que más te gusten a tus favoritos</p>
-              <a href="/propiedades" className="btn btn-primary">
+              <Link href="/propiedades" className="btn btn-primary">
                 Ver Propiedades
-              </a>
+              </Link>
             </div>
           </div>
         </div>

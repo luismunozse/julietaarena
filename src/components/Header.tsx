@@ -82,18 +82,18 @@ export default function Header() {
                 Servicios
               </a>
               <div className={styles.dropdown}>
-                <a href="/propiedades" className={styles.dropdownLink}>
+                <Link href="/propiedades" className={styles.dropdownLink}>
                   Propiedades
-                </a>
-                <a href="/asesoramiento-legal" className={styles.dropdownLink}>
+                </Link>
+                <Link href="/asesoramiento-legal" className={styles.dropdownLink}>
                   Asesoramiento Legal
-                </a>
-                <a href="/remates-judiciales" className={styles.dropdownLink}>
+                </Link>
+                <Link href="/remates-judiciales" className={styles.dropdownLink}>
                   Remates Judiciales
-                </a>
-                <a href="/tasaciones" className={styles.dropdownLink}>
+                </Link>
+                <Link href="/tasaciones" className={styles.dropdownLink}>
                   Tasaciones
-                </a>
+                </Link>
               </div>
             </li>
             <li className={styles.navItem}>
