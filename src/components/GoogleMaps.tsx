@@ -67,7 +67,7 @@ export default function GoogleMaps({
     return `$${price.toLocaleString()}`
   }
 
-  const createMarkers = useCallback((mapInstance: any) => {
+  const createMarkers = useCallback((mapInstance: google.maps.Map | null) => {
     if (!mapInstance) return
 
     markersRef.current.forEach(marker => marker.setMap(null))
@@ -126,7 +126,7 @@ export default function GoogleMaps({
 
     markersRef.current = newMarkers
 
-    ;(window as any).selectProperty = (propertyId: string) => {
+    ;(window as unknown as { selectProperty?: (propertyId: string) => void }).selectProperty = (propertyId: string) => {
       const property = properties.find(p => p.id === propertyId)
       if (property && onPropertySelect) {
         onPropertySelect(property)

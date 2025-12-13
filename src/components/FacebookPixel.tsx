@@ -13,9 +13,10 @@ export default function FacebookPixel({ pixelId }: FacebookPixelProps) {
     // Initialize Facebook Pixel
     if (typeof window !== 'undefined' && pixelId) {
       // Load fbq
-      window.fbq = window.fbq || function(...args: any[]) {
-        (window.fbq as any).q = (window.fbq as any).q || []
-        ;(window.fbq as any).q.push(args)
+      window.fbq = window.fbq || function(...args: unknown[]) {
+        const fbqQueue = (window.fbq as unknown as { q?: unknown[] }).q || []
+        fbqQueue.push(args)
+        ;(window.fbq as unknown as { q: unknown[] }).q = fbqQueue
       }
       window.fbq('init', pixelId)
       window.fbq('track', 'PageView')
@@ -62,6 +63,6 @@ export default function FacebookPixel({ pixelId }: FacebookPixelProps) {
 // Extend Window interface for TypeScript
 declare global {
   interface Window {
-    fbq: (...args: any[]) => void
+    fbq: (...args: unknown[]) => void
   }
 }

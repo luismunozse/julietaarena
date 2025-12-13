@@ -283,6 +283,26 @@ const autocomplete = new google.maps.places.Autocomplete(inputRef.current, {
 - **React Hooks** - Estado y efectos
 - **Responsive Design** - Mobile-first
 
+## 📚 Documentación
+
+El proyecto incluye documentación completa organizada en la carpeta `docs/`:
+
+- **[Índice de Documentación](docs/README.md)** - Guía completa de toda la documentación disponible
+- **Guías principales** - Configuración, autenticación, analytics, etc.
+- **Scripts SQL** - Organizados en `scripts/sql/` (setup y migrations)
+
+### Estructura de Documentación
+
+```
+docs/
+├── guias/              # Guías principales de uso
+├── configuracion/      # Archivos de configuración
+├── setup/             # Guías de setup y mantenimiento
+└── archivo/           # Documentación histórica
+```
+
+Para más detalles, consulta el [README.md de documentación](docs/README.md).
+
 ## 📝 Licencia
 
 Este proyecto es propiedad de Julieta Arena Servicios Inmobiliarios.

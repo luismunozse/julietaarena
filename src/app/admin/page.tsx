@@ -2,6 +2,9 @@
 
 import Link from 'next/link'
 import NotificationSettings from '@/components/NotificationSettings'
+import DashboardStats from '@/components/admin/DashboardStats'
+import RecentActivity from '@/components/admin/RecentActivity'
+import DashboardCharts from '@/components/admin/DashboardCharts'
 import styles from './page.module.css'
 
 export default function AdminDashboard() {
@@ -11,6 +14,15 @@ export default function AdminDashboard() {
         <h1>Panel de Administración</h1>
         <p>Bienvenido al panel de control de Julieta Arena</p>
       </div>
+
+      {/* Estadísticas en tiempo real */}
+      <DashboardStats />
+
+      {/* Gráficos */}
+      <DashboardCharts />
+
+      {/* Actividad reciente */}
+      <RecentActivity />
 
       <div className={styles.dashboardGrid}>
         {/* Card de Propiedades */}

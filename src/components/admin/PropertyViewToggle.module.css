@@ -1,0 +1,99 @@
+.viewControls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.viewToggle {
+  display: flex;
+  gap: 0.5rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.viewButton {
+  padding: 0.5rem 1rem;
+  border: none;
+  background: white;
+  color: #666;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.viewButton:hover {
+  background: #f5f5f5;
+}
+
+.viewButton.active {
+  background: #2c5f7d;
+  color: white;
+}
+
+.sortControls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sortControls label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #666;
+}
+
+.sortSelect {
+  padding: 0.5rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.sortSelect:focus {
+  outline: none;
+  border-color: #2c5f7d;
+}
+
+.sortOrderButton {
+  padding: 0.5rem 0.75rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  background: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sortOrderButton:hover {
+  border-color: #2c5f7d;
+  background: #f5f5f5;
+}
+
+@media (max-width: 768px) {
+  .viewControls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .viewToggle {
+    width: 100%;
+  }
+
+  .viewButton {
+    flex: 1;
+  }
+
+  .sortControls {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+

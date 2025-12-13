@@ -1,12 +1,15 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import Image from 'next/image'
 import { Property } from '@/data/properties'
 import { AppointmentFormData } from '@/types/appointment'
 import { useAppointments } from '@/hooks/useAppointments'
 import { emailService } from '@/services/emailService'
 import { useToast } from '@/components/ToastContainer'
+import { checkRateLimit, RATE_LIMIT_CONFIGS } from '@/lib/rateLimit'
+import { logger } from '@/lib/logger'
+import { normalizeError, getUserFriendlyMessage } from '@/lib/errors'
 import styles from './AppointmentBooking.module.css'
 
 const TIME_SLOTS = [
@@ -60,6 +63,18 @@ export default function AppointmentBooking({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Verificar rate limit antes de procesar
+    const rateLimitCheck = checkRateLimit(`appointment-${property.id}`, RATE_LIMIT_CONFIGS.appointment)
+    if (!rateLimitCheck.allowed) {
+      const minutes = Math.ceil((rateLimitCheck.timeUntilReset || 0) / 60000)
+      showError(
+        `Has agendado demasiadas visitas. Por favor, espera ${minutes} minuto${minutes > 1 ? 's' : ''} antes de intentar nuevamente.`,
+        7000
+      )
+      return
+    }
+
     setIsSubmitting(true)
 
     try {
@@ -91,26 +106,29 @@ export default function AppointmentBooking({
         showError(result.message, 7000)
       }
     } catch (err) {
-      console.error('Error creating appointment:', err)
-      showError('Error inesperado al agendar la visita. Por favor, contactanos por WhatsApp.', 7000)
+      const error = normalizeError(err)
+      logger.error('Error creating appointment', { propertyId: property.id }, error)
+      showError(getUserFriendlyMessage(error), 7000)
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  const getMinDate = () => {
+  // Memoizar fechas mínima y máxima
+  const minDate = useMemo(() => {
     const tomorrow = new Date()
     tomorrow.setDate(tomorrow.getDate() + 1)
     return tomorrow.toISOString().split('T')[0]
-  }
+  }, [])
 
-  const getMaxDate = () => {
+  const maxDate = useMemo(() => {
     const maxDate = new Date()
     maxDate.setDate(maxDate.getDate() + 30)
     return maxDate.toISOString().split('T')[0]
-  }
+  }, [])
 
-  const formatDate = (dateString: string) => {
+  // Memoizar formateo de fecha
+  const formatDate = useCallback((dateString: string) => {
     const date = new Date(dateString)
     return date.toLocaleDateString('es-AR', {
       weekday: 'long',
@@ -118,7 +136,16 @@ export default function AppointmentBooking({
       month: 'long',
       day: 'numeric'
     })
-  }
+  }, [])
+
+  // Memoizar precio formateado
+  const formattedPrice = useMemo(() => {
+    return new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: property.currency || 'ARS',
+      minimumFractionDigits: 0,
+    }).format(property.price)
+  }, [property.price, property.currency])
 
   return (
     <div className={styles.overlay} onClick={onClose}>
@@ -178,11 +205,7 @@ export default function AppointmentBooking({
             </p>
             <div className={styles.propertyMeta}>
               <span className={styles.propertyPrice}>
-                {new Intl.NumberFormat('es-AR', {
-                  style: 'currency',
-                  currency: 'ARS',
-                  minimumFractionDigits: 0,
-                }).format(property.price)}
+                {formattedPrice}
               </span>
               <span className={styles.propertyType}>{property.type}</span>
             </div>
@@ -284,8 +307,8 @@ export default function AppointmentBooking({
                   name="date"
                   value={formData.date}
                   onChange={handleInputChange}
-                  min={getMinDate()}
-                  max={getMaxDate()}
+                  min={minDate}
+                  max={maxDate}
                   required
                 />
               </div>

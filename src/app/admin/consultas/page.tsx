@@ -1,9 +1,16 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useToast } from '@/components/ToastContainer'
 import Modal from '@/components/Modal'
+import InquirySearch from '@/components/admin/InquirySearch'
+import Pagination from '@/components/admin/Pagination'
+import TagsManager from '@/components/admin/TagsManager'
+import AssigneeSelector from '@/components/admin/AssigneeSelector'
+import ChangeHistory from '@/components/admin/ChangeHistory'
+import { logStatusChange } from '@/lib/audit'
+import { useAuth } from '@/hooks/useAuth'
 import styles from './page.module.css'
 
 interface PropertyInquiry {
@@ -19,17 +26,22 @@ interface PropertyInquiry {
   message: string
   status: 'nueva' | 'leida' | 'contactada' | 'cerrada'
   notes: string | null
+  tags?: string[]
+  assigned_to?: string | null
 }
 
 export default function ConsultasPage() {
   const [inquiries, setInquiries] = useState<PropertyInquiry[]>([])
-  const [filteredInquiries, setFilteredInquiries] = useState<PropertyInquiry[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [filterStatus, setFilterStatus] = useState<string>('todas')
+  const [searchTerm, setSearchTerm] = useState<string>('')
+  const [filterProperty, setFilterProperty] = useState<string>('')
   const [selectedInquiry, setSelectedInquiry] = useState<PropertyInquiry | null>(null)
   const [showDetailModal, setShowDetailModal] = useState(false)
+  const [showHistoryModal, setShowHistoryModal] = useState(false)
   const [notes, setNotes] = useState('')
   const { success, error: showError } = useToast()
+  const { user } = useAuth()
 
   const loadInquiries = useCallback(async () => {
     try {
@@ -53,23 +65,58 @@ export default function ConsultasPage() {
     }
   }, [showError])
 
-  const filterInquiries = useCallback(() => {
-    if (filterStatus === 'todas') {
-      setFilteredInquiries(inquiries)
-    } else {
-      setFilteredInquiries(inquiries.filter(inq => inq.status === filterStatus))
+  // Filtrar consultas con búsqueda avanzada
+  const filteredInquiries = useMemo(() => {
+    let filtered = [...inquiries]
+
+    // Búsqueda por texto
+    if (searchTerm.trim()) {
+      const searchLower = searchTerm.toLowerCase()
+      filtered = filtered.filter(inq =>
+        inq.customer_name.toLowerCase().includes(searchLower) ||
+        inq.customer_email.toLowerCase().includes(searchLower) ||
+        inq.customer_phone.toLowerCase().includes(searchLower) ||
+        inq.property_title.toLowerCase().includes(searchLower) ||
+        inq.property_location.toLowerCase().includes(searchLower) ||
+        inq.message.toLowerCase().includes(searchLower)
+      )
     }
-  }, [filterStatus, inquiries])
+
+    // Filtro por estado
+    if (filterStatus !== 'todas') {
+      filtered = filtered.filter(inq => inq.status === filterStatus)
+    }
+
+    // Filtro por propiedad
+    if (filterProperty.trim()) {
+      const propertyLower = filterProperty.toLowerCase()
+      filtered = filtered.filter(inq =>
+        inq.property_title.toLowerCase().includes(propertyLower) ||
+        inq.property_location.toLowerCase().includes(propertyLower)
+      )
+    }
+
+    return filtered
+  }, [inquiries, searchTerm, filterStatus, filterProperty])
 
   useEffect(() => {
     void loadInquiries()
   }, [loadInquiries])
 
-  useEffect(() => {
-    filterInquiries()
-  }, [filterInquiries])
+  const hasActiveFilters = useMemo(() => {
+    return searchTerm.trim() !== '' || filterStatus !== 'todas' || filterProperty.trim() !== ''
+  }, [searchTerm, filterStatus, filterProperty])
+
+  const clearFilters = () => {
+    setSearchTerm('')
+    setFilterStatus('todas')
+    setFilterProperty('')
+  }
 
   const updateStatus = async (id: string, newStatus: PropertyInquiry['status']) => {
+    const inquiry = inquiries.find(i => i.id === id)
+    const oldStatus = inquiry?.status || 'nueva'
+    
     try {
       const { error } = await supabase
         .from('property_inquiries')
@@ -81,6 +128,9 @@ export default function ConsultasPage() {
         showError('Error al actualizar el estado')
         return
       }
+
+      // Registrar en auditoría
+      await logStatusChange('property_inquiry', id, oldStatus, newStatus, user || undefined)
 
       success('Estado actualizado correctamente')
       loadInquiries()
@@ -245,7 +295,20 @@ export default function ConsultasPage() {
         </div>
       </div>
 
-      {/* Filtros */}
+      {/* Búsqueda Avanzada */}
+      <InquirySearch
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        filterStatus={filterStatus}
+        onStatusChange={setFilterStatus}
+        filterProperty={filterProperty}
+        onPropertyChange={setFilterProperty}
+        hasActiveFilters={hasActiveFilters}
+        onClearFilters={clearFilters}
+        type="consultas"
+      />
+
+      {/* Filtros rápidos */}
       <div className={styles.filters}>
         <button
           className={`${styles.filterBtn} ${filterStatus === 'todas' ? styles.active : ''}`}
@@ -279,15 +342,20 @@ export default function ConsultasPage() {
         </button>
       </div>
 
-      {/* Lista de consultas */}
-      {filteredInquiries.length === 0 ? (
-        <div className={styles.empty}>
-          <p className={styles.emptyIcon}>📭</p>
-          <p className={styles.emptyText}>No hay consultas {filterStatus !== 'todas' ? `con estado "${getStatusLabel(filterStatus)}"` : ''}</p>
-        </div>
-      ) : (
-        <div className={styles.inquiriesList}>
-          {filteredInquiries.map((inquiry) => (
+      {/* Lista de consultas con paginación */}
+      <Pagination
+        items={filteredInquiries}
+        itemsPerPage={20}
+        render={(paginatedItems) => (
+          <>
+            {paginatedItems.length === 0 ? (
+              <div className={styles.empty}>
+                <p className={styles.emptyIcon}>📭</p>
+                <p className={styles.emptyText}>No hay consultas {filterStatus !== 'todas' ? `con estado "${getStatusLabel(filterStatus)}"` : ''}</p>
+              </div>
+            ) : (
+              <div className={styles.inquiriesList}>
+                {paginatedItems.map((inquiry) => (
             <div key={inquiry.id} className={`${styles.inquiryCard} ${inquiry.status === 'nueva' ? styles.unread : ''}`}>
               <div className={styles.inquiryHeader}>
                 <div className={styles.inquiryInfo}>
@@ -365,9 +433,12 @@ export default function ConsultasPage() {
                 </div>
               </div>
             </div>
-          ))}
-        </div>
-      )}
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      />
 
       {/* Modal de detalles */}
       {showDetailModal && selectedInquiry && (
@@ -414,7 +485,59 @@ export default function ConsultasPage() {
                 Guardar Notas
               </button>
             </div>
+
+            <div className={styles.modalSection}>
+              <h3 className={styles.modalSectionTitle}>Etiquetas</h3>
+              <TagsManager
+                entityType="property_inquiry"
+                entityId={selectedInquiry.id}
+                currentTags={selectedInquiry.tags || []}
+                onTagsChange={(tags) => {
+                  setSelectedInquiry({ ...selectedInquiry, tags })
+                  loadInquiries()
+                }}
+              />
+            </div>
+
+            <div className={styles.modalSection}>
+              <AssigneeSelector
+                entityType="property_inquiry"
+                entityId={selectedInquiry.id}
+                currentAssigneeId={selectedInquiry.assigned_to || null}
+                onAssigneeChange={(assigneeId) => {
+                  setSelectedInquiry({ ...selectedInquiry, assigned_to: assigneeId })
+                  loadInquiries()
+                }}
+              />
+            </div>
+
+            <div className={styles.modalSection}>
+              <button
+                onClick={() => {
+                  setShowHistoryModal(true)
+                }}
+                className={styles.historyButton}
+              >
+                Ver Historial de Cambios
+              </button>
+            </div>
           </div>
+        </Modal>
+      )}
+
+      {/* Modal de historial */}
+      {showHistoryModal && selectedInquiry && (
+        <Modal
+          isOpen={showHistoryModal}
+          onClose={() => setShowHistoryModal(false)}
+          title="Historial de Cambios"
+          type="alert"
+          message=""
+        >
+          <ChangeHistory
+            entityType="property_inquiry"
+            entityId={selectedInquiry.id}
+          />
         </Modal>
       )}
     </div>

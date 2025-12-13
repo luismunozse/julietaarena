@@ -1,9 +1,14 @@
 'use client'
 
-import { useState, FormEvent } from 'react'
+import { useState, FormEvent, useCallback } from 'react'
 import styles from './Contact.module.css'
 import { supabase } from '@/lib/supabaseClient'
 import { useToast } from '@/components/ToastContainer'
+import { contactFormSchema, validateAndParse } from '@/lib/validation'
+import { sanitizeText } from '@/lib/sanitize'
+import { logger } from '@/lib/logger'
+import { normalizeError, getUserFriendlyMessage } from '@/lib/errors'
+import { checkRateLimit, RATE_LIMIT_CONFIGS } from '@/lib/rateLimit'
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -16,32 +21,70 @@ export default function Contact() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { success, error: showError } = useToast()
 
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    // Actualizar estado inmediatamente para UI responsiva
+    setFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }))
+  }, [])
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    
+    // Verificar rate limit antes de procesar
+    const rateLimitCheck = checkRateLimit('contact-form', RATE_LIMIT_CONFIGS.contactForm)
+    if (!rateLimitCheck.allowed) {
+      const minutes = Math.ceil((rateLimitCheck.timeUntilReset || 0) / 60000)
+      showError(
+        `Has enviado demasiados mensajes. Por favor, espera ${minutes} minuto${minutes > 1 ? 's' : ''} antes de intentar nuevamente.`,
+        7000
+      )
+      return
+    }
+
     setIsSubmitting(true)
 
     try {
-      // Guardar la consulta en Supabase
-      const { data, error } = await supabase
-        .from('contact_inquiries')
-        .insert([
-          {
-            customer_name: formData.name,
-            customer_email: formData.email,
-            customer_phone: formData.phone,
-            service: formData.service,
-            message: formData.message,
-            status: 'nueva'
-          }
-        ])
-        .select()
+      // Validar y sanitizar datos antes de enviar
+      const validation = validateAndParse(contactFormSchema, {
+        from_name: formData.name,
+        from_email: formData.email,
+        phone: formData.phone,
+        message: formData.message,
+      }, 'Datos del formulario inválidos')
 
-      if (error) {
-        console.error('Error al guardar consulta:', error)
-        showError('Error al enviar el mensaje. Por favor, contactanos por WhatsApp.', 7000)
+      if (!validation.success) {
+        const errorMessage = validation.details?.issues?.[0]?.message || 'Por favor, completa todos los campos correctamente'
+        showError(errorMessage, 5000)
+        logger.warn('Contact form validation failed', { errors: validation.details?.issues })
         return
       }
 
+      // Sanitizar datos antes de guardar
+      const sanitizedData = {
+        customer_name: sanitizeText(validation.data.from_name),
+        customer_email: validation.data.from_email, // Email ya validado por Zod
+        customer_phone: validation.data.phone ? sanitizeText(validation.data.phone) : null,
+        service: sanitizeText(formData.service),
+        message: sanitizeText(validation.data.message),
+        status: 'nueva' as const
+      }
+
+      // Guardar la consulta en Supabase
+      const { data, error } = await supabase
+        .from('contact_inquiries')
+        .insert([sanitizedData])
+        .select()
+
+      if (error) {
+        const normalizedError = normalizeError(error)
+        logger.error('Error saving contact inquiry', {}, normalizedError)
+        showError(getUserFriendlyMessage(normalizedError), 7000)
+        return
+      }
+
+      logger.info('Contact inquiry saved successfully', { email: sanitizedData.customer_email })
       success('¡Mensaje enviado correctamente! Te contactaremos pronto.', 5000)
 
       // Limpiar formulario
@@ -53,18 +96,12 @@ export default function Contact() {
         message: '',
       })
     } catch (err) {
-      console.error('Error al enviar formulario:', err)
-      showError('Error inesperado al enviar el mensaje. Por favor, contactanos por WhatsApp.', 7000)
+      const error = normalizeError(err)
+      logger.error('Error submitting contact form', {}, error)
+      showError(getUserFriendlyMessage(error), 7000)
     } finally {
       setIsSubmitting(false)
     }
-  }
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    })
   }
 
   return (

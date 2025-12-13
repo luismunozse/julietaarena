@@ -30,6 +30,7 @@ yarn-error.log*
 
 # SQL scripts with sensitive data
 SETUP_EMAIL_NOTIFICATIONS.sql
+scripts/sql/setup/SETUP_EMAIL_NOTIFICATIONS.sql
 
 # vercel
 .vercel

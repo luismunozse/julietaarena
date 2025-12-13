@@ -1,9 +1,16 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useToast } from '@/components/ToastContainer'
 import Modal from '@/components/Modal'
+import InquirySearch from '@/components/admin/InquirySearch'
+import Pagination from '@/components/admin/Pagination'
+import TagsManager from '@/components/admin/TagsManager'
+import AssigneeSelector from '@/components/admin/AssigneeSelector'
+import ChangeHistory from '@/components/admin/ChangeHistory'
+import { logStatusChange } from '@/lib/audit'
+import { useAuth } from '@/hooks/useAuth'
 import styles from './page.module.css'
 
 interface ContactInquiry {
@@ -16,18 +23,22 @@ interface ContactInquiry {
   message: string
   status: 'nueva' | 'leida' | 'contactada' | 'cerrada'
   notes: string | null
+  tags?: string[]
+  assigned_to?: string | null
 }
 
 export default function ContactosPage() {
   const [inquiries, setInquiries] = useState<ContactInquiry[]>([])
-  const [filteredInquiries, setFilteredInquiries] = useState<ContactInquiry[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [filterStatus, setFilterStatus] = useState<string>('todas')
   const [filterService, setFilterService] = useState<string>('todos')
+  const [searchTerm, setSearchTerm] = useState<string>('')
   const [selectedInquiry, setSelectedInquiry] = useState<ContactInquiry | null>(null)
   const [showDetailModal, setShowDetailModal] = useState(false)
+  const [showHistoryModal, setShowHistoryModal] = useState(false)
   const [notes, setNotes] = useState('')
   const { success, error: showError } = useToast()
+  const { user } = useAuth()
 
   const loadInquiries = useCallback(async () => {
     try {
@@ -51,29 +62,53 @@ export default function ContactosPage() {
     }
   }, [showError])
 
-  const filterInquiries = useCallback(() => {
-    let filtered = inquiries
+  // Filtrar contactos con búsqueda avanzada
+  const filteredInquiries = useMemo(() => {
+    let filtered = [...inquiries]
 
+    // Búsqueda por texto
+    if (searchTerm.trim()) {
+      const searchLower = searchTerm.toLowerCase()
+      filtered = filtered.filter(inq =>
+        inq.customer_name.toLowerCase().includes(searchLower) ||
+        inq.customer_email.toLowerCase().includes(searchLower) ||
+        inq.customer_phone.toLowerCase().includes(searchLower) ||
+        inq.message.toLowerCase().includes(searchLower) ||
+        inq.service.toLowerCase().includes(searchLower)
+      )
+    }
+
+    // Filtro por estado
     if (filterStatus !== 'todas') {
       filtered = filtered.filter(inq => inq.status === filterStatus)
     }
 
+    // Filtro por servicio
     if (filterService !== 'todos') {
       filtered = filtered.filter(inq => inq.service === filterService)
     }
 
-    setFilteredInquiries(filtered)
-  }, [filterService, filterStatus, inquiries])
+    return filtered
+  }, [inquiries, searchTerm, filterStatus, filterService])
 
   useEffect(() => {
     void loadInquiries()
   }, [loadInquiries])
 
-  useEffect(() => {
-    filterInquiries()
-  }, [filterInquiries])
+  const hasActiveFilters = useMemo(() => {
+    return searchTerm.trim() !== '' || filterStatus !== 'todas' || filterService !== 'todos'
+  }, [searchTerm, filterStatus, filterService])
+
+  const clearFilters = () => {
+    setSearchTerm('')
+    setFilterStatus('todas')
+    setFilterService('todos')
+  }
 
   const updateStatus = async (id: string, newStatus: ContactInquiry['status']) => {
+    const inquiry = inquiries.find(i => i.id === id)
+    const oldStatus = inquiry?.status || 'nueva'
+    
     try {
       const { error } = await supabase
         .from('contact_inquiries')
@@ -85,6 +120,9 @@ export default function ContactosPage() {
         showError('Error al actualizar el estado')
         return
       }
+
+      // Registrar en auditoría
+      await logStatusChange('contact_inquiry', id, oldStatus, newStatus, user || undefined)
 
       success('Estado actualizado correctamente')
       loadInquiries()
@@ -262,7 +300,20 @@ export default function ContactosPage() {
         </div>
       </div>
 
-      {/* Filtros */}
+      {/* Búsqueda Avanzada */}
+      <InquirySearch
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        filterStatus={filterStatus}
+        onStatusChange={setFilterStatus}
+        filterService={filterService}
+        onServiceChange={setFilterService}
+        hasActiveFilters={hasActiveFilters}
+        onClearFilters={clearFilters}
+        type="contactos"
+      />
+
+      {/* Filtros rápidos */}
       <div className={styles.filtersContainer}>
         <div className={styles.filters}>
           <p className={styles.filterLabel}>Estado:</p>
@@ -297,35 +348,22 @@ export default function ContactosPage() {
             Cerradas ({stats.cerradas})
           </button>
         </div>
-
-        <div className={styles.filters}>
-          <p className={styles.filterLabel}>Servicio:</p>
-          <select
-            value={filterService}
-            onChange={(e) => setFilterService(e.target.value)}
-            className={styles.filterSelect}
-          >
-            <option value="todos">Todos los servicios</option>
-            <option value="venta">Venta de Propiedades</option>
-            <option value="alquiler">Alquileres</option>
-            <option value="remate">Remates Judiciales</option>
-            <option value="jubilacion">Jubilaciones</option>
-            <option value="tasacion">Tasaciones</option>
-            <option value="asesoria">Asesoramiento Legal</option>
-            <option value="otro">Otro</option>
-          </select>
-        </div>
       </div>
 
-      {/* Lista de contactos */}
-      {filteredInquiries.length === 0 ? (
-        <div className={styles.empty}>
-          <p className={styles.emptyIcon}>📭</p>
-          <p className={styles.emptyText}>No hay contactos con los filtros seleccionados</p>
-        </div>
-      ) : (
-        <div className={styles.inquiriesList}>
-          {filteredInquiries.map((inquiry) => (
+      {/* Lista de contactos con paginación */}
+      <Pagination
+        items={filteredInquiries}
+        itemsPerPage={20}
+        render={(paginatedItems) => (
+          <>
+            {paginatedItems.length === 0 ? (
+              <div className={styles.empty}>
+                <p className={styles.emptyIcon}>📭</p>
+                <p className={styles.emptyText}>No hay contactos con los filtros seleccionados</p>
+              </div>
+            ) : (
+              <div className={styles.inquiriesList}>
+                {paginatedItems.map((inquiry) => (
             <div key={inquiry.id} className={`${styles.inquiryCard} ${inquiry.status === 'nueva' ? styles.unread : ''}`}>
               <div className={styles.inquiryHeader}>
                 <div className={styles.inquiryInfo}>
@@ -400,9 +438,12 @@ export default function ContactosPage() {
                 </div>
               </div>
             </div>
-          ))}
-        </div>
-      )}
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      />
 
       {/* Modal de detalles */}
       {showDetailModal && selectedInquiry && (
@@ -445,7 +486,59 @@ export default function ContactosPage() {
                 Guardar Notas
               </button>
             </div>
+
+            <div className={styles.modalSection}>
+              <h3 className={styles.modalSectionTitle}>Etiquetas</h3>
+              <TagsManager
+                entityType="contact_inquiry"
+                entityId={selectedInquiry.id}
+                currentTags={selectedInquiry.tags || []}
+                onTagsChange={(tags) => {
+                  setSelectedInquiry({ ...selectedInquiry, tags })
+                  loadInquiries()
+                }}
+              />
+            </div>
+
+            <div className={styles.modalSection}>
+              <AssigneeSelector
+                entityType="contact_inquiry"
+                entityId={selectedInquiry.id}
+                currentAssigneeId={selectedInquiry.assigned_to || null}
+                onAssigneeChange={(assigneeId) => {
+                  setSelectedInquiry({ ...selectedInquiry, assigned_to: assigneeId })
+                  loadInquiries()
+                }}
+              />
+            </div>
+
+            <div className={styles.modalSection}>
+              <button
+                onClick={() => {
+                  setShowHistoryModal(true)
+                }}
+                className={styles.historyButton}
+              >
+                Ver Historial de Cambios
+              </button>
+            </div>
           </div>
+        </Modal>
+      )}
+
+      {/* Modal de historial */}
+      {showHistoryModal && selectedInquiry && (
+        <Modal
+          isOpen={showHistoryModal}
+          onClose={() => setShowHistoryModal(false)}
+          title="Historial de Cambios"
+          type="alert"
+          message=""
+        >
+          <ChangeHistory
+            entityType="contact_inquiry"
+            entityId={selectedInquiry.id}
+          />
         </Modal>
       )}
     </div>

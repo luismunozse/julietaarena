@@ -1,20 +1,40 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useProperties } from '@/hooks/useProperties'
+import { usePropertyFilters } from '@/hooks/usePropertyFilters'
+import { useBulkActions } from '@/hooks/useBulkActions'
 import type { Property } from '@/data/properties'
 import Modal from '@/components/Modal'
+import PropertyFilters from '@/components/admin/PropertyFilters'
+import PropertyViewToggle from '@/components/admin/PropertyViewToggle'
+import BulkActions from '@/components/admin/BulkActions'
+import ExportButton from '@/components/admin/ExportButton'
+import Pagination from '@/components/admin/Pagination'
+import { exportToCSV } from '@/lib/export'
 import styles from './page.module.css'
+
+type ViewMode = 'grid' | 'table' | 'list'
 
 export default function AdminPropertiesPage() {
   const router = useRouter()
-  const { properties, isLoading, deleteProperty, useSupabase, refreshProperties } = useProperties()
-  const [filterType, setFilterType] = useState<string>('all')
-  const [filterOperation, setFilterOperation] = useState<string>('all')
-  const [filterStatus, setFilterStatus] = useState<string>('all')
+  const { properties, isLoading, deleteProperty, updateProperty, duplicateProperty, useSupabase, refreshProperties } = useProperties()
+  const { filters, filteredProperties, updateFilter, clearFilters, hasActiveFilters } = usePropertyFilters(properties)
+  const {
+    selectedIds,
+    toggleSelection,
+    selectAll,
+    deselectAll,
+    bulkStatusChange,
+    bulkFeaturedToggle,
+    bulkDelete,
+  } = useBulkActions()
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [viewMode, setViewMode] = useState<ViewMode>('grid')
+  const [sortBy, setSortBy] = useState<string>('createdAt')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
 
   // Estados del modal
   const [modal, setModal] = useState<{
@@ -51,13 +71,50 @@ export default function AdminPropertiesPage() {
     }
   }
 
-  // Filtros
-  const filteredProperties = properties.filter(prop => {
-    if (filterType !== 'all' && prop.type !== filterType) return false
-    if (filterOperation !== 'all' && prop.operation !== filterOperation) return false
-    if (filterStatus !== 'all' && prop.status !== filterStatus) return false
-    return true
-  })
+  // Ordenar propiedades filtradas
+  const sortedProperties = useMemo(() => {
+    const sorted = [...filteredProperties]
+    
+    sorted.sort((a, b) => {
+      let aValue: any
+      let bValue: any
+      
+      switch (sortBy) {
+        case 'price':
+          aValue = a.price
+          bValue = b.price
+          break
+        case 'title':
+          aValue = a.title.toLowerCase()
+          bValue = b.title.toLowerCase()
+          break
+        case 'location':
+          aValue = a.location.toLowerCase()
+          bValue = b.location.toLowerCase()
+          break
+        case 'updatedAt':
+          aValue = a.updatedAt ? new Date(a.updatedAt).getTime() : 0
+          bValue = b.updatedAt ? new Date(b.updatedAt).getTime() : 0
+          break
+        case 'createdAt':
+        default:
+          aValue = a.createdAt ? new Date(a.createdAt).getTime() : 0
+          bValue = b.createdAt ? new Date(b.createdAt).getTime() : 0
+          break
+      }
+      
+      if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1
+      if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1
+      return 0
+    })
+    
+    return sorted
+  }, [filteredProperties, sortBy, sortOrder])
+
+  const handleSortChange = (newSortBy: string, newSortOrder: 'asc' | 'desc') => {
+    setSortBy(newSortBy)
+    setSortOrder(newSortOrder)
+  }
 
   const handleDeleteClick = (id: string) => {
     setModal({
@@ -308,148 +365,282 @@ export default function AdminPropertiesPage() {
         </div>
       </div>
 
-      {/* Filtros */}
+      {/* Filtros Avanzados */}
+      <PropertyFilters
+        filters={filters}
+        onFilterChange={updateFilter}
+        onClearFilters={clearFilters}
+        hasActiveFilters={hasActiveFilters}
+      />
+
+      {/* Acciones Masivas */}
+      <BulkActions
+        selectedIds={selectedIds}
+        properties={sortedProperties}
+        onSelectAll={() => selectAll(sortedProperties)}
+        onDeselectAll={deselectAll}
+        onBulkStatusChange={(status) => bulkStatusChange(sortedProperties, status)}
+        onBulkFeaturedToggle={(featured) => bulkFeaturedToggle(sortedProperties, featured)}
+        onBulkDelete={bulkDelete}
+        onBulkExport={() => {
+          const selectedProperties = sortedProperties.filter(p => selectedIds.has(p.id))
+          exportToCSV(selectedProperties, 'propiedades_seleccionadas')
+        }}
+      />
+
+      {/* Controles de Vista y Ordenamiento */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
+        <PropertyViewToggle
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          onSortChange={handleSortChange}
+          sortBy={sortBy}
+          sortOrder={sortOrder}
+        />
+        <ExportButton properties={sortedProperties} />
+      </div>
+
+      {/* Lista de Propiedades */}
       <div className={styles.filtersSection}>
         <div className={styles.filtersHeader}>
           <h2>Lista de Propiedades</h2>
           <span className={styles.resultsCount}>
-            {filteredProperties.length} {filteredProperties.length === 1 ? 'propiedad' : 'propiedades'}
+            {sortedProperties.length} {sortedProperties.length === 1 ? 'propiedad' : 'propiedades'}
+            {hasActiveFilters && ` (de ${properties.length} total)`}
           </span>
         </div>
-
-        <div className={styles.filters}>
-          <div className={styles.filterGroup}>
-            <label>Tipo</label>
-            <select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              className={styles.filterSelect}
-            >
-              <option value="all">Todos los tipos</option>
-              <option value="casa">Casas</option>
-              <option value="departamento">Departamentos</option>
-              <option value="terreno">Terrenos</option>
-              <option value="local">Locales</option>
-              <option value="oficina">Oficinas</option>
-              <option value="cochera">Cocheras</option>
-            </select>
-          </div>
-
-          <div className={styles.filterGroup}>
-            <label>Operación</label>
-            <select
-              value={filterOperation}
-              onChange={(e) => setFilterOperation(e.target.value)}
-              className={styles.filterSelect}
-            >
-              <option value="all">Todas las operaciones</option>
-              <option value="venta">Venta</option>
-              <option value="alquiler">Alquiler</option>
-            </select>
-          </div>
-
-          <div className={styles.filterGroup}>
-            <label>Estado</label>
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className={styles.filterSelect}
-            >
-              <option value="all">Todos los estados</option>
-              <option value="disponible">Disponible</option>
-              <option value="reservado">Reservado</option>
-              <option value="vendido">Vendido</option>
-            </select>
-          </div>
-        </div>
       </div>
 
-      {/* Lista de propiedades */}
-      <div className={styles.propertiesGrid}>
-        {filteredProperties.length === 0 ? (
-          <div className={styles.emptyState}>
-            <p>No hay propiedades que mostrar</p>
-            <button
-              onClick={() => router.push('/admin/propiedades/nueva')}
-              className={styles.addButton}
-            >
-              Agregar primera propiedad
-            </button>
-          </div>
-        ) : (
-          filteredProperties.map(prop => (
-            <div key={prop.id} className={styles.propertyCard}>
-              <div className={styles.propertyImage}>
-                {prop.images && prop.images.length > 0 ? (
-                  <Image
-                    src={prop.images[0]}
-                    alt={prop.title}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 350px"
-                    className={styles.propertyImageContent}
-                  />
-                ) : (
-                  <div className={styles.noImage}>Sin imagen</div>
-                )}
-                {prop.featured && (
-                  <span className={styles.featuredBadge}>⭐ Destacada</span>
-                )}
+      {/* Lista de propiedades con paginación */}
+      <Pagination
+        items={sortedProperties}
+        itemsPerPage={25}
+        render={(paginatedItems) => (
+          <>
+            {viewMode === 'table' ? (
+              <table className={styles.propertiesTable}>
+                <thead>
+                  <tr>
+                    <th>
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.size === paginatedItems.length && paginatedItems.length > 0}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            paginatedItems.forEach(p => toggleSelection(p.id))
+                          } else {
+                            paginatedItems.forEach(p => {
+                              if (selectedIds.has(p.id)) {
+                                toggleSelection(p.id)
+                              }
+                            })
+                          }
+                        }}
+                      />
+                    </th>
+                    <th>Imagen</th>
+                    <th>Título</th>
+                    <th>Ubicación</th>
+                    <th>Tipo</th>
+                    <th>Operación</th>
+                    <th>Precio</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedItems.map(prop => (
+                    <tr key={prop.id}>
+                      <td>
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.has(prop.id)}
+                          onChange={() => toggleSelection(prop.id)}
+                        />
+                      </td>
+                      <td>
+                        {prop.images && prop.images.length > 0 ? (
+                          <Image
+                            src={prop.images[0]}
+                            alt={prop.title}
+                            width={60}
+                            height={60}
+                            style={{ objectFit: 'cover', borderRadius: '4px' }}
+                          />
+                        ) : (
+                          <div style={{ width: 60, height: 60, background: '#e0e0e0', borderRadius: '4px' }} />
+                        )}
+                      </td>
+                      <td>{prop.title}</td>
+                      <td>{prop.location}</td>
+                      <td>{getTypeIcon(prop.type)} {prop.type}</td>
+                      <td>{prop.operation === 'venta' ? '💰 Venta' : '🔑 Alquiler'}</td>
+                      <td>{formatPrice(prop.price, prop.currency)}</td>
+                      <td>
+                        <span className={styles.statusBadge}>
+                          {prop.status === 'disponible' && '✅ Disponible'}
+                          {prop.status === 'reservado' && '⏳ Reservado'}
+                          {prop.status === 'vendido' && '❌ Vendido'}
+                        </span>
+                      </td>
+                      <td>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          <button
+                            onClick={() => router.push(`/propiedades/${prop.id}`)}
+                            className={styles.viewButton}
+                            title="Ver"
+                          >
+                            👁️
+                          </button>
+                          <button
+                            onClick={() => router.push(`/admin/propiedades/${prop.id}`)}
+                            className={styles.editButton}
+                            title="Editar"
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            onClick={async () => {
+                              const newId = await duplicateProperty(prop.id)
+                              if (newId) {
+                                router.push(`/admin/propiedades/${newId}`)
+                              }
+                            }}
+                            className={styles.duplicateButton}
+                            title="Duplicar"
+                          >
+                            📋
+                          </button>
+                          <button
+                            onClick={() => handleDeleteClick(prop.id)}
+                            disabled={deletingId === prop.id}
+                            className={styles.deleteButton}
+                            title="Eliminar"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : paginatedItems.length === 0 ? (
+              <div className={styles.emptyState}>
+                <p>No hay propiedades que mostrar</p>
+                <button
+                  onClick={() => router.push('/admin/propiedades/nueva')}
+                  className={styles.addButton}
+                >
+                  Agregar primera propiedad
+                </button>
               </div>
+            ) : (
+              <div className={viewMode === 'grid' ? styles.propertiesGrid : styles.propertiesList}>
+                {paginatedItems.map(prop => (
+                  <div key={prop.id} className={styles.propertyCard}>
+                    <div style={{ position: 'relative' }}>
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.has(prop.id)}
+                        onChange={() => toggleSelection(prop.id)}
+                        style={{
+                          position: 'absolute',
+                          top: '0.5rem',
+                          left: '0.5rem',
+                          zIndex: 10,
+                          width: '20px',
+                          height: '20px',
+                          cursor: 'pointer',
+                        }}
+                      />
+                      <div className={styles.propertyImage}>
+                        {prop.images && prop.images.length > 0 ? (
+                          <Image
+                            src={prop.images[0]}
+                            alt={prop.title}
+                            fill
+                            sizes="(max-width: 768px) 100vw, 350px"
+                            className={styles.propertyImageContent}
+                          />
+                        ) : (
+                          <div className={styles.noImage}>Sin imagen</div>
+                        )}
+                        {prop.featured && (
+                          <span className={styles.featuredBadge}>⭐ Destacada</span>
+                        )}
+                      </div>
+                    </div>
 
-              <div className={styles.propertyInfo}>
-                <h3>{prop.title}</h3>
-                <p className={styles.location}>{prop.location}</p>
-                
-                <div className={styles.propertyMeta}>
-                  <span>{getTypeIcon(prop.type)} {prop.type}</span>
-                  <span className={styles.operation}>
-                    {prop.operation === 'venta' ? '💰 Venta' : '🔑 Alquiler'}
-                  </span>
-                </div>
+                    <div className={styles.propertyInfo}>
+                      <h3>{prop.title}</h3>
+                      <p className={styles.location}>{prop.location}</p>
+                      
+                      <div className={styles.propertyMeta}>
+                        <span>{getTypeIcon(prop.type)} {prop.type}</span>
+                        <span className={styles.operation}>
+                          {prop.operation === 'venta' ? '💰 Venta' : '🔑 Alquiler'}
+                        </span>
+                      </div>
 
-                <p className={styles.price}>{formatPrice(prop.price, prop.currency)}</p>
+                      <p className={styles.price}>{formatPrice(prop.price, prop.currency)}</p>
 
-                <div className={styles.propertyDetails}>
-                  {prop.bedrooms && <span>🛏️ {prop.bedrooms}</span>}
-                  {prop.bathrooms && <span>🚿 {prop.bathrooms}</span>}
-                  {prop.area && <span>📐 {prop.area}m²</span>}
-                  {prop.parking && <span>🚗 {prop.parking}</span>}
-                </div>
+                      <div className={styles.propertyDetails}>
+                        {prop.bedrooms && <span>🛏️ {prop.bedrooms}</span>}
+                        {prop.bathrooms && <span>🚿 {prop.bathrooms}</span>}
+                        {prop.area && <span>📐 {prop.area}m²</span>}
+                        {prop.parking && <span>🚗 {prop.parking}</span>}
+                      </div>
 
-                <div className={styles.status}>
-                  <span className={styles.statusBadge}>
-                    {prop.status === 'disponible' && '✅ Disponible'}
-                    {prop.status === 'reservado' && '⏳ Reservado'}
-                    {prop.status === 'vendido' && '❌ Vendido'}
-                  </span>
-                </div>
+                      <div className={styles.status}>
+                        <span className={styles.statusBadge}>
+                          {prop.status === 'disponible' && '✅ Disponible'}
+                          {prop.status === 'reservado' && '⏳ Reservado'}
+                          {prop.status === 'vendido' && '❌ Vendido'}
+                        </span>
+                      </div>
 
-                <div className={styles.actions}>
-                  <button
-                    onClick={() => router.push(`/propiedades/${prop.id}`)}
-                    className={styles.viewButton}
-                  >
-                    👁️ Ver
-                  </button>
-                  <button
-                    onClick={() => router.push(`/admin/propiedades/${prop.id}`)}
-                    className={styles.editButton}
-                  >
-                    ✏️ Editar
-                  </button>
-                  <button
-                    onClick={() => handleDeleteClick(prop.id)}
-                    disabled={deletingId === prop.id}
-                    className={styles.deleteButton}
-                  >
-                    {deletingId === prop.id ? '🗑️ Eliminando...' : '🗑️ Eliminar'}
-                  </button>
-                </div>
+                      <div className={styles.actions}>
+                        <button
+                          onClick={() => router.push(`/propiedades/${prop.id}`)}
+                          className={styles.viewButton}
+                        >
+                          👁️ Ver
+                        </button>
+                        <button
+                          onClick={() => router.push(`/admin/propiedades/${prop.id}`)}
+                          className={styles.editButton}
+                        >
+                          ✏️ Editar
+                        </button>
+                        <button
+                          onClick={async () => {
+                            const newId = await duplicateProperty(prop.id)
+                            if (newId) {
+                              router.push(`/admin/propiedades/${newId}`)
+                            }
+                          }}
+                          className={styles.duplicateButton}
+                          title="Duplicar"
+                        >
+                          📋
+                        </button>
+                        <button
+                          onClick={() => handleDeleteClick(prop.id)}
+                          disabled={deletingId === prop.id}
+                          className={styles.deleteButton}
+                        >
+                          {deletingId === prop.id ? '🗑️ Eliminando...' : '🗑️ Eliminar'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
-          ))
+            )}
+          </>
         )}
-      </div>
+      />
 
       {/* Footer */}
       <div className={styles.footer}>

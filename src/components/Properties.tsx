@@ -1,12 +1,14 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Property } from '@/data/properties'
 import PropertyCard from './PropertyCard'
 import MapPlaceholder from './MapPlaceholder'
+import VirtualizedPropertyList from './VirtualizedPropertyList'
 import { useAnalytics } from '@/hooks/useAnalytics'
 import { useProperties } from '@/hooks/useProperties'
+import { debounce } from '@/lib/debounce'
 import styles from './Properties.module.css'
 
 export default function Properties() {
@@ -22,7 +24,54 @@ export default function Properties() {
   const [yearBuilt, setYearBuilt] = useState<string>('all')
   const [features, setFeatures] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState('')
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
   const analytics = useAnalytics()
+
+  const handleClearAllFilters = useCallback(() => {
+    setSelectedType('all')
+    setSelectedLocation('all')
+    setPriceRange({ min: 0, max: activeTab === 'venta' ? 200000000 : 500000 })
+    setAreaRange({ min: 0, max: 1000 })
+    setBedrooms('all')
+    setBathrooms('all')
+    setYearBuilt('all')
+    setFeatures([])
+    setSearchTerm('')
+  }, [activeTab])
+
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value)
+  }, [])
+
+  const handleTypeChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedType(e.target.value)
+  }, [])
+
+  const handleLocationChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedLocation(e.target.value)
+  }, [])
+
+  const handleBedroomsChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    setBedrooms(e.target.value)
+  }, [])
+
+  const handleFilters = useCallback(() => {
+    // Esta función puede usarse para aplicar filtros adicionales si es necesario
+    // Por ahora los filtros se aplican automáticamente con useMemo
+  }, [])
+
+  const clearFilters = useCallback(() => {
+    handleClearAllFilters()
+  }, [handleClearAllFilters])
+
+  // Debounce del término de búsqueda para evitar filtros excesivos
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm)
+    }, 300)
+
+    return () => clearTimeout(timer)
+  }, [searchTerm])
 
   // Leer parámetros de la URL al cargar
   useEffect(() => {
@@ -42,6 +91,7 @@ export default function Properties() {
     if (location) {
       setSelectedLocation(location)
       setSearchTerm(location)
+      // El debounce se aplicará automáticamente en el useEffect
     }
 
     if (featured === 'true') {
@@ -136,19 +186,20 @@ export default function Properties() {
         if (!hasAllFeatures) return false
       }
       
-      // Filtro por búsqueda
-      if (searchTerm && !property.title.toLowerCase().includes(searchTerm.toLowerCase()) && 
-          !property.description.toLowerCase().includes(searchTerm.toLowerCase()) &&
-          !property.location.toLowerCase().includes(searchTerm.toLowerCase())) return false
+      // Filtro por búsqueda (usar término debounced)
+      if (debouncedSearchTerm.trim() && 
+          !property.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) && 
+          !property.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) &&
+          !property.location.toLowerCase().includes(debouncedSearchTerm.toLowerCase())) return false
       
       return property.status === 'disponible'
     })
-  }, [currentProperties, selectedType, selectedLocation, currentPriceRange, areaRange, bedrooms, bathrooms, yearBuilt, features, searchTerm, searchParams, isLoading])
+  }, [currentProperties, selectedType, selectedLocation, currentPriceRange, areaRange, bedrooms, bathrooms, yearBuilt, features, debouncedSearchTerm, searchParams, isLoading])
 
-  // Track search events
+  // Track search events (usar término debounced)
   useEffect(() => {
-    if (searchTerm) {
-      analytics.trackSearch(searchTerm, filteredProperties.length, {
+    if (debouncedSearchTerm) {
+      analytics.trackSearch(debouncedSearchTerm, filteredProperties.length, {
         type: selectedType,
         location: selectedLocation,
         priceRange: currentPriceRange,
@@ -159,9 +210,12 @@ export default function Properties() {
         features
       })
     }
-  }, [searchTerm, filteredProperties.length, selectedType, selectedLocation, currentPriceRange, areaRange, bedrooms, bathrooms, yearBuilt, features, analytics])
+  }, [debouncedSearchTerm, filteredProperties.length, selectedType, selectedLocation, currentPriceRange, areaRange, bedrooms, bathrooms, yearBuilt, features, analytics])
 
-  const featuredProperties = properties.filter(prop => prop.featured && prop.status === 'disponible')
+  // Memoizar propiedades destacadas
+  const featuredProperties = useMemo(() => {
+    return properties.filter(prop => prop.featured && prop.status === 'disponible')
+  }, [properties])
 
   const formatPrice = (price: number): string => {
     // Formato sin moneda específica para el filtro (aplica a todas las propiedades)
@@ -265,17 +319,7 @@ export default function Properties() {
           <div className={styles.filtersHeader}>
             <h4>Filtros Avanzados</h4>
             <button 
-              onClick={() => {
-                setSelectedType('all')
-                setSelectedLocation('all')
-                setPriceRange({ min: 0, max: activeTab === 'venta' ? 200000000 : 500000 })
-                setAreaRange({ min: 0, max: 1000 })
-                setBedrooms('all')
-                setBathrooms('all')
-                setYearBuilt('all')
-                setFeatures([])
-                setSearchTerm('')
-              }}
+              onClick={handleClearAllFilters}
               className={styles.clearAllBtn}
             >
               Limpiar todo
@@ -296,7 +340,7 @@ export default function Properties() {
                 type="text"
                 placeholder="Ubicación, tipo..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={handleSearchChange}
                 className={styles.filterSelect}
               />
             </div>
@@ -311,7 +355,7 @@ export default function Properties() {
               </label>
               <select 
                 value={selectedType} 
-                onChange={(e) => setSelectedType(e.target.value)}
+                onChange={handleTypeChange}
                 className={styles.filterSelect}
               >
                 {types.map(type => (
@@ -332,7 +376,7 @@ export default function Properties() {
               </label>
               <select 
                 value={selectedLocation} 
-                onChange={(e) => setSelectedLocation(e.target.value)}
+                onChange={handleLocationChange}
                 className={styles.filterSelect}
               >
                 {locations.map(location => (
@@ -405,7 +449,7 @@ export default function Properties() {
               </label>
               <select 
                 value={bedrooms} 
-                onChange={(e) => setBedrooms(e.target.value)}
+                onChange={handleBedroomsChange}
                 className={styles.filterSelect}
               >
                 {bedroomOptions.map(option => (
@@ -512,19 +556,9 @@ export default function Properties() {
             <h3>
               {filteredProperties.length} propiedad{filteredProperties.length !== 1 ? 'es' : ''} encontrada{filteredProperties.length !== 1 ? 's' : ''}
             </h3>
-            {(selectedType !== 'all' || selectedLocation !== 'all' || searchTerm || currentPriceRange.max < (activeTab === 'venta' ? 200000000 : 500000) || areaRange.max < 1000 || bedrooms !== 'all' || bathrooms !== 'all' || yearBuilt !== 'all' || features.length > 0) && (
+            {(selectedType !== 'all' || selectedLocation !== 'all' || debouncedSearchTerm || currentPriceRange.max < (activeTab === 'venta' ? 200000000 : 500000) || areaRange.max < 1000 || bedrooms !== 'all' || bathrooms !== 'all' || yearBuilt !== 'all' || features.length > 0) && (
               <button 
-                onClick={() => {
-                  setSelectedType('all')
-                  setSelectedLocation('all')
-                  setPriceRange({ min: 0, max: activeTab === 'venta' ? 200000000 : 500000 })
-                  setAreaRange({ min: 0, max: 1000 })
-                  setBedrooms('all')
-                  setBathrooms('all')
-                  setYearBuilt('all')
-                  setFeatures([])
-                  setSearchTerm('')
-                }}
+                onClick={clearFilters}
                 className={styles.clearFiltersBtn}
               >
                 Limpiar filtros
@@ -533,11 +567,11 @@ export default function Properties() {
           </div>
 
           {filteredProperties.length > 0 ? (
-            <div className={styles.propertiesGrid}>
-              {filteredProperties.map(property => (
-                <PropertyCard key={property.id} property={property} />
-              ))}
-            </div>
+            <VirtualizedPropertyList 
+              properties={filteredProperties}
+              height={600}
+              itemHeight={450}
+            />
           ) : (
             <div className={styles.noResults}>
               <p>No se encontraron propiedades con los filtros seleccionados.</p>

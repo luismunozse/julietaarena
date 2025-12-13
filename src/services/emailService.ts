@@ -1,4 +1,7 @@
 import emailjs from '@emailjs/browser'
+import { logger } from '@/lib/logger'
+import { normalizeError, NetworkError } from '@/lib/errors'
+import { contactFormSchema, validateAndParse } from '@/lib/validation'
 
 // Configuración de EmailJS
 const EMAILJS_CONFIG = {
@@ -62,15 +65,28 @@ class EmailService {
     return !!(EMAILJS_CONFIG.serviceId && EMAILJS_CONFIG.publicKey)
   }
 
-  private logError(formType: string, error: any) {
-    console.error(`[EmailService] Error enviando ${formType}:`, error)
+  private logError(formType: string, error: unknown) {
+    const normalizedError = normalizeError(error)
+    logger.error(`EmailService error: ${formType}`, { formType }, normalizedError)
   }
 
   /**
    * Enviar formulario de contacto general
    */
   async sendContactForm(data: ContactFormData): Promise<{ success: boolean; message: string }> {
+    // Validar datos antes de enviar
+    const validation = validateAndParse(contactFormSchema, data, 'Datos del formulario inválidos')
+    if (!validation.success) {
+      const errorMessage = validation.details?.issues?.[0]?.message || 'Datos del formulario inválidos'
+      logger.warn('Contact form validation failed', { errors: validation.details?.issues })
+      return {
+        success: false,
+        message: errorMessage
+      }
+    }
+
     if (!this.isConfigured()) {
+      logger.warn('EmailJS not configured', {})
       return {
         success: false,
         message: 'EmailJS no está configurado correctamente. Por favor, contactanos por WhatsApp.'
@@ -78,6 +94,7 @@ class EmailService {
     }
 
     if (!EMAILJS_CONFIG.templates.contact) {
+      logger.warn('Contact template not configured', {})
       return {
         success: false,
         message: 'Template de contacto no configurado.'
@@ -89,21 +106,24 @@ class EmailService {
         EMAILJS_CONFIG.serviceId,
         EMAILJS_CONFIG.templates.contact,
         {
-          from_name: data.from_name,
-          from_email: data.from_email,
-          phone: data.phone || 'No proporcionado',
-          message: data.message,
+          from_name: validation.data.from_name,
+          from_email: validation.data.from_email,
+          phone: validation.data.phone || 'No proporcionado',
+          message: validation.data.message,
           to_name: 'Julieta Arena',
         }
       )
 
       if (response.status === 200) {
+        logger.info('Contact form sent successfully', { email: validation.data.from_email })
         return {
           success: true,
           message: '¡Mensaje enviado correctamente! Nos pondremos en contacto pronto.'
         }
       }
 
+      const error = new NetworkError(`EmailJS returned status ${response.status}`)
+      this.logError('contacto', error)
       return {
         success: false,
         message: 'Hubo un problema al enviar el mensaje. Por favor, intenta nuevamente.'

@@ -271,6 +271,64 @@
   margin-bottom: 2rem;
 }
 
+.propertiesTable {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.propertiesTable table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.propertiesTable thead {
+  background: #f5f5f5;
+}
+
+.propertiesTable th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #2c5f7d;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.propertiesTable td {
+  padding: 1rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.propertiesTable tbody tr:hover {
+  background: #f9f9f9;
+}
+
+.propertiesList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.propertiesList .propertyCard {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.propertiesList .propertyImage {
+  width: 150px;
+  height: 150px;
+  flex-shrink: 0;
+}
+
+.propertiesList .propertyInfo {
+  flex: 1;
+  padding: 0;
+}
+
 .propertyCard {
   background: white;
   border-radius: 12px;
@@ -433,6 +491,15 @@
 .deleteButton:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.duplicateButton {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.duplicateButton:hover {
+  background: #c8e6c9;
 }
 
 .emptyState {

@@ -3,9 +3,15 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import type { Property } from '@/data/properties'
+import type { SupabaseProperty } from '@/types/supabase'
 import { properties as initialProperties } from '@/data/properties'
 import { useAuth } from '@/hooks/useAuth'
 import { getPublicImageUrl } from '@/lib/storage'
+import { validateAndParse, supabasePropertySchema } from '@/lib/validation'
+import { debugLog } from '@/lib/debugLogger'
+import { logger } from '@/lib/logger'
+import { normalizeError, getUserFriendlyMessage } from '@/lib/errors'
+import { useToast } from '@/components/ToastContainer'
 
 const PROPERTIES_STORAGE_KEY = 'julieta-arena-properties'
 
@@ -18,7 +24,7 @@ const normalizeImages = (images?: string[] | null) => {
     .map(image => getPublicImageUrl(image))
 }
 
-const propertyToSupabase = (property: Property) => ({
+const propertyToSupabase = (property: Property): Omit<SupabaseProperty, 'created_at' | 'updated_at' | 'created_by' | 'updated_by'> => ({
   id: property.id,
   title: property.title,
   description: property.description,
@@ -49,50 +55,107 @@ const propertyToSupabase = (property: Property) => ({
   longitude: property.coordinates?.lng ?? null,
 })
 
-// Función helper para convertir formato Supabase a Property
-const supabaseToProperty = (data: any): Property => ({
-  id: data.id,
-  title: data.title,
-  description: data.description,
-  price: data.price,
-  currency: data.currency || 'USD',
-  location: data.location,
-  type: data.type,
-  bedrooms: data.bedrooms ?? undefined,
-  bathrooms: data.bathrooms ?? undefined,
-  area: data.area,
-  coveredArea: data.covered_area ?? undefined,
-  images: normalizeImages(data.images),
-  features: Array.isArray(data.features) ? data.features : [],
-  status: data.status,
-  featured: data.featured,
-  yearBuilt: data.year_built ?? undefined,
-  parking: data.parking ?? undefined,
-  floor: data.floor ?? undefined,
-  totalFloors: data.total_floors ?? undefined,
-  orientation: data.orientation ?? undefined,
-  expenses: data.expenses ?? undefined,
-  operation: data.operation,
-  broker: data.broker_name
-    ? {
-        name: data.broker_name,
-        phone: data.broker_phone,
-        email: data.broker_email,
-        avatar: data.broker_avatar,
+// Función para normalizar datos de Supabase antes de validar
+// Maneja casos donde los datos vienen con tipos incorrectos (strings en lugar de numbers, JSON strings en lugar de arrays)
+const normalizeSupabaseData = (data: Record<string, unknown>): Record<string, unknown> => {
+  const normalized = { ...data }
+
+  // Convertir strings a numbers donde corresponda
+  const numericFields = ['price', 'area', 'covered_area', 'bedrooms', 'bathrooms', 'year_built', 'parking', 'floor', 'total_floors', 'expenses', 'latitude', 'longitude']
+  for (const field of numericFields) {
+    const value = normalized[field]
+    // Empty strings or whitespace-only strings should become null
+    if (typeof value === 'string') {
+      const trimmed = value.trim()
+      if (trimmed === '') {
+        normalized[field] = null
+      } else {
+        const parsed = parseFloat(trimmed)
+        normalized[field] = isNaN(parsed) ? null : parsed
       }
-    : undefined,
-  coordinates:
-    data.latitude && data.longitude
+    }
+  }
+
+  // Parsear JSON strings a arrays
+  const arrayFields = ['images', 'features']
+  for (const field of arrayFields) {
+    const value = normalized[field]
+    if (typeof value === 'string') {
+      try {
+        normalized[field] = JSON.parse(value)
+      } catch {
+        normalized[field] = []
+      }
+    }
+  }
+
+  return normalized
+}
+
+// Función helper para convertir formato Supabase a Property con validación
+const supabaseToProperty = (data: unknown): Property | null => {
+  // Normalizar datos antes de validar
+  const normalizedData = typeof data === 'object' && data !== null
+    ? normalizeSupabaseData(data as Record<string, unknown>)
+    : data
+
+  // Validar datos con Zod
+  const validation = validateAndParse(supabasePropertySchema, normalizedData, 'Datos de propiedad inválidos')
+
+  if (!validation.success) {
+    logger.error('Error validando propiedad de Supabase', {
+      error: validation.error,
+      details: validation.details?.issues,
+    })
+    return null
+  }
+
+  const validated = validation.data
+  
+  return {
+    id: validated.id,
+    title: validated.title,
+    description: validated.description,
+    price: validated.price,
+    currency: validated.currency,
+    location: validated.location,
+    type: validated.type,
+    bedrooms: validated.bedrooms ?? undefined,
+    bathrooms: validated.bathrooms ?? undefined,
+    area: validated.area,
+    coveredArea: validated.covered_area ?? undefined,
+    images: normalizeImages(validated.images),
+    features: Array.isArray(validated.features) ? validated.features : [],
+    status: validated.status,
+    featured: validated.featured,
+    yearBuilt: validated.year_built ?? undefined,
+    parking: validated.parking ?? undefined,
+    floor: validated.floor ?? undefined,
+    totalFloors: validated.total_floors ?? undefined,
+    orientation: validated.orientation ?? undefined,
+    expenses: validated.expenses ?? undefined,
+    operation: validated.operation,
+    broker: validated.broker_name
       ? {
-          lat: data.latitude,
-          lng: data.longitude,
+          name: validated.broker_name,
+          phone: validated.broker_phone ?? '',
+          email: validated.broker_email ?? '',
+          avatar: validated.broker_avatar ?? undefined,
         }
       : undefined,
-  createdBy: data.created_by ?? undefined,
-  updatedBy: data.updated_by ?? undefined,
-  createdAt: data.created_at ?? undefined,
-  updatedAt: data.updated_at ?? undefined,
-})
+    coordinates:
+      validated.latitude !== null && validated.longitude !== null
+        ? {
+            lat: validated.latitude,
+            lng: validated.longitude,
+          }
+        : undefined,
+    createdBy: validated.created_by ?? undefined,
+    updatedBy: validated.updated_by ?? undefined,
+    createdAt: validated.created_at ?? undefined,
+    updatedAt: validated.updated_at ?? undefined,
+  }
+}
 
 export function useProperties() {
   const [properties, setProperties] = useState<Property[]>([])
@@ -100,9 +163,13 @@ export function useProperties() {
   const [error, setError] = useState<string | null>(null)
   const [useSupabase, setUseSupabase] = useState(false)
   const { user } = useAuth()
+  const { error: showErrorToast, success: showSuccessToast } = useToast()
 
   const migrateInitialProperties = useCallback(async (userId?: string | null) => {
     if (!userId) {
+      // #region agent log
+      debugLog({location:'useProperties.ts:127',message:'Migration skipped - no userId',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'});
+      // #endregion
       console.warn('Se requiere un usuario autenticado para migrar propiedades de ejemplo.')
       return
     }
@@ -119,39 +186,65 @@ export function useProperties() {
       const { error } = await supabase.from('properties').insert(supabaseProperties)
 
       if (error) {
+        // #region agent log
+        debugLog({location:'useProperties.ts:142',message:'Migration error from Supabase',data:{errorMessage:error?.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'});
+        // #endregion
         console.error('Error migrando propiedades:', error)
       }
     } catch (err) {
+      // #region agent log
+      debugLog({location:'useProperties.ts:145',message:'Migration exception caught',data:{errorMessage:err instanceof Error?err.message:String(err)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'});
+      // #endregion
       console.error('Error en migración:', err)
     }
   }, [])
 
   const loadProperties = useCallback(async () => {
+    // #region agent log
+    debugLog({location:'useProperties.ts:159',message:'loadProperties called',data:{userId:user?.id,useSupabase},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'});
+    // #endregion
     try {
       setIsLoading(true)
       setError(null)
 
       // Intentar cargar desde Supabase primero
+      // #region agent log
+      debugLog({location:'useProperties.ts:167',message:'Before Supabase query',data:{userId:user?.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'});
+      // #endregion
       const { data, error: supabaseError } = await supabase
         .from('properties')
         .select('*')
         .order('created_at', { ascending: false })
+      // #region agent log
+      debugLog({location:'useProperties.ts:171',message:'After Supabase query',data:{hasData:!!data,hasError:!!supabaseError,dataLength:data?.length,errorMessage:supabaseError?.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'});
+      // #endregion
 
       if (!supabaseError && data) {
         // Supabase está disponible
         setUseSupabase(true)
-        const mappedProperties = data.map(supabaseToProperty)
+        const mappedProperties = data
+          .map(supabaseToProperty)
+          .filter((prop): prop is Property => prop !== null)
 
         // Si no hay propiedades en Supabase pero hay en initialProperties, migrar
         if (mappedProperties.length === 0 && initialProperties.length > 0) {
+          // #region agent log
+          debugLog({location:'useProperties.ts:180',message:'Starting migration',data:{initialPropertiesCount:initialProperties.length,userId:user?.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'});
+          // #endregion
           await migrateInitialProperties(user?.id)
           // Recargar después de migrar
           const { data: newData } = await supabase
             .from('properties')
             .select('*')
             .order('created_at', { ascending: false })
+          // #region agent log
+          debugLog({location:'useProperties.ts:186',message:'After migration reload',data:{newDataLength:newData?.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'});
+          // #endregion
           if (newData) {
-            setProperties(newData.map(supabaseToProperty))
+            const reloadedProperties = newData
+              .map(supabaseToProperty)
+              .filter((prop): prop is Property => prop !== null)
+            setProperties(reloadedProperties)
           }
         } else {
           setProperties(mappedProperties)
@@ -172,29 +265,50 @@ export function useProperties() {
         }
       }
     } catch (err) {
-      console.error('Error loading properties:', err)
-      setError('Error al cargar propiedades')
+      // #region agent log
+      debugLog({location:'useProperties.ts:211',message:'Error caught in loadProperties',data:{errorMessage:err instanceof Error?err.message:String(err),errorType:err?.constructor?.name},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'});
+      // #endregion
+      const error = normalizeError(err)
+      logger.error('Error loading properties', { userId: user?.id }, error)
+      const errorMessage = getUserFriendlyMessage(error)
+      setError(errorMessage)
+      showErrorToast(errorMessage)
       setUseSupabase(false)
       // Fallback a localStorage
       try {
         const stored = localStorage.getItem(PROPERTIES_STORAGE_KEY)
         if (stored) {
-          setProperties(JSON.parse(stored))
+          const parsed = JSON.parse(stored)
+          // Validar propiedades del localStorage también
+          const validated = Array.isArray(parsed)
+            ? parsed.filter((p: unknown) => {
+                const validation = validateAndParse(supabasePropertySchema, p)
+                return validation.success
+              })
+            : []
+          setProperties(validated)
         } else {
           setProperties([])
         }
-      } catch {
+      } catch (localStorageError) {
+        logger.error('Error parsing localStorage properties', {}, normalizeError(localStorageError))
         setProperties([])
       }
     } finally {
       setIsLoading(false)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [migrateInitialProperties, user?.id])
 
   // Cargar propiedades (desde Supabase o localStorage)
+  // Usar useCallback para evitar recreación de loadProperties en cada render
   useEffect(() => {
+    // #region agent log
+    debugLog({location:'useProperties.ts:245',message:'useEffect loadProperties executing',data:{loadPropertiesDefined:!!loadProperties},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'});
+    // #endregion
     void loadProperties()
-  }, [loadProperties])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // Solo ejecutar una vez al montar el componente
 
   // Guardar en localStorage (fallback)
   const saveToLocalStorage = (updatedProperties: Property[]) => {
@@ -203,6 +317,9 @@ export function useProperties() {
       setProperties(updatedProperties)
       return true
     } catch (err) {
+      // #region agent log
+      debugLog({location:'useProperties.ts:277',message:'Error saving to localStorage',data:{errorMessage:err instanceof Error?err.message:String(err)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'});
+      // #endregion
       console.error('Error saving to localStorage:', err)
       setError('Error al guardar propiedades')
       return false
@@ -243,17 +360,16 @@ export function useProperties() {
           .insert([supabaseData])
 
         if (insertError) {
-          console.error('Error creating property in Supabase:', insertError)
-          console.error('Error details:', {
-            message: insertError.message,
-            details: insertError.details,
-            hint: insertError.hint,
-            code: insertError.code
-          })
-          setError(`Error al crear propiedad: ${insertError.message}`)
+          const error = new Error(insertError.message)
+          logger.error('Error creating property', { propertyId: newProperty.id, userId: user.id }, error)
+          const errorMessage = `Error al crear propiedad: ${insertError.message}`
+          setError(errorMessage)
+          showErrorToast(errorMessage)
           return false
         }
 
+        logger.info('Property created', { propertyId: newProperty.id, userId: user.id })
+        showSuccessToast('Propiedad creada exitosamente')
         // Recargar propiedades
         await loadProperties()
         return true
@@ -263,8 +379,11 @@ export function useProperties() {
         return saveToLocalStorage(updatedProperties)
       }
     } catch (err) {
-      console.error('Error creating property:', err)
-      setError('Error al crear propiedad')
+      const error = normalizeError(err)
+      logger.error('Error creating property', { userId: user?.id }, error)
+      const errorMessage = getUserFriendlyMessage(error)
+      setError(errorMessage)
+      showErrorToast(errorMessage)
       return false
     }
   }
@@ -302,11 +421,16 @@ export function useProperties() {
           .eq('id', id)
 
         if (updateError) {
-          console.error('Error updating property in Supabase:', updateError)
-          setError(updateError.message || 'Error al actualizar propiedad')
+          const error = new Error(updateError.message)
+          logger.error('Error updating property', { propertyId: id, userId: user.id }, error)
+          const errorMessage = updateError.message || 'Error al actualizar propiedad'
+          setError(errorMessage)
+          showErrorToast(errorMessage)
           return false
         }
 
+        logger.info('Property updated', { propertyId: id, userId: user.id })
+        showSuccessToast('Propiedad actualizada exitosamente')
         // Recargar propiedades
         await loadProperties()
         return true
@@ -320,8 +444,11 @@ export function useProperties() {
         return saveToLocalStorage(updatedProperties)
       }
     } catch (err) {
-      console.error('Error updating property:', err)
-      setError('Error al actualizar propiedad')
+      const error = normalizeError(err)
+      logger.error('Error updating property', { propertyId: id, userId: user?.id }, error)
+      const errorMessage = getUserFriendlyMessage(error)
+      setError(errorMessage)
+      showErrorToast(errorMessage)
       return false
     }
   }
@@ -352,11 +479,16 @@ export function useProperties() {
           .eq('id', id)
 
         if (deleteError) {
-          console.error('❌ Error deleting property in Supabase:', deleteError)
-          setError(deleteError.message || 'Error al eliminar propiedad')
+          const error = new Error(deleteError.message)
+          logger.error('Error deleting property', { propertyId: id, userId: user.id }, error)
+          const errorMessage = deleteError.message || 'Error al eliminar propiedad'
+          setError(errorMessage)
+          showErrorToast(errorMessage)
           return false
         }
 
+        logger.info('Property deleted', { propertyId: id, userId: user.id })
+        showSuccessToast('Propiedad eliminada exitosamente')
         // Recargar propiedades
         await loadProperties()
         return true
@@ -366,8 +498,11 @@ export function useProperties() {
         return saveToLocalStorage(updatedProperties)
       }
     } catch (err) {
-      console.error('❌ Error deleting property:', err)
-      setError('Error al eliminar propiedad')
+      const error = normalizeError(err)
+      logger.error('Error deleting property', { propertyId: id, userId: user?.id }, error)
+      const errorMessage = getUserFriendlyMessage(error)
+      setError(errorMessage)
+      showErrorToast(errorMessage)
       return false
     }
   }
@@ -375,6 +510,44 @@ export function useProperties() {
   // Obtener propiedad por ID
   const getPropertyById = (id: string): Property | undefined => {
     return properties.find(prop => prop.id === id)
+  }
+
+  // Duplicar propiedad
+  const duplicateProperty = async (id: string): Promise<string | null> => {
+    try {
+      const originalProperty = properties.find(p => p.id === id)
+      if (!originalProperty) {
+        setError('Propiedad no encontrada')
+        return null
+      }
+
+      const duplicatedProperty: Omit<Property, 'id'> = {
+        ...originalProperty,
+        title: `[Copia] ${originalProperty.title}`,
+        status: 'disponible',
+        featured: false,
+        createdAt: undefined,
+        updatedAt: undefined,
+        createdBy: user?.id,
+        updatedBy: user?.id,
+      }
+
+      const success = await createProperty(duplicatedProperty)
+      if (success) {
+        // Esperar a que se cargue la nueva propiedad
+        await loadProperties()
+        const newProperty = properties.find(p => p.title === duplicatedProperty.title)
+        return newProperty?.id || null
+      }
+      return null
+    } catch (err) {
+      const error = normalizeError(err)
+      logger.error('Error duplicating property', { propertyId: id, userId: user?.id }, error)
+      const errorMessage = getUserFriendlyMessage(error)
+      setError(errorMessage)
+      showErrorToast(errorMessage)
+      return null
+    }
   }
 
   // Refrescar propiedades
@@ -389,6 +562,7 @@ export function useProperties() {
     createProperty,
     updateProperty,
     deleteProperty,
+    duplicateProperty,
     getPropertyById,
     refreshProperties,
     useSupabase, // Exponer si está usando Supabase

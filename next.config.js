@@ -39,6 +39,20 @@ const nextConfig = {
         removeEmptyChunks: false,
       }
     }
+    
+    // Hacer que @sentry/nextjs sea completamente opcional
+    // Esto evita errores de compilación si no está instalado
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@sentry/nextjs': false,
+    }
+    
+    // Fallback para módulos del servidor
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+    }
+    
     return config
   },
 }

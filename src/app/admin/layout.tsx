@@ -4,7 +4,10 @@ import { useEffect, ReactNode, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/hooks/useAuth'
+import { useAdminKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import Modal from '@/components/Modal'
+import KeyboardShortcuts from '@/components/admin/KeyboardShortcuts'
+import ThemeToggle from '@/components/admin/ThemeToggle'
 import styles from './layout.module.css'
 
 interface AdminLayoutProps {
@@ -17,6 +20,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const { isAuthenticated, isLoading, user, logout } = useAuth()
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [showLogoutModal, setShowLogoutModal] = useState(false)
+  
+  // Activar atajos de teclado
+  useAdminKeyboardShortcuts()
 
   useEffect(() => {
     // Solo redirigir si ya terminó de cargar y no está autenticado
@@ -56,6 +62,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { path: '/admin/consultas', icon: '💬', label: 'Consultas', exact: false },
     { path: '/admin/contactos', icon: '📧', label: 'Contactos', exact: false },
     { path: '/admin/analytics', icon: '📈', label: 'Analytics', exact: false },
+    { path: '/admin/usuarios', icon: '👥', label: 'Usuarios', exact: false },
+    { path: '/admin/logs', icon: '📋', label: 'Logs', exact: false },
+    { path: '/admin/plantillas', icon: '📄', label: 'Plantillas', exact: false },
+    { path: '/admin/backup', icon: '💾', label: 'Backup', exact: false },
+    { path: '/admin/configuracion', icon: '⚙️', label: 'Configuración', exact: false },
   ]
 
   const isActive = (path: string, exact: boolean) => {
@@ -129,6 +140,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               <span className={styles.navIcon}>🌐</span>
               {!sidebarCollapsed && <span className={styles.navLabel}>Ver Sitio</span>}
             </Link>
+            {!sidebarCollapsed && (
+              <div style={{ padding: '0.5rem', display: 'flex', justifyContent: 'center' }}>
+                <ThemeToggle />
+              </div>
+            )}
             <button
               onClick={handleLogoutClick}
               className={`${styles.navItem} ${styles.logoutItem}`}
@@ -146,6 +162,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       <main className={styles.mainContent}>
         {children}
       </main>
+
+      {/* Componentes globales */}
+      <KeyboardShortcuts />
 
       {/* Modal de Logout */}
       <Modal

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo, useCallback, memo } from 'react'
 import Image from 'next/image'
 import { Property } from '@/data/properties'
 import FavoriteButton from './FavoriteButton'
@@ -11,20 +11,20 @@ interface PropertyCardListProps {
   property: Property
 }
 
-export default function PropertyCardList({ property }: PropertyCardListProps) {
+function PropertyCardList({ property }: PropertyCardListProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
-  const nextImage = () => {
+  const nextImage = useCallback(() => {
     setCurrentImageIndex((prev) => 
       prev === property.images.length - 1 ? 0 : prev + 1
     )
-  }
+  }, [property.images.length])
 
-  const prevImage = () => {
+  const prevImage = useCallback(() => {
     setCurrentImageIndex((prev) => 
       prev === 0 ? property.images.length - 1 : prev - 1
     )
-  }
+  }, [property.images.length])
 
   // Swipe gestures para navegación de imágenes
   const swipeHandlers = useSwipe({
@@ -33,16 +33,18 @@ export default function PropertyCardList({ property }: PropertyCardListProps) {
     minSwipeDistance: 50
   })
 
-  const formatPrice = (price: number, currency: 'ARS' | 'USD' = 'USD'): string => {
+  // Memoizar precio formateado
+  const formattedPrice = useMemo(() => {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
-      currency: currency,
+      currency: property.currency || 'USD',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
-    }).format(price)
-  }
+    }).format(property.price)
+  }, [property.price, property.currency])
 
-  const getTypeLabel = (type: string): string => {
+  // Memoizar label de tipo
+  const typeLabel = useMemo(() => {
     const types: { [key: string]: string } = {
       'casa': 'Casa',
       'departamento': 'Departamento',
@@ -51,8 +53,8 @@ export default function PropertyCardList({ property }: PropertyCardListProps) {
       'oficina': 'Oficina',
       'cochera': 'Cochera'
     }
-    return types[type] || type
-  }
+    return types[property.type] || property.type
+  }, [property.type])
 
   return (
     <div className={`${styles.propertyCardList} hover-lift`}>
@@ -81,7 +83,7 @@ export default function PropertyCardList({ property }: PropertyCardListProps) {
             <p className={styles.propertyLocation}>📍 {property.location}</p>
           </div>
           <div className={styles.priceSection}>
-            <span className={styles.price}>{formatPrice(property.price, property.currency)}</span>
+            <span className={styles.price}>{formattedPrice}</span>
             <span className={styles.priceLabel}>
               {property.operation === 'venta' ? 'Venta' : 'Alquiler'}
             </span>
@@ -130,3 +132,13 @@ export default function PropertyCardList({ property }: PropertyCardListProps) {
     </div>
   )
 }
+
+// Memoizar componente para evitar re-renders innecesarios
+export default memo(PropertyCardList, (prevProps, nextProps) => {
+  return (
+    prevProps.property.id === nextProps.property.id &&
+    prevProps.property.price === nextProps.property.price &&
+    prevProps.property.status === nextProps.property.status &&
+    JSON.stringify(prevProps.property.images) === JSON.stringify(nextProps.property.images)
+  )
+})

@@ -10,6 +10,7 @@ import PropertyMetrics from './PropertyMetrics'
 import PropertyFeatures from './PropertyFeatures'
 import PropertyLocationMap from './PropertyLocationMap'
 import { useAnalytics } from '@/hooks/useAnalytics'
+import { sanitizeText } from '@/lib/sanitize'
 import styles from './PropertyDetail.module.css'
 
 interface PropertyDetailProps {
@@ -136,7 +137,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
           {/* Descripción */}
           <div className={styles.descriptionSection}>
             <h2 className={styles.sectionTitle}>Descripción</h2>
-            <p className={styles.descriptionText}>{property.description}</p>
+            <p className={styles.descriptionText}>{sanitizeText(property.description)}</p>
           </div>
 
           {/* Características */}

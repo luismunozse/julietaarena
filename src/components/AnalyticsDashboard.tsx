@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useAnalytics } from '@/hooks/useAnalytics'
+import AnalyticsCharts from '@/components/admin/AnalyticsCharts'
 import styles from './AnalyticsDashboard.module.css'
 
 interface AnalyticsData {
@@ -229,6 +230,9 @@ export default function AnalyticsDashboard() {
           )}
         </div>
       </div>
+
+      {/* Gráficos Avanzados */}
+      <AnalyticsCharts timeRange={timeRange} />
     </div>
   )
 }

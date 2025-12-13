@@ -1,9 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { emailService } from '@/services/emailService'
 import { useToast } from '@/components/ToastContainer'
+import { checkRateLimit, RATE_LIMIT_CONFIGS } from '@/lib/rateLimit'
+import { logger } from '@/lib/logger'
+import { normalizeError, getUserFriendlyMessage } from '@/lib/errors'
 import styles from './VenderForm.module.css'
 
 interface FormErrors {
@@ -226,8 +229,9 @@ export default function VenderForm() {
         showError(result.message, 7000)
       }
     } catch (err) {
-      console.error('Error al enviar formulario:', err)
-      showError('Error inesperado al enviar la solicitud. Por favor, contactanos por WhatsApp.', 7000)
+      const error = normalizeError(err)
+      logger.error('Error submitting vender form', {}, error)
+      showError(getUserFriendlyMessage(error), 7000)
     } finally {
       setIsSubmitting(false)
     }

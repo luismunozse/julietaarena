@@ -1,0 +1,25 @@
+.toggle {
+  background: #f0f0f0;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toggle:hover {
+  background: #e0e0e0;
+  transform: scale(1.05);
+}
+
+[data-theme='dark'] .toggle {
+  background: #333;
+  border-color: #555;
+  color: white;
+}
+
+[data-theme='dark'] .toggle:hover {
+  background: #444;
+}
+

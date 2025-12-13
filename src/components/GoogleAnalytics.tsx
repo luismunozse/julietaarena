@@ -13,7 +13,7 @@ export default function GoogleAnalytics({ measurementId }: GoogleAnalyticsProps)
     if (typeof window !== 'undefined' && measurementId) {
       // Load gtag
       window.dataLayer = window.dataLayer || []
-      function gtag(...args: any[]) {
+      function gtag(...args: unknown[]) {
         window.dataLayer.push(args)
       }
       window.gtag = gtag
@@ -57,7 +57,7 @@ export default function GoogleAnalytics({ measurementId }: GoogleAnalyticsProps)
 // Extend Window interface for TypeScript
 declare global {
   interface Window {
-    dataLayer: any[]
-    gtag: (...args: any[]) => void
+    dataLayer: unknown[]
+    gtag: (...args: unknown[]) => void
   }
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback, memo } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Property } from '@/data/properties'
@@ -16,7 +16,7 @@ interface PropertyCardProps {
   property: Property
 }
 
-export default function PropertyCard({ property }: PropertyCardProps) {
+function PropertyCard({ property }: PropertyCardProps) {
   const router = useRouter()
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [showAppointmentBooking, setShowAppointmentBooking] = useState(false)
@@ -29,16 +29,28 @@ export default function PropertyCard({ property }: PropertyCardProps) {
     analytics.trackPropertyView(property.id, property.title)
   }, [property.id, property.title, analytics])
 
-  const formatPrice = (price: number): string => {
+  // Memoizar formateo de precio
+  const formattedPrice = useMemo(() => {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
       currency: property.currency || 'USD',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
-    }).format(price)
-  }
+    }).format(property.price)
+  }, [property.price, property.currency])
 
-  const getTypeLabel = (type: string): string => {
+  const formattedExpenses = useMemo(() => {
+    if (!property.expenses) return null
+    return new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: property.currency || 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(property.expenses)
+  }, [property.expenses, property.currency])
+
+  // Memoizar label de tipo
+  const typeLabel = useMemo(() => {
     const types: { [key: string]: string } = {
       'casa': 'Casa',
       'departamento': 'Departamento',
@@ -47,33 +59,53 @@ export default function PropertyCard({ property }: PropertyCardProps) {
       'oficina': 'Oficina',
       'cochera': 'Cochera'
     }
-    return types[type] || type
-  }
+    return types[property.type] || property.type
+  }, [property.type])
 
-  const nextImage = () => {
+  // Memoizar características principales
+  const mainFeatures = useMemo(() => {
+    return property.features.slice(0, 4)
+  }, [property.features])
+
+  // Callbacks memoizados para evitar recreaciones
+  const nextImage = useCallback(() => {
     setCurrentImageIndex((prev) => 
       prev === property.images.length - 1 ? 0 : prev + 1
     )
-  }
+  }, [property.images.length])
 
-  const prevImage = () => {
+  const prevImage = useCallback(() => {
     setCurrentImageIndex((prev) => 
       prev === 0 ? property.images.length - 1 : prev - 1
     )
-  }
+  }, [property.images.length])
 
-  const handleCardClick = (e: React.MouseEvent) => {
+  const handleCardClick = useCallback((e: React.MouseEvent) => {
     // Solo navegar si no se clickeó un botón o enlace
     if ((e.target as HTMLElement).closest('button') || (e.target as HTMLElement).closest('a')) {
       return
     }
     router.push(`/propiedades/${property.id}`)
     analytics.trackClick('property_card', 'property_list', { propertyId: property.id })
-  }
+  }, [property.id, router, analytics])
+
+  const handleAppointmentClick = useCallback(() => {
+    analytics.trackClick('appointment_button', 'property_card', { propertyId: property.id })
+    setShowAppointmentBooking(true)
+  }, [property.id, analytics])
+
+  const handleReviewsClick = useCallback(() => {
+    analytics.trackClick('reviews_button', 'property_card', { propertyId: property.id })
+    setShowReviews(true)
+  }, [property.id, analytics])
+
+  const handleImageIndexChange = useCallback((index: number) => {
+    setCurrentImageIndex(index)
+  }, [])
 
   return (
     <div
-      ref={elementRef as any}
+      ref={elementRef as React.RefObject<HTMLDivElement>}
       className={`${styles.propertyCard} ${property.featured ? styles.featured : ''} hover-lift ${styles.clickable}`}
       onClick={handleCardClick}
     >
@@ -117,7 +149,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
                 <button
                   key={index}
                   className={`${styles.dot} ${index === currentImageIndex ? styles.active : ''}`}
-                  onClick={() => setCurrentImageIndex(index)}
+                  onClick={() => handleImageIndexChange(index)}
                   aria-label={`Ver imagen ${index + 1}`}
                 />
               ))}
@@ -136,7 +168,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
       <div className={styles.propertyContent}>
         <div className={styles.propertyHeader}>
           <h3 className={styles.propertyTitle}>{property.title}</h3>
-          <span className={styles.propertyType}>{getTypeLabel(property.type)}</span>
+          <span className={styles.propertyType}>{typeLabel}</span>
         </div>
 
         <p className={styles.propertyLocation}>
@@ -167,7 +199,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
         <div className={styles.propertyFeatures}>
           <h4>Características principales:</h4>
           <ul>
-            {property.features.slice(0, 4).map((feature, index) => (
+            {mainFeatures.map((feature, index) => (
               <li key={index}>{feature}</li>
             ))}
             {property.features.length > 4 && (
@@ -179,10 +211,10 @@ export default function PropertyCard({ property }: PropertyCardProps) {
         </div>
 
         <div className={styles.propertyPrice}>
-          <span className={styles.price}>{formatPrice(property.price)}</span>
-          {property.expenses && (
+          <span className={styles.price}>{formattedPrice}</span>
+          {formattedExpenses && (
             <span className={styles.expenses}>
-              + {formatPrice(property.expenses)} expensas
+              + {formattedExpenses} expensas
             </span>
           )}
         </div>
@@ -190,19 +222,13 @@ export default function PropertyCard({ property }: PropertyCardProps) {
         <div className={styles.propertyActions}>
           <button 
             className={`${styles.appointmentBtn} button-press`}
-            onClick={() => {
-              analytics.trackClick('appointment_button', 'property_card', { propertyId: property.id })
-              setShowAppointmentBooking(true)
-            }}
+            onClick={handleAppointmentClick}
           >
             📅 Agendar Visita
           </button>
           <button 
             className={`${styles.reviewsBtn} button-press`}
-            onClick={() => {
-              analytics.trackClick('reviews_button', 'property_card', { propertyId: property.id })
-              setShowReviews(true)
-            }}
+            onClick={handleReviewsClick}
           >
             ⭐ Reseñas
           </button>
@@ -254,3 +280,16 @@ export default function PropertyCard({ property }: PropertyCardProps) {
     </div>
   )
 }
+
+// Memoizar componente para evitar re-renders innecesarios
+export default memo(PropertyCard, (prevProps, nextProps) => {
+  // Comparación personalizada: solo re-renderizar si cambian propiedades relevantes
+  return (
+    prevProps.property.id === nextProps.property.id &&
+    prevProps.property.title === nextProps.property.title &&
+    prevProps.property.price === nextProps.property.price &&
+    prevProps.property.status === nextProps.property.status &&
+    prevProps.property.featured === nextProps.property.featured &&
+    JSON.stringify(prevProps.property.images) === JSON.stringify(nextProps.property.images)
+  )
+})

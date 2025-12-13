@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, use } from 'react'
 import PropertyDetail from '@/components/PropertyDetail'
 import SkeletonLoader from '@/components/SkeletonLoader'
 import { useProperties } from '@/hooks/useProperties'
@@ -8,24 +8,27 @@ import { useRouter } from 'next/navigation'
 import type { Property } from '@/data/properties'
 
 interface PropertyDetailPageProps {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 export default function PropertyDetailPage({ params }: PropertyDetailPageProps) {
   const router = useRouter()
   const { getPropertyById, isLoading } = useProperties()
   const [property, setProperty] = useState<Property | undefined>(undefined)
+  
+  // Unwrap params Promise using React.use() for Next.js 15 compatibility
+  const { id } = use(params)
 
   useEffect(() => {
     if (!isLoading) {
-      const foundProperty = getPropertyById(params.id)
+      const foundProperty = getPropertyById(id)
       if (!foundProperty) {
         router.push('/propiedades')
       } else {
         setProperty(foundProperty)
       }
     }
-  }, [params.id, isLoading, getPropertyById, router])
+  }, [id, isLoading, getPropertyById, router])
 
   if (isLoading) {
     return (

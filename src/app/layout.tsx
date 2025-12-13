@@ -10,6 +10,7 @@ import ConditionalLayout from '@/components/ConditionalLayout'
 import GoogleAnalytics from '@/components/GoogleAnalytics'
 import FacebookPixel from '@/components/FacebookPixel'
 import AnalyticsProvider from '@/components/AnalyticsProvider'
+import ErrorBoundary from '@/components/ErrorBoundary'
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -74,24 +75,17 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="es">
+    <html lang="es" data-theme="light" style={{ colorScheme: 'light' }}>
       <head>
         <StructuredData />
       </head>
-      <body className={poppins.className}>
+      <body
+        className={poppins.className}
+        style={{ backgroundColor: '#ffffff', color: '#2d3436' }}
+      >
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              // Forzar modo claro - versión optimizada
-              if (document.documentElement) {
-                document.documentElement.style.colorScheme = 'light';
-                document.documentElement.setAttribute('data-theme', 'light');
-              }
-              if (document.body) {
-                document.body.style.backgroundColor = '#ffffff';
-                document.body.style.color = '#2d3436';
-              }
-
               // Desregistrar service workers problemáticos
               if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.getRegistrations().then(function(registrations) {
@@ -109,15 +103,17 @@ export default function RootLayout({
         />
         <GoogleAnalytics measurementId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || ''} />
         <FacebookPixel pixelId={process.env.NEXT_PUBLIC_FB_PIXEL_ID || ''} />
-        <ToastProvider>
-          <AnalyticsProvider>
-            <AuthProvider>
-              <ConditionalLayout>
-                {children}
-              </ConditionalLayout>
-            </AuthProvider>
-          </AnalyticsProvider>
-        </ToastProvider>
+        <ErrorBoundary>
+          <ToastProvider>
+            <AnalyticsProvider>
+              <AuthProvider>
+                <ConditionalLayout>
+                  {children}
+                </ConditionalLayout>
+              </AuthProvider>
+            </AnalyticsProvider>
+          </ToastProvider>
+        </ErrorBoundary>
       </body>
     </html>
   )
