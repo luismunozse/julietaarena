@@ -155,3 +155,4 @@ export function loadBackupFile(file: File): Promise<BackupData> {
     reader.readAsText(file)
   })
 }
+

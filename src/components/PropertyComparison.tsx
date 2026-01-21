@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import { Property } from '@/data/properties'
 import { usePropertyComparator } from '@/hooks/usePropertyComparator'
-import styles from './PropertyComparison.module.css'
+
 
 interface PropertyComparisonProps {
   onClose: () => void
@@ -62,64 +62,64 @@ export default function PropertyComparison({ onClose }: PropertyComparisonProps)
   }
 
   return (
-    <div className={styles.comparisonOverlay}>
-      <div className={styles.comparisonModal}>
-        <div className={styles.comparisonHeader}>
+    <div className="comparisonOverlay">
+      <div className="comparisonModal">
+        <div className="comparisonHeader">
           <h2>Comparación de Propiedades</h2>
-          <div className={styles.headerActions}>
+          <div className="headerActions">
             <button 
               onClick={clearComparison}
-              className={styles.clearAllBtn}
+              className="clearAllBtn"
             >
               Limpiar Todo
             </button>
             <button 
               onClick={onClose}
-              className={styles.closeBtn}
+              className="closeBtn"
             >
               ✕
             </button>
           </div>
         </div>
 
-        <div className={styles.comparisonContent}>
-          <div className={styles.propertiesHeader}>
-            <div className={styles.propertyColumn}>
-              <span className={styles.columnLabel}>Características</span>
+        <div className="comparisonContent">
+          <div className="propertiesHeader">
+            <div className="propertyColumn">
+              <span className="columnLabel">Características</span>
             </div>
             {comparisonProperties.map((property, index) => (
-              <div key={property.id} className={styles.propertyColumn}>
-                <div className={styles.propertyCard}>
-                  <div className={styles.propertyImage}>
+              <div key={property.id} className="propertyColumn">
+                <div className="propertyCard">
+                  <div className="propertyImage">
                     <Image 
                       src={property.images[0]} 
                       alt={property.title}
                       fill
                       sizes="(max-width: 768px) 100vw, 250px"
-                      className={styles.propertyImageContent}
+                      className="propertyImageContent"
                     />
                     <button 
-                      className={styles.removeBtn}
+                      className="removeBtn"
                       onClick={() => removeFromComparison(property.id)}
                     >
                       ✕
                     </button>
                   </div>
-                  <h3 className={styles.propertyTitle}>{property.title}</h3>
-                  <p className={styles.propertyType}>{getTypeLabel(property.type)}</p>
+                  <h3 className="propertyTitle">{property.title}</h3>
+                  <p className="propertyType">{getTypeLabel(property.type)}</p>
                 </div>
               </div>
             ))}
           </div>
 
-          <div className={styles.comparisonTable}>
+          <div className="comparisonTable">
             {getComparisonData().map((row, index) => (
-              <div key={index} className={styles.comparisonRow}>
-                <div className={styles.rowLabel}>
+              <div key={index} className="comparisonRow">
+                <div className="rowLabel">
                   {row.label}
                 </div>
                 {comparisonProperties.map((property) => (
-                  <div key={property.id} className={styles.rowValue}>
+                  <div key={property.id} className="rowValue">
                     {String(row.format(property))}
                   </div>
                 ))}
@@ -127,11 +127,11 @@ export default function PropertyComparison({ onClose }: PropertyComparisonProps)
             ))}
           </div>
 
-          <div className={styles.featuresComparison}>
+          <div className="featuresComparison">
             <h3>Características Especiales</h3>
-            <div className={styles.featuresGrid}>
+            <div className="featuresGrid">
               {comparisonProperties.map((property) => (
-                <div key={property.id} className={styles.propertyFeatures}>
+                <div key={property.id} className="propertyFeatures">
                   <h4>{property.title}</h4>
                   <ul>
                     {property.features.map((feature, index) => (
@@ -144,7 +144,7 @@ export default function PropertyComparison({ onClose }: PropertyComparisonProps)
           </div>
         </div>
 
-        <div className={styles.comparisonActions}>
+        <div className="comparisonActions">
           <button 
             onClick={onClose}
             className="btn btn-secondary"

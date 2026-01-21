@@ -6,7 +6,7 @@ import { useProperties } from '@/hooks/useProperties'
 import type { Property } from '@/data/properties'
 import PropertyForm from '@/components/PropertyForm'
 import Modal from '@/components/Modal'
-import styles from './page.module.css'
+
 
 export default function EditPropertyPage() {
   const router = useRouter()
@@ -85,7 +85,7 @@ export default function EditPropertyPage() {
   }
 
   if (isLoading) {
-    return <div className={styles.loading}>Cargando propiedad...</div>
+    return <div className="loading">Cargando propiedad...</div>
   }
 
   if (!property) {
@@ -93,12 +93,12 @@ export default function EditPropertyPage() {
   }
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
+    <div className="container">
+      <div className="header">
         <h1>Editar Propiedad</h1>
         <button
           onClick={() => router.push('/admin/propiedades')}
-          className={styles.cancelButton}
+          className="cancelButton"
         >
           ← Volver
         </button>

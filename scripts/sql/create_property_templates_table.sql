@@ -69,3 +69,4 @@ CREATE POLICY "Solo usuarios autenticados pueden eliminar plantillas"
 COMMENT ON TABLE property_templates IS 'Plantillas reutilizables para crear propiedades similares rápidamente';
 COMMENT ON COLUMN property_templates.template_data IS 'JSON con todos los campos de una propiedad que se usarán como plantilla';
 COMMENT ON COLUMN property_templates.usage_count IS 'Contador de cuántas veces se ha usado esta plantilla';
+

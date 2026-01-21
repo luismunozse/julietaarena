@@ -1,12 +1,10 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, CSSProperties } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useProperties } from '@/hooks/useProperties'
 import { useAnalytics } from '@/hooks/useAnalytics'
 import {
-  LineChart,
-  Line,
   BarChart,
   Bar,
   PieChart,
@@ -18,16 +16,70 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from 'recharts'
-import { subDays, format, startOfDay, endOfDay } from 'date-fns'
-import styles from './AnalyticsCharts.module.css'
+import { subDays, format } from 'date-fns'
 
 const COLORS = ['#2196F3', '#4CAF50', '#FF9800', '#E91E63', '#9C27B0', '#607D8B']
 
 interface AnalyticsChartsProps {
   timeRange: '24h' | '7d' | '30d' | 'all'
+}
+
+const styles: Record<string, CSSProperties> = {
+  chartsContainer: {
+    marginTop: '1.5rem',
+  },
+  loading: {
+    padding: '2rem',
+    textAlign: 'center',
+    color: '#636e72',
+    fontSize: '0.875rem',
+  },
+  metricsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+    gap: '1rem',
+    marginBottom: '2rem',
+  },
+  metricCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: '16px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+    padding: '1.25rem',
+    textAlign: 'center',
+    border: '1px solid #e5e7eb',
+  },
+  metricCardH3: {
+    margin: '0 0 0.5rem 0',
+    fontSize: '0.8125rem',
+    fontWeight: 500,
+    color: '#636e72',
+  },
+  metricValue: {
+    margin: 0,
+    fontSize: '1.5rem',
+    fontWeight: 700,
+    color: '#2c5f7d',
+  },
+  chartsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+    gap: '1.5rem',
+  },
+  chartCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: '16px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+    padding: '1.5rem',
+    border: '1px solid #e5e7eb',
+  },
+  chartTitle: {
+    margin: '0 0 1rem 0',
+    fontSize: '1rem',
+    fontWeight: 600,
+    color: '#1a4158',
+  },
 }
 
 export default function AnalyticsCharts({ timeRange }: AnalyticsChartsProps) {
@@ -90,7 +142,7 @@ export default function AnalyticsCharts({ timeRange }: AnalyticsChartsProps) {
     }
   }, [timeRange])
 
-  // Consultas por día
+  // Consultas por dia
   const inquiriesByDay = useMemo(() => {
     const filtered = inquiriesData.filter(i => filterByTimeRange(i.created_at))
     const grouped: Record<string, number> = {}
@@ -142,7 +194,7 @@ export default function AnalyticsCharts({ timeRange }: AnalyticsChartsProps) {
     }))
   }, [inquiriesData, filterByTimeRange])
 
-  // Consultas por hora del día (heatmap)
+  // Consultas por hora del dia (heatmap)
   const inquiriesByHour = useMemo(() => {
     const filtered = inquiriesData.filter(i => filterByTimeRange(i.created_at))
     const grouped: Record<number, number> = {}
@@ -158,7 +210,7 @@ export default function AnalyticsCharts({ timeRange }: AnalyticsChartsProps) {
     }))
   }, [inquiriesData, filterByTimeRange])
 
-  // Tasa de conversión (consultas / propiedades activas)
+  // Tasa de conversion (consultas / propiedades activas)
   const conversionRate = useMemo(() => {
     const activeProperties = properties.filter(p => p.status === 'disponible').length
     const filteredInquiries = inquiriesData.filter(i => filterByTimeRange(i.created_at))
@@ -166,47 +218,47 @@ export default function AnalyticsCharts({ timeRange }: AnalyticsChartsProps) {
     return (filteredInquiries.length / activeProperties) * 100
   }, [properties, inquiriesData, filterByTimeRange])
 
-  // Tiempo promedio de respuesta (simulado - necesitaría campo updated_at en consultas)
+  // Tiempo promedio de respuesta (simulado - necesitaria campo updated_at en consultas)
   const avgResponseTime = useMemo(() => {
     // Por ahora retornamos un valor simulado
     return '2.5 horas'
   }, [])
 
   if (isLoading) {
-    return <div className={styles.loading}>Cargando gráficos...</div>
+    return <div style={styles.loading}>Cargando graficos...</div>
   }
 
   return (
-    <div className={styles.chartsContainer}>
-      {/* Métricas principales */}
-      <div className={styles.metricsGrid}>
-        <div className={styles.metricCard}>
-          <h3>Consultas Totales</h3>
-          <p className={styles.metricValue}>
+    <div style={styles.chartsContainer}>
+      {/* Metricas principales */}
+      <div style={styles.metricsGrid}>
+        <div style={styles.metricCard}>
+          <h3 style={styles.metricCardH3}>Consultas Totales</h3>
+          <p style={styles.metricValue}>
             {inquiriesData.filter(i => filterByTimeRange(i.created_at)).length}
           </p>
         </div>
-        <div className={styles.metricCard}>
-          <h3>Tasa de Conversión</h3>
-          <p className={styles.metricValue}>{conversionRate.toFixed(1)}%</p>
+        <div style={styles.metricCard}>
+          <h3 style={styles.metricCardH3}>Tasa de Conversion</h3>
+          <p style={styles.metricValue}>{conversionRate.toFixed(1)}%</p>
         </div>
-        <div className={styles.metricCard}>
-          <h3>Contactos Totales</h3>
-          <p className={styles.metricValue}>
+        <div style={styles.metricCard}>
+          <h3 style={styles.metricCardH3}>Contactos Totales</h3>
+          <p style={styles.metricValue}>
             {contactsData.filter(c => filterByTimeRange(c.created_at)).length}
           </p>
         </div>
-        <div className={styles.metricCard}>
-          <h3>Tiempo Promedio Respuesta</h3>
-          <p className={styles.metricValue}>{avgResponseTime}</p>
+        <div style={styles.metricCard}>
+          <h3 style={styles.metricCardH3}>Tiempo Promedio Respuesta</h3>
+          <p style={styles.metricValue}>{avgResponseTime}</p>
         </div>
       </div>
 
-      {/* Gráficos */}
-      <div className={styles.chartsGrid}>
-        {/* Consultas por día */}
-        <div className={styles.chartCard}>
-          <h3 className={styles.chartTitle}>Consultas por Día</h3>
+      {/* Graficos */}
+      <div style={styles.chartsGrid}>
+        {/* Consultas por dia */}
+        <div style={styles.chartCard}>
+          <h3 style={styles.chartTitle}>Consultas por Dia</h3>
           <ResponsiveContainer width="100%" height={250}>
             <AreaChart data={inquiriesByDay}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -219,8 +271,8 @@ export default function AnalyticsCharts({ timeRange }: AnalyticsChartsProps) {
         </div>
 
         {/* Consultas por propiedad */}
-        <div className={styles.chartCard}>
-          <h3 className={styles.chartTitle}>Top 10 Propiedades Más Consultadas</h3>
+        <div style={styles.chartCard}>
+          <h3 style={styles.chartTitle}>Top 10 Propiedades Mas Consultadas</h3>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={inquiriesByProperty}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -233,8 +285,8 @@ export default function AnalyticsCharts({ timeRange }: AnalyticsChartsProps) {
         </div>
 
         {/* Consultas por estado */}
-        <div className={styles.chartCard}>
-          <h3 className={styles.chartTitle}>Distribución por Estado</h3>
+        <div style={styles.chartCard}>
+          <h3 style={styles.chartTitle}>Distribucion por Estado</h3>
           <ResponsiveContainer width="100%" height={250}>
             <PieChart>
               <Pie
@@ -257,8 +309,8 @@ export default function AnalyticsCharts({ timeRange }: AnalyticsChartsProps) {
         </div>
 
         {/* Consultas por hora */}
-        <div className={styles.chartCard}>
-          <h3 className={styles.chartTitle}>Consultas por Hora del Día</h3>
+        <div style={styles.chartCard}>
+          <h3 style={styles.chartTitle}>Consultas por Hora del Dia</h3>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={inquiriesByHour}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -273,4 +325,3 @@ export default function AnalyticsCharts({ timeRange }: AnalyticsChartsProps) {
     </div>
   )
 }
-

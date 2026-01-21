@@ -2,50 +2,78 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import styles from './SearchHero.module.css'
+import { Search, Home, Key, DollarSign, Building2 } from 'lucide-react'
+
+/* =============================================================================
+   TYPES
+============================================================================= */
+
+type Operation = 'venta' | 'alquiler' | null
+
+interface ActionButton {
+  id: Operation | 'vender' | 'emprendimientos'
+  label: string
+  icon: React.ReactNode
+  isSpecial?: boolean
+}
+
+/* =============================================================================
+   CONSTANTS
+============================================================================= */
+
+const PLACEHOLDERS = [
+  "¿Dónde querés mudarte?",
+  "Ejemplo: Córdoba Capital",
+  "Ejemplo: Villa Carlos Paz",
+  "Ejemplo: Alta Gracia",
+  "Ejemplo: Río Cuarto"
+]
+
+const PROPERTY_TYPES = [
+  { value: 'all', label: 'Todos los tipos' },
+  { value: 'casa', label: 'Casa' },
+  { value: 'departamento', label: 'Departamento' },
+  { value: 'terreno', label: 'Terreno' },
+  { value: 'local', label: 'Local Comercial' },
+  { value: 'oficina', label: 'Oficina' }
+]
+
+const ACTION_BUTTONS: ActionButton[] = [
+  { id: 'venta', label: 'Quiero comprar', icon: <Home className="w-4 h-4" /> },
+  { id: 'alquiler', label: 'Quiero alquilar', icon: <Key className="w-4 h-4" /> },
+  { id: 'vender', label: 'Quiero vender', icon: <DollarSign className="w-4 h-4" /> },
+  { id: 'emprendimientos', label: 'Emprendimientos', icon: <Building2 className="w-4 h-4" />, isSpecial: true }
+]
+
+/* =============================================================================
+   MAIN COMPONENT
+============================================================================= */
 
 export default function SearchHero() {
   const [searchLocation, setSearchLocation] = useState('')
   const [propertyType, setPropertyType] = useState('all')
-  const [operation, setOperation] = useState<'venta' | 'alquiler' | null>(null)
+  const [operation, setOperation] = useState<Operation>(null)
   const [isLoadingMaps, setIsLoadingMaps] = useState(true)
   const [mapsError, setMapsError] = useState<string | null>(null)
   const [selectedPlace, setSelectedPlace] = useState<google.maps.places.PlaceResult | null>(null)
   const [placeholderIndex, setPlaceholderIndex] = useState(0)
-  
+
   const router = useRouter()
   const inputRef = useRef<HTMLInputElement>(null)
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null)
 
-  const placeholders = [
-    "¿Dónde querés mudarte?",
-    "Ejemplo: Córdoba Capital",
-    "Ejemplo: Villa Carlos Paz",
-    "Ejemplo: Alta Gracia",
-    "Ejemplo: Río Cuarto"
-  ]
-
-  const propertyTypes = [
-    { value: 'all', label: 'Todos los tipos' },
-    { value: 'casa', label: 'Casa' },
-    { value: 'departamento', label: 'Departamento' },
-    { value: 'terreno', label: 'Terreno' },
-    { value: 'local', label: 'Local Comercial' },
-    { value: 'oficina', label: 'Oficina' }
-  ]
-
-  // Animar placeholders
+  // Rotate placeholders
   useEffect(() => {
     if (isLoadingMaps || searchLocation) return
 
     const interval = setInterval(() => {
-      setPlaceholderIndex((prev) => (prev + 1) % placeholders.length)
-    }, 3000) // Cambiar cada 3 segundos
+      setPlaceholderIndex((prev) => (prev + 1) % PLACEHOLDERS.length)
+    }, 3000)
 
     return () => clearInterval(interval)
-  }, [isLoadingMaps, searchLocation, placeholders.length])
+  }, [isLoadingMaps, searchLocation])
 
-  // Inicializar Google Places Autocomplete
+  // Initialize Google Maps Autocomplete
   useEffect(() => {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 
@@ -55,25 +83,20 @@ export default function SearchHero() {
       return
     }
 
-    // Función para cargar el script de Google Maps
     const loadGoogleMapsScript = () => {
       return new Promise<void>((resolve, reject) => {
-        // Si ya está cargado, resolver inmediatamente
-        if (window.google && window.google.maps && window.google.maps.places) {
+        if (window.google?.maps?.places) {
           resolve()
           return
         }
 
-        // Verificar si ya existe un script en proceso de carga
         const existingScript = document.querySelector('script[src*="maps.googleapis.com"]')
         if (existingScript) {
-          // Si existe, esperar a que cargue
           existingScript.addEventListener('load', () => resolve())
           existingScript.addEventListener('error', () => reject(new Error('Failed to load Google Maps')))
           return
         }
 
-        // Crear nuevo script solo si no existe
         const script = document.createElement('script')
         script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&language=es`
         script.async = true
@@ -90,16 +113,14 @@ export default function SearchHero() {
 
         if (!inputRef.current) return
 
-        // Crear autocomplete con restricciones para Argentina
         const autocomplete = new google.maps.places.Autocomplete(inputRef.current, {
           componentRestrictions: { country: 'ar' },
           fields: ['address_components', 'geometry', 'name', 'formatted_address'],
-          types: ['(cities)'] // Solo ciudades y localidades
+          types: ['(cities)']
         })
 
         autocomplete.addListener('place_changed', () => {
           const place = autocomplete.getPlace()
-          
           if (place.geometry && place.formatted_address) {
             setSelectedPlace(place)
             setSearchLocation(place.formatted_address)
@@ -126,130 +147,149 @@ export default function SearchHero() {
 
   const handleSearch = () => {
     const params = new URLSearchParams()
-    
-    // Agregar parámetros de búsqueda
-    if (operation) {
-      params.append('operation', operation)
-    } else {
-      params.append('operation', 'venta') // Por defecto venta
-    }
-    
+    params.append('operation', operation || 'venta')
+
     if (searchLocation) {
       params.append('location', searchLocation.toLowerCase())
     }
-    
+
     if (propertyType && propertyType !== 'all') {
       params.append('type', propertyType)
     }
-    
-    // Agregar coordenadas si están disponibles
+
     if (selectedPlace?.geometry?.location) {
       params.append('lat', selectedPlace.geometry.location.lat().toString())
       params.append('lng', selectedPlace.geometry.location.lng().toString())
     }
 
-    // Redirigir a página de resultados
     router.push(`/propiedades/resultado?${params.toString()}`)
   }
 
-  const handleOperationClick = (op: 'venta' | 'alquiler' | 'emprendimientos') => {
-    if (op === 'emprendimientos') {
+  const handleActionClick = (id: ActionButton['id']) => {
+    if (id === 'vender') {
+      router.push('/vender')
+    } else if (id === 'emprendimientos') {
       router.push('/propiedades/resultado?featured=true&operation=venta')
     } else {
-      setOperation(op)
-      router.push(`/propiedades/resultado?operation=${op}`)
+      setOperation(id)
+      router.push(`/propiedades/resultado?operation=${id}`)
     }
   }
 
   return (
-    <section className={styles.searchHero}>
-      <div className={styles.heroOverlay}></div>
-      <div className="container">
-        <div className={styles.heroContent}>
-          <h1 className={styles.heroTitle}>
+    <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-brand-dark via-brand-accent to-brand-primary" />
+
+      {/* Decorative overlay */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-brand-secondary/10 blur-3xl" />
+        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] rounded-full bg-brand-primary/20 blur-3xl" />
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10 w-full max-w-4xl mx-auto px-6 py-16">
+        <div className="text-center">
+          {/* Title */}
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight">
             Mucho más que mudarte
           </h1>
-          
-          <p className={styles.heroSubtitle}>
+
+          {/* Subtitle */}
+          <p className="text-lg sm:text-xl text-white/80 mb-10 max-w-2xl mx-auto">
             Encuentra tu hogar ideal con el acompañamiento profesional que necesitás
           </p>
 
-          {/* Botones de Acción */}
-          <div className={styles.actionButtons}>
-            <button
-              className={`${styles.actionBtn} ${operation === 'venta' ? styles.active : ''}`}
-              onClick={() => handleOperationClick('venta')}
-            >
-              🏠 Quiero comprar
-            </button>
-            <button
-              className={`${styles.actionBtn} ${operation === 'alquiler' ? styles.active : ''}`}
-              onClick={() => handleOperationClick('alquiler')}
-            >
-              🔑 Quiero alquilar
-            </button>
-            <button
-              className={`${styles.actionBtn}`}
-              onClick={() => router.push('/vender')}
-            >
-              💰 Quiero vender
-            </button>
-            <button
-              className={`${styles.actionBtn} ${styles.emprendimientos}`}
-              onClick={() => handleOperationClick('emprendimientos')}
-            >
-              🏗️ Emprendimientos
-            </button>
+          {/* Action Buttons */}
+          <div className="flex flex-wrap gap-3 justify-center mb-8">
+            {ACTION_BUTTONS.map((btn) => (
+              <button
+                key={btn.id}
+                onClick={() => handleActionClick(btn.id)}
+                className={`
+                  inline-flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm
+                  transition-all duration-200 hover:-translate-y-0.5
+                  ${operation === btn.id
+                    ? 'bg-white text-brand-accent shadow-lg'
+                    : btn.isSpecial
+                      ? 'bg-brand-secondary/20 text-brand-secondary border border-brand-secondary/30 hover:bg-brand-secondary/30'
+                      : 'bg-white/15 text-white border border-white/20 hover:bg-white/25'
+                  }
+                `}
+              >
+                {btn.icon}
+                {btn.label}
+              </button>
+            ))}
           </div>
 
-          {/* Barra de Búsqueda */}
-          <div className={styles.searchBox}>
-            <div className={styles.searchInputGroup}>
-              <input
-                ref={inputRef}
-                type="text"
-                placeholder={isLoadingMaps ? "Cargando ubicaciones..." : placeholders[placeholderIndex]}
-                value={searchLocation}
-                onChange={(e) => setSearchLocation(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                className={`${styles.searchInput} ${!isLoadingMaps && !searchLocation ? styles.animatedPlaceholder : ''}`}
-                disabled={isLoadingMaps}
-              />
-              {mapsError && (
-                <div className={styles.errorTooltip} title={mapsError}>
-                  ⚠️
-                </div>
-              )}
-            </div>
-            
-            <div className={styles.searchInputGroup}>
+          {/* Search Box */}
+          <div className="bg-white rounded-2xl p-3 shadow-2xl shadow-black/20">
+            <div className="flex flex-col sm:flex-row gap-3">
+              {/* Location Input */}
+              <div className="flex-1 relative">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  placeholder={isLoadingMaps ? "Cargando ubicaciones..." : PLACEHOLDERS[placeholderIndex]}
+                  value={searchLocation}
+                  onChange={(e) => setSearchLocation(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                  disabled={isLoadingMaps}
+                  className="w-full h-14 px-5 text-base bg-surface border-2 border-border rounded-xl outline-none transition-all duration-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 disabled:opacity-60"
+                />
+                {mapsError && (
+                  <span
+                    className="absolute right-4 top-1/2 -translate-y-1/2 cursor-help text-warning"
+                    title={mapsError}
+                  >
+                    ⚠️
+                  </span>
+                )}
+              </div>
+
+              {/* Property Type Select */}
               <select
                 value={propertyType}
                 onChange={(e) => setPropertyType(e.target.value)}
-                className={styles.searchSelect}
+                className="h-14 px-4 text-base bg-surface border-2 border-border rounded-xl outline-none cursor-pointer transition-all duration-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 sm:w-48"
               >
-                {propertyTypes.map(type => (
+                {PROPERTY_TYPES.map(type => (
                   <option key={type.value} value={type.value}>
                     {type.label}
                   </option>
                 ))}
               </select>
-            </div>
 
-            <button
-              onClick={handleSearch}
-              className={styles.searchButton}
-              aria-label="Buscar propiedades"
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="11" cy="11" r="8"></circle>
-                <path d="m21 21-4.35-4.35"></path>
-              </svg>
-            </button>
+              {/* Search Button */}
+              <button
+                onClick={handleSearch}
+                aria-label="Buscar propiedades"
+                className="h-14 px-6 bg-gradient-to-r from-brand-secondary to-yellow-500 rounded-xl flex items-center justify-center gap-2 font-semibold text-brand-dark hover:shadow-lg hover:shadow-brand-secondary/30 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
+              >
+                <Search className="w-5 h-5" />
+                <span className="hidden sm:inline">Buscar</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Quick stats */}
+          <div className="mt-10 flex flex-wrap justify-center gap-8 text-white/70">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-white">+500</div>
+              <div className="text-sm">Propiedades</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-white">+15</div>
+              <div className="text-sm">Años de experiencia</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-white">+300</div>
+              <div className="text-sm">Clientes satisfechos</div>
+            </div>
           </div>
         </div>
       </div>
     </section>
   )
 }
-

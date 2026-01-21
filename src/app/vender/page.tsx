@@ -1,5 +1,4 @@
-import VenderForm from '../../components/VenderForm'
-import styles from './page.module.css'
+import VenderForm from '@/components/VenderForm'
 
 export const metadata = {
   title: 'Vendé tu Propiedad | Julieta Arena - Martillera Pública',
@@ -9,9 +8,8 @@ export const metadata = {
 
 export default function VenderPage() {
   return (
-    <main className={styles.venderPage}>
+    <main className="pt-16">
       <VenderForm />
     </main>
   )
 }
-

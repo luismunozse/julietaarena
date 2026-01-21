@@ -3,10 +3,24 @@
 import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useToast } from '@/components/ToastContainer'
-import { useRouter } from 'next/navigation'
 import Modal from '@/components/Modal'
 import Pagination from '@/components/admin/Pagination'
-import styles from './page.module.css'
+import AdminPageHeader from '@/components/admin/AdminPageHeader'
+import { cn } from '@/lib/utils'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Plus, Pencil, Trash2, Power } from 'lucide-react'
 
 interface UserRole {
   id: string
@@ -18,6 +32,18 @@ interface UserRole {
   is_active: boolean
   created_at: string
   notes?: string
+}
+
+const roleVariants: Record<string, string> = {
+  admin: 'bg-red-100 text-red-800',
+  editor: 'bg-blue-100 text-blue-800',
+  viewer: 'bg-gray-100 text-gray-700',
+}
+
+const roleLabels: Record<string, string> = {
+  admin: 'Administrador',
+  editor: 'Editor',
+  viewer: 'Visualizador',
 }
 
 export default function UsuariosPage() {
@@ -34,7 +60,6 @@ export default function UsuariosPage() {
     is_active: true
   })
   const { success, error: showError } = useToast()
-  const router = useRouter()
 
   const loadUsers = useCallback(async () => {
     try {
@@ -45,16 +70,12 @@ export default function UsuariosPage() {
         .order('created_at', { ascending: false })
 
       if (error) {
-        console.error('Error al cargar usuarios:', error)
         showError('Error al cargar los usuarios')
         return
       }
 
-      // En producción, aquí deberías hacer un join con auth.users para obtener emails
-      // Por ahora, usamos los datos disponibles
       setUsers(data || [])
-    } catch (err) {
-      console.error('Error:', err)
+    } catch {
       showError('Error al cargar los usuarios')
     } finally {
       setIsLoading(false)
@@ -67,23 +88,18 @@ export default function UsuariosPage() {
 
   const handleCreateUser = async () => {
     try {
-      // Crear usuario en auth
       const { data: authData, error: authError } = await supabase.auth.admin?.createUser({
         email: formData.email,
         password: formData.password,
         email_confirm: true,
-        user_metadata: {
-          name: formData.name
-        }
+        user_metadata: { name: formData.name }
       })
 
       if (authError || !authData.user) {
-        console.error('Error al crear usuario:', authError)
         showError('Error al crear el usuario')
         return
       }
 
-      // Crear rol
       const { error: roleError } = await supabase
         .from('user_roles')
         .insert({
@@ -94,23 +110,15 @@ export default function UsuariosPage() {
         })
 
       if (roleError) {
-        console.error('Error al crear rol:', roleError)
         showError('Error al crear el rol del usuario')
         return
       }
 
       success('Usuario creado correctamente')
       setShowCreateModal(false)
-      setFormData({
-        email: '',
-        password: '',
-        name: '',
-        role: 'viewer',
-        is_active: true
-      })
+      setFormData({ email: '', password: '', name: '', role: 'viewer', is_active: true })
       loadUsers()
-    } catch (err) {
-      console.error('Error:', err)
+    } catch {
       showError('Error al crear el usuario')
     }
   }
@@ -129,7 +137,6 @@ export default function UsuariosPage() {
         .eq('id', selectedUser.id)
 
       if (error) {
-        console.error('Error al actualizar usuario:', error)
         showError('Error al actualizar el usuario')
         return
       }
@@ -138,8 +145,7 @@ export default function UsuariosPage() {
       setShowEditModal(false)
       setSelectedUser(null)
       loadUsers()
-    } catch (err) {
-      console.error('Error:', err)
+    } catch {
       showError('Error al actualizar el usuario')
     }
   }
@@ -152,21 +158,19 @@ export default function UsuariosPage() {
         .eq('id', user.id)
 
       if (error) {
-        console.error('Error al actualizar estado:', error)
         showError('Error al actualizar el estado')
         return
       }
 
       success(`Usuario ${!user.is_active ? 'activado' : 'desactivado'} correctamente`)
       loadUsers()
-    } catch (err) {
-      console.error('Error:', err)
+    } catch {
       showError('Error al actualizar el estado')
     }
   }
 
   const handleDeleteUser = async (user: UserRole) => {
-    if (!confirm(`¿Estás seguro de que deseas eliminar este usuario?`)) return
+    if (!confirm('¿Estás seguro de que deseas eliminar este usuario?')) return
 
     try {
       const { error } = await supabase
@@ -175,15 +179,13 @@ export default function UsuariosPage() {
         .eq('id', user.id)
 
       if (error) {
-        console.error('Error al eliminar usuario:', error)
         showError('Error al eliminar el usuario')
         return
       }
 
       success('Usuario eliminado correctamente')
       loadUsers()
-    } catch (err) {
-      console.error('Error:', err)
+    } catch {
       showError('Error al eliminar el usuario')
     }
   }
@@ -221,48 +223,29 @@ export default function UsuariosPage() {
     return basePermissions
   }
 
-  const getRoleBadgeClass = (role: string) => {
-    switch (role) {
-      case 'admin': return styles.roleAdmin
-      case 'editor': return styles.roleEditor
-      case 'viewer': return styles.roleViewer
-      default: return ''
-    }
-  }
-
-  const getRoleLabel = (role: string) => {
-    switch (role) {
-      case 'admin': return 'Administrador'
-      case 'editor': return 'Editor'
-      case 'viewer': return 'Visualizador'
-      default: return role
-    }
-  }
-
   if (isLoading) {
     return (
-      <div className={styles.container}>
-        <div className={styles.loading}>
-          <div className={styles.spinner}></div>
-          <p>Cargando usuarios...</p>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2c5f7d] mx-auto mb-4" />
+          <p className="text-muted-foreground">Cargando usuarios...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <div>
-          <h1 className={styles.title}>Gestión de Usuarios</h1>
-          <p className={styles.subtitle}>Administra usuarios y permisos del panel</p>
-        </div>
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className={styles.createButton}
-        >
-          + Nuevo Usuario
-        </button>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-200 p-6 md:p-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <AdminPageHeader
+          title="Gestión de Usuarios"
+          subtitle="Administra usuarios y permisos del panel"
+          className="mb-0"
+        />
+        <Button onClick={() => setShowCreateModal(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          Nuevo Usuario
+        </Button>
       </div>
 
       <Pagination
@@ -271,61 +254,80 @@ export default function UsuariosPage() {
         render={(paginatedItems) => (
           <>
             {paginatedItems.length === 0 ? (
-              <div className={styles.empty}>
-                <p className={styles.emptyIcon}>👥</p>
-                <p className={styles.emptyText}>No hay usuarios registrados</p>
-              </div>
+              <Card className="text-center p-12">
+                <p className="text-4xl mb-4">👥</p>
+                <p className="text-muted-foreground">No hay usuarios registrados</p>
+              </Card>
             ) : (
-              <div className={styles.usersList}>
+              <div className="space-y-4">
                 {paginatedItems.map((user) => (
-                  <div key={user.id} className={styles.userCard}>
-                    <div className={styles.userInfo}>
-                      <div>
-                        <h3 className={styles.userName}>
-                          {user.user_name || user.user_email || `Usuario ${user.user_id.substring(0, 8)}`}
-                        </h3>
-                        <p className={styles.userEmail}>{user.user_email || user.user_id}</p>
+                  <Card key={user.id} className="hover:shadow-md transition-shadow">
+                    <CardContent className="p-4 md:p-6">
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div className="flex-1">
+                          <h3 className="text-lg font-semibold text-[#1a4158]">
+                            {user.user_name || user.user_email || `Usuario ${user.user_id.substring(0, 8)}`}
+                          </h3>
+                          <p className="text-sm text-muted-foreground">
+                            {user.user_email || user.user_id}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge className={cn('font-medium', roleVariants[user.role])}>
+                            {roleLabels[user.role]}
+                          </Badge>
+                          <Badge className={cn(
+                            'font-medium',
+                            user.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-700'
+                          )}>
+                            {user.is_active ? 'Activo' : 'Inactivo'}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedUser(user)
+                              setFormData({
+                                email: user.user_email || '',
+                                password: '',
+                                name: user.user_name || '',
+                                role: user.role,
+                                is_active: user.is_active
+                              })
+                              setShowEditModal(true)
+                            }}
+                          >
+                            <Pencil className="h-4 w-4 mr-1" />
+                            Editar
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleToggleActive(user)}
+                            className={cn(
+                              user.is_active
+                                ? 'text-orange-600 border-orange-200 hover:bg-orange-50'
+                                : 'text-green-600 border-green-200 hover:bg-green-50'
+                            )}
+                          >
+                            <Power className="h-4 w-4 mr-1" />
+                            {user.is_active ? 'Desactivar' : 'Activar'}
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDeleteUser(user)}
+                            className="text-red-600 border-red-200 hover:bg-red-50"
+                          >
+                            <Trash2 className="h-4 w-4 mr-1" />
+                            Eliminar
+                          </Button>
+                        </div>
                       </div>
-                      <div className={styles.userMeta}>
-                        <span className={`${styles.roleBadge} ${getRoleBadgeClass(user.role)}`}>
-                          {getRoleLabel(user.role)}
-                        </span>
-                        <span className={`${styles.statusBadge} ${user.is_active ? styles.statusActive : styles.statusInactive}`}>
-                          {user.is_active ? 'Activo' : 'Inactivo'}
-                        </span>
-                      </div>
-                    </div>
-                    <div className={styles.userActions}>
-                      <button
-                        onClick={() => {
-                          setSelectedUser(user)
-                          setFormData({
-                            email: user.user_email || '',
-                            password: '',
-                            name: user.user_name || '',
-                            role: user.role,
-                            is_active: user.is_active
-                          })
-                          setShowEditModal(true)
-                        }}
-                        className={styles.editButton}
-                      >
-                        Editar
-                      </button>
-                      <button
-                        onClick={() => handleToggleActive(user)}
-                        className={styles.toggleButton}
-                      >
-                        {user.is_active ? 'Desactivar' : 'Activar'}
-                      </button>
-                      <button
-                        onClick={() => handleDeleteUser(user)}
-                        className={styles.deleteButton}
-                      >
-                        Eliminar
-                      </button>
-                    </div>
-                  </div>
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
             )}
@@ -342,66 +344,65 @@ export default function UsuariosPage() {
           type="alert"
           message=""
         >
-          <div className={styles.modalContent}>
-            <div className={styles.formGroup}>
-              <label>Email</label>
-              <input
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Email</Label>
+              <Input
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className={styles.input}
                 placeholder="usuario@ejemplo.com"
               />
             </div>
-            <div className={styles.formGroup}>
-              <label>Contraseña</label>
-              <input
+            <div className="space-y-2">
+              <Label>Contraseña</Label>
+              <Input
                 type="password"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className={styles.input}
                 placeholder="Mínimo 6 caracteres"
               />
             </div>
-            <div className={styles.formGroup}>
-              <label>Nombre</label>
-              <input
+            <div className="space-y-2">
+              <Label>Nombre</Label>
+              <Input
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className={styles.input}
                 placeholder="Nombre completo"
               />
             </div>
-            <div className={styles.formGroup}>
-              <label>Rol</label>
-              <select
+            <div className="space-y-2">
+              <Label>Rol</Label>
+              <Select
                 value={formData.role}
-                onChange={(e) => setFormData({ ...formData, role: e.target.value as 'admin' | 'editor' | 'viewer' })}
-                className={styles.select}
+                onValueChange={(value) => setFormData({ ...formData, role: value as 'admin' | 'editor' | 'viewer' })}
               >
-                <option value="viewer">Visualizador</option>
-                <option value="editor">Editor</option>
-                <option value="admin">Administrador</option>
-              </select>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="viewer">Visualizador</SelectItem>
+                  <SelectItem value="editor">Editor</SelectItem>
+                  <SelectItem value="admin">Administrador</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <div className={styles.formGroup}>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={formData.is_active}
-                  onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                />
-                Usuario activo
-              </label>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="is_active"
+                checked={formData.is_active}
+                onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked as boolean })}
+              />
+              <Label htmlFor="is_active">Usuario activo</Label>
             </div>
-            <div className={styles.modalActions}>
-              <button onClick={handleCreateUser} className={styles.saveButton}>
+            <div className="flex gap-2 pt-4">
+              <Button onClick={handleCreateUser} className="flex-1">
                 Crear Usuario
-              </button>
-              <button onClick={() => setShowCreateModal(false)} className={styles.cancelButton}>
+              </Button>
+              <Button variant="outline" onClick={() => setShowCreateModal(false)} className="flex-1">
                 Cancelar
-              </button>
+              </Button>
             </div>
           </div>
         </Modal>
@@ -419,42 +420,45 @@ export default function UsuariosPage() {
           type="alert"
           message=""
         >
-          <div className={styles.modalContent}>
-            <div className={styles.formGroup}>
-              <label>Rol</label>
-              <select
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Rol</Label>
+              <Select
                 value={formData.role}
-                onChange={(e) => setFormData({ ...formData, role: e.target.value as 'admin' | 'editor' | 'viewer' })}
-                className={styles.select}
+                onValueChange={(value) => setFormData({ ...formData, role: value as 'admin' | 'editor' | 'viewer' })}
               >
-                <option value="viewer">Visualizador</option>
-                <option value="editor">Editor</option>
-                <option value="admin">Administrador</option>
-              </select>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="viewer">Visualizador</SelectItem>
+                  <SelectItem value="editor">Editor</SelectItem>
+                  <SelectItem value="admin">Administrador</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <div className={styles.formGroup}>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={formData.is_active}
-                  onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                />
-                Usuario activo
-              </label>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="edit_is_active"
+                checked={formData.is_active}
+                onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked as boolean })}
+              />
+              <Label htmlFor="edit_is_active">Usuario activo</Label>
             </div>
-            <div className={styles.modalActions}>
-              <button onClick={handleUpdateUser} className={styles.saveButton}>
+            <div className="flex gap-2 pt-4">
+              <Button onClick={handleUpdateUser} className="flex-1">
                 Guardar Cambios
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="outline"
                 onClick={() => {
                   setShowEditModal(false)
                   setSelectedUser(null)
                 }}
-                className={styles.cancelButton}
+                className="flex-1"
               >
                 Cancelar
-              </button>
+              </Button>
             </div>
           </div>
         </Modal>

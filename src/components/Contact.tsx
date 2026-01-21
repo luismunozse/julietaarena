@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, FormEvent, useCallback } from 'react'
-import styles from './Contact.module.css'
 import { supabase } from '@/lib/supabaseClient'
 import { useToast } from '@/components/ToastContainer'
 import { contactFormSchema, validateAndParse } from '@/lib/validation'
@@ -9,30 +8,268 @@ import { sanitizeText } from '@/lib/sanitize'
 import { logger } from '@/lib/logger'
 import { normalizeError, getUserFriendlyMessage } from '@/lib/errors'
 import { checkRateLimit, RATE_LIMIT_CONFIGS } from '@/lib/rateLimit'
+import { MapPin, Phone, Mail, Clock, Loader2, Send, MessageSquare, type LucideIcon } from 'lucide-react'
+
+/* =============================================================================
+   TYPES
+============================================================================= */
+
+interface ContactInfo {
+  icon: LucideIcon
+  title: string
+  content: string
+  href?: string
+}
+
+interface FormData {
+  name: string
+  email: string
+  phone: string
+  service: string
+  message: string
+}
+
+interface FormErrors {
+  name?: string
+  email?: string
+  phone?: string
+  service?: string
+  message?: string
+}
+
+/* =============================================================================
+   CONSTANTS
+============================================================================= */
+
+const CONTACT_INFO: ContactInfo[] = [
+  {
+    icon: MapPin,
+    title: 'Ubicación',
+    content: 'Córdoba, Argentina',
+  },
+  {
+    icon: Phone,
+    title: 'Teléfono',
+    content: '+54 (351) 307-8376',
+    href: 'tel:+543513078376',
+  },
+  {
+    icon: Mail,
+    title: 'Email',
+    content: 'inmobiliaria72juliarena@gmail.com',
+    href: 'mailto:inmobiliaria72juliarena@gmail.com',
+  },
+  {
+    icon: Clock,
+    title: 'Horario de Atención',
+    content: 'Lunes a Viernes: 9:00 - 18:00',
+  },
+]
+
+const SERVICE_OPTIONS = [
+  { value: '', label: 'Seleccionar...' },
+  { value: 'venta', label: 'Venta de Propiedades' },
+  { value: 'alquiler', label: 'Alquileres' },
+  { value: 'remate', label: 'Remates Judiciales' },
+  { value: 'jubilacion', label: 'Jubilaciones' },
+  { value: 'tasacion', label: 'Tasaciones' },
+  { value: 'asesoria', label: 'Asesoramiento Legal' },
+  { value: 'otro', label: 'Otro' },
+]
+
+const INITIAL_FORM_DATA: FormData = {
+  name: '',
+  email: '',
+  phone: '',
+  service: '',
+  message: '',
+}
+
+/* =============================================================================
+   VALIDATION FUNCTIONS
+============================================================================= */
+
+const validateName = (name: string): string | undefined => {
+  if (!name.trim()) return 'El nombre es requerido'
+  if (name.trim().length < 3) return 'El nombre debe tener al menos 3 caracteres'
+  if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/.test(name)) return 'El nombre solo puede contener letras'
+  return undefined
+}
+
+const validateEmail = (email: string): string | undefined => {
+  if (!email.trim()) return 'El email es requerido'
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(email)) return 'Por favor ingresa un email válido'
+  return undefined
+}
+
+const validatePhone = (phone: string): string | undefined => {
+  if (!phone.trim()) return 'El teléfono es requerido'
+  const phoneLimpio = phone.replace(/[\s\-\(\)]/g, '')
+  if (!/^\d+$/.test(phoneLimpio)) return 'El teléfono solo puede contener números'
+  if (phoneLimpio.length > 10) return 'El teléfono no puede tener más de 10 dígitos'
+  if (phoneLimpio.length < 8) return 'El teléfono debe tener al menos 8 dígitos'
+  return undefined
+}
+
+const validateService = (service: string): string | undefined => {
+  if (!service) return 'Debe seleccionar un servicio'
+  return undefined
+}
+
+const validateMessage = (message: string): string | undefined => {
+  if (!message.trim()) return 'El mensaje es requerido'
+  if (message.trim().length < 10) return 'El mensaje debe tener al menos 10 caracteres'
+  return undefined
+}
+
+/* =============================================================================
+   SUB-COMPONENTS
+============================================================================= */
+
+function ContactInfoCard({ icon: Icon, title, content, href }: ContactInfo) {
+  const cardContent = (
+    <div className="flex items-center gap-4 p-4 rounded-xl bg-white border border-border hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
+      <div className="w-12 h-12 rounded-xl flex-shrink-0 bg-gradient-to-br from-brand-primary to-brand-accent flex items-center justify-center">
+        <Icon className="w-5 h-5 text-white" />
+      </div>
+      <div>
+        <div className="text-sm text-muted">{title}</div>
+        <div className="font-medium text-brand-accent">{content}</div>
+      </div>
+    </div>
+  )
+
+  if (href) {
+    return (
+      <a href={href} className="block no-underline">
+        {cardContent}
+      </a>
+    )
+  }
+
+  return cardContent
+}
+
+function WhatsAppCard() {
+  return (
+    <div className="bg-gradient-to-br from-brand-accent to-brand-primary rounded-2xl p-6 text-white mb-4">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center">
+          <MessageSquare className="w-6 h-6" />
+        </div>
+        <div>
+          <h3 className="text-xl font-semibold">Hablemos</h3>
+          <p className="text-sm text-white/70">Respuesta en 24 horas</p>
+        </div>
+      </div>
+      <p className="text-white/80 leading-relaxed mb-5">
+        No dudes en contactarme. Estaré encantada de responder
+        todas tus consultas y ayudarte a encontrar lo que necesitas.
+      </p>
+      <a
+        href="https://wa.me/543513078376"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-2 px-5 py-3 bg-[#25D366] hover:bg-[#20BD5A] rounded-xl font-medium transition-colors duration-200"
+      >
+        <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+        Escribir por WhatsApp
+      </a>
+    </div>
+  )
+}
+
+/* =============================================================================
+   MAIN COMPONENT
+============================================================================= */
 
 export default function Contact() {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    service: '',
-    message: '',
-  })
+  const [formData, setFormData] = useState<FormData>(INITIAL_FORM_DATA)
+  const [errors, setErrors] = useState<FormErrors>({})
+  const [touched, setTouched] = useState<Record<string, boolean>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { success, error: showError } = useToast()
 
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    // Actualizar estado inmediatamente para UI responsiva
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }))
+  const validateField = useCallback((name: string, value: string): string | undefined => {
+    switch (name) {
+      case 'name': return validateName(value)
+      case 'email': return validateEmail(value)
+      case 'phone': return validatePhone(value)
+      case 'service': return validateService(value)
+      case 'message': return validateMessage(value)
+      default: return undefined
+    }
   }, [])
+
+  const validateForm = useCallback((): boolean => {
+    const newErrors: FormErrors = {
+      name: validateName(formData.name),
+      email: validateEmail(formData.email),
+      phone: validatePhone(formData.phone),
+      service: validateService(formData.service),
+      message: validateMessage(formData.message),
+    }
+
+    const filteredErrors = Object.entries(newErrors).reduce((acc, [key, value]) => {
+      if (value) acc[key as keyof FormErrors] = value
+      return acc
+    }, {} as FormErrors)
+
+    setErrors(filteredErrors)
+    return Object.keys(filteredErrors).length === 0
+  }, [formData])
+
+  const handleChange = useCallback((
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
+
+    if (touched[name]) {
+      const error = validateField(name, value)
+      setErrors(prev => ({ ...prev, [name]: error }))
+    }
+  }, [touched, validateField])
+
+  const handlePhoneChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, '').slice(0, 10)
+    setFormData(prev => ({ ...prev, phone: value }))
+
+    if (touched.phone) {
+      const error = validateField('phone', value)
+      setErrors(prev => ({ ...prev, phone: error }))
+    }
+  }, [touched.phone, validateField])
+
+  const handleBlur = useCallback((
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target
+    setTouched(prev => ({ ...prev, [name]: true }))
+    const error = validateField(name, value)
+    setErrors(prev => ({ ...prev, [name]: error }))
+  }, [validateField])
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    
-    // Verificar rate limit antes de procesar
+
+    // Mark all fields as touched
+    setTouched({
+      name: true,
+      email: true,
+      phone: true,
+      service: true,
+      message: true,
+    })
+
+    if (!validateForm()) {
+      showError('Por favor, corrige los errores en el formulario', 4000)
+      return
+    }
+
     const rateLimitCheck = checkRateLimit('contact-form', RATE_LIMIT_CONFIGS.contactForm)
     if (!rateLimitCheck.allowed) {
       const minutes = Math.ceil((rateLimitCheck.timeUntilReset || 0) / 60000)
@@ -46,7 +283,6 @@ export default function Contact() {
     setIsSubmitting(true)
 
     try {
-      // Validar y sanitizar datos antes de enviar
       const validation = validateAndParse(contactFormSchema, {
         from_name: formData.name,
         from_email: formData.email,
@@ -61,18 +297,16 @@ export default function Contact() {
         return
       }
 
-      // Sanitizar datos antes de guardar
       const sanitizedData = {
         customer_name: sanitizeText(validation.data.from_name),
-        customer_email: validation.data.from_email, // Email ya validado por Zod
+        customer_email: validation.data.from_email,
         customer_phone: validation.data.phone ? sanitizeText(validation.data.phone) : null,
         service: sanitizeText(formData.service),
         message: sanitizeText(validation.data.message),
         status: 'nueva' as const
       }
 
-      // Guardar la consulta en Supabase
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('contact_inquiries')
         .insert([sanitizedData])
         .select()
@@ -85,16 +319,31 @@ export default function Contact() {
       }
 
       logger.info('Contact inquiry saved successfully', { email: sanitizedData.customer_email })
-      success('¡Mensaje enviado correctamente! Te contactaremos pronto.', 5000)
 
-      // Limpiar formulario
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        service: '',
-        message: '',
-      })
+      try {
+        const emailResponse = await fetch('/api/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: sanitizedData.customer_name,
+            email: sanitizedData.customer_email,
+            phone: sanitizedData.customer_phone,
+            service: sanitizedData.service,
+            message: sanitizedData.message,
+          }),
+        })
+
+        if (!emailResponse.ok) {
+          logger.warn('Email notification failed but inquiry was saved', { email: sanitizedData.customer_email })
+        }
+      } catch (emailError) {
+        logger.warn('Email notification failed but inquiry was saved', { error: emailError })
+      }
+
+      success('¡Mensaje enviado correctamente! Te contactaremos pronto.', 5000)
+      setFormData(INITIAL_FORM_DATA)
+      setErrors({})
+      setTouched({})
     } catch (err) {
       const error = normalizeError(err)
       logger.error('Error submitting contact form', {}, error)
@@ -104,163 +353,177 @@ export default function Contact() {
     }
   }
 
+  const inputBaseClasses = "w-full h-12 px-4 text-base bg-surface border rounded-xl outline-none transition-all duration-200 focus:bg-white focus:ring-2"
+  const inputNormalClasses = `${inputBaseClasses} border-border focus:border-brand-primary focus:ring-brand-primary/20`
+  const inputErrorClasses = `${inputBaseClasses} border-red-500 border-2 focus:border-red-500 focus:ring-red-500/20`
+
   return (
-    <section className="section" id="contacto">
-      <div className="container">
-        <div className="section-header">
-          <h2 className="section-title">Contacto</h2>
-          <p className="section-subtitle">¿Necesitas asesoramiento? Estoy aquí para ayudarte</p>
+    <section id="contacto" className="pt-8 pb-16 lg:pt-10 lg:pb-20 bg-gradient-to-b from-surface to-white">
+      <div className="max-w-7xl mx-auto px-6">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <span className="inline-block px-4 py-1.5 bg-brand-secondary/10 text-brand-primary rounded-full text-sm font-medium mb-4">
+            Contacto
+          </span>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-brand-accent mb-4">
+            ¿Necesitas Asesoramiento?
+          </h2>
+          <p className="text-lg text-muted max-w-2xl mx-auto leading-relaxed">
+            Estoy aquí para ayudarte. Contáctame para cualquier consulta sobre
+            servicios inmobiliarios, remates judiciales o asesoramiento profesional.
+          </p>
         </div>
 
-        <div className={styles.contactContent}>
-          <div className={styles.contactInfo}>
-            <h3>Información de Contacto</h3>
-            <p className={styles.contactText}>
-              No dudes en contactarme para cualquier consulta sobre servicios inmobiliarios, 
-              remates judiciales o asesoramiento profesional.
-            </p>
-            
-            <div className={styles.contactItems}>
-              <div className={styles.contactItem}>
-                <div className={styles.contactIcon}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                    <circle cx="12" cy="10" r="3"></circle>
-                  </svg>
-                </div>
-                <div className={styles.contactDetails}>
-                  <h4>Ubicación</h4>
-                  <p>Córdoba, Argentina</p>
-                </div>
-              </div>
-
-              <div className={styles.contactItem}>
-                <div className={styles.contactIcon}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-                  </svg>
-                </div>
-                <div className={styles.contactDetails}>
-                  <h4>Teléfono</h4>
-                  <p>+54 (351) 307-8376</p>
-                </div>
-              </div>
-
-              <div className={styles.contactItem}>
-                <div className={styles.contactIcon}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                    <polyline points="22,6 12,13 2,6"></polyline>
-                  </svg>
-                </div>
-                <div className={styles.contactDetails}>
-                  <h4>Email</h4>
-                  <p>inmobiliaria72juliarena@gmail.com</p>
-                </div>
-              </div>
-
-              <div className={styles.contactItem}>
-                <div className={styles.contactIcon}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <polyline points="12 6 12 12 16 14"></polyline>
-                  </svg>
-                </div>
-                <div className={styles.contactDetails}>
-                  <h4>Horario de Atención</h4>
-                  <p>Lunes a Viernes: 9:00 - 18:00</p>
-                </div>
-              </div>
+        {/* Content Grid */}
+        <div className="grid lg:grid-cols-5 gap-8 lg:gap-10">
+          {/* Contact Info - Left Side */}
+          <div className="lg:col-span-2">
+            <WhatsAppCard />
+            <div className="space-y-3">
+              {CONTACT_INFO.map((info, index) => (
+                <ContactInfoCard key={index} {...info} />
+              ))}
             </div>
           </div>
 
-          <form className={styles.contactForm} onSubmit={handleSubmit}>
-            <div className={styles.formGroup}>
-              <label htmlFor="name">Nombre Completo</label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-              />
-            </div>
+          {/* Contact Form - Right Side */}
+          <div className="lg:col-span-3">
+            <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-xl border border-border">
+              <h3 className="text-2xl font-bold text-brand-accent mb-2">
+                Envíame un mensaje
+              </h3>
+              <p className="text-muted mb-6">
+                Completa el formulario y te responderé a la brevedad.
+              </p>
 
-            <div className={styles.formGroup}>
-              <label htmlFor="email">Email</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
-            </div>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Row 1: Name & Email */}
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Nombre Completo <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      placeholder="Tu nombre"
+                      className={errors.name ? inputErrorClasses : inputNormalClasses}
+                    />
+                    {errors.name && (
+                      <p className="text-xs text-red-500 mt-1">{errors.name}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Email <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      placeholder="tu@email.com"
+                      className={errors.email ? inputErrorClasses : inputNormalClasses}
+                    />
+                    {errors.email && (
+                      <p className="text-xs text-red-500 mt-1">{errors.email}</p>
+                    )}
+                  </div>
+                </div>
 
-            <div className={styles.formGroup}>
-              <label htmlFor="phone">Teléfono</label>
-              <input
-                type="tel"
-                id="phone"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                required
-              />
-            </div>
+                {/* Row 2: Phone & Service */}
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Teléfono <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handlePhoneChange}
+                      onBlur={handleBlur}
+                      maxLength={10}
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      placeholder="3511234567"
+                      className={errors.phone ? inputErrorClasses : inputNormalClasses}
+                    />
+                    {errors.phone ? (
+                      <p className="text-xs text-red-500 mt-1">{errors.phone}</p>
+                    ) : (
+                      <p className="text-xs text-gray-500 mt-1">10 dígitos sin espacios</p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Servicio de Interés <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      name="service"
+                      value={formData.service}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      className={errors.service ? inputErrorClasses : inputNormalClasses}
+                    >
+                      {SERVICE_OPTIONS.map(option => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.service && (
+                      <p className="text-xs text-red-500 mt-1">{errors.service}</p>
+                    )}
+                  </div>
+                </div>
 
-            <div className={styles.formGroup}>
-              <label htmlFor="service">Servicio de Interés</label>
-              <select
-                id="service"
-                name="service"
-                value={formData.service}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Seleccione un servicio</option>
-                <option value="venta">Venta de Propiedades</option>
-                <option value="alquiler">Alquileres</option>
-                <option value="remate">Remates Judiciales</option>
-                <option value="jubilacion">Jubilaciones</option>
-                <option value="tasacion">Tasaciones</option>
-                <option value="asesoria">Asesoramiento Legal</option>
-                <option value="otro">Otro</option>
-              </select>
-            </div>
+                {/* Message */}
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    Mensaje <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    name="message"
+                    rows={5}
+                    value={formData.message}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    placeholder="¿En qué puedo ayudarte?"
+                    className={`${errors.message ? inputErrorClasses : inputNormalClasses} h-auto py-3 resize-none`}
+                  />
+                  {errors.message && (
+                    <p className="text-xs text-red-500 mt-1">{errors.message}</p>
+                  )}
+                </div>
 
-            <div className={styles.formGroup}>
-              <label htmlFor="message">Mensaje</label>
-              <textarea
-                id="message"
-                name="message"
-                rows={5}
-                value={formData.message}
-                onChange={handleChange}
-                required
-              />
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full h-14 flex items-center justify-center gap-2 text-base font-semibold text-white bg-gradient-to-r from-brand-primary to-brand-accent rounded-xl shadow-lg shadow-brand-primary/30 hover:shadow-xl hover:shadow-brand-primary/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Enviando...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-5 h-5" />
+                      Enviar Mensaje
+                    </>
+                  )}
+                </button>
+              </form>
             </div>
-
-            <button 
-              type="submit" 
-              className="btn btn-primary btn-submit button-press ripple"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <>
-                  <span className="spinner"></span>
-                  Enviando...
-                </>
-              ) : (
-                'Enviar Mensaje'
-              )}
-            </button>
-          </form>
+          </div>
         </div>
       </div>
     </section>
   )
 }
-

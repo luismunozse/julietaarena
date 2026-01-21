@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Property } from '@/data/properties'
 import PropertyCard from './PropertyCard'
@@ -9,7 +9,6 @@ import VirtualizedPropertyList from './VirtualizedPropertyList'
 import { useAnalytics } from '@/hooks/useAnalytics'
 import { useProperties } from '@/hooks/useProperties'
 import { debounce } from '@/lib/debounce'
-import styles from './Properties.module.css'
 
 export default function Properties() {
   const searchParams = useSearchParams()
@@ -25,6 +24,7 @@ export default function Properties() {
   const [features, setFeatures] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
+  const [showSidebar, setShowSidebar] = useState(false)
   const analytics = useAnalytics()
 
   const handleClearAllFilters = useCallback(() => {
@@ -55,16 +55,10 @@ export default function Properties() {
     setBedrooms(e.target.value)
   }, [])
 
-  const handleFilters = useCallback(() => {
-    // Esta función puede usarse para aplicar filtros adicionales si es necesario
-    // Por ahora los filtros se aplican automáticamente con useMemo
-  }, [])
-
   const clearFilters = useCallback(() => {
     handleClearAllFilters()
   }, [handleClearAllFilters])
 
-  // Debounce del término de búsqueda para evitar filtros excesivos
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm)
@@ -73,7 +67,6 @@ export default function Properties() {
     return () => clearTimeout(timer)
   }, [searchTerm])
 
-  // Leer parámetros de la URL al cargar
   useEffect(() => {
     const operation = searchParams.get('operation')
     const type = searchParams.get('type')
@@ -91,12 +84,6 @@ export default function Properties() {
     if (location) {
       setSelectedLocation(location)
       setSearchTerm(location)
-      // El debounce se aplicará automáticamente en el useEffect
-    }
-
-    if (featured === 'true') {
-      // Mostrar solo propiedades destacadas
-      // Esto se manejará en el filtrado
     }
   }, [searchParams])
 
@@ -121,14 +108,12 @@ export default function Properties() {
     'cochera': 'Cocheras'
   }
 
-  // Filtrar propiedades por operación
   const currentProperties = useMemo(() => {
-    return properties.filter(prop => 
+    return properties.filter(prop =>
       prop.operation === activeTab && prop.status === 'disponible'
     )
   }, [properties, activeTab])
 
-  // Ajustar rango de precios según la pestaña activa
   const currentPriceRange = useMemo(() => {
     const maxPrice = activeTab === 'venta' ? 200000000 : 500000
     return priceRange.max > maxPrice ? { min: 0, max: maxPrice } : priceRange
@@ -136,67 +121,52 @@ export default function Properties() {
 
   const filteredProperties = useMemo(() => {
     if (isLoading) return []
-    
+
     const featured = searchParams.get('featured')
-    
+
     return currentProperties.filter(property => {
-      // Filtro por destacadas (si viene en URL)
       if (featured === 'true' && !property.featured) return false
-      
-      // Filtro por tipo
       if (selectedType !== 'all' && property.type !== selectedType) return false
-      
-      // Filtro por ubicación
       if (selectedLocation !== 'all' && !property.location.toLowerCase().includes(selectedLocation.toLowerCase())) return false
-      
-      // Filtro por precio
       if (property.price < currentPriceRange.min || property.price > currentPriceRange.max) return false
-      
-      // Filtro por área
       if (property.area < areaRange.min || property.area > areaRange.max) return false
-      
-      // Filtro por dormitorios
+
       if (bedrooms !== 'all') {
         const bedroomCount = property.bedrooms || 0
         if (bedrooms === '5+' && bedroomCount < 5) return false
         if (bedrooms !== '5+' && bedroomCount !== parseInt(bedrooms)) return false
       }
-      
-      // Filtro por baños
+
       if (bathrooms !== 'all') {
         const bathroomCount = property.bathrooms || 0
         if (bathrooms === '4+' && bathroomCount < 4) return false
         if (bathrooms !== '4+' && bathroomCount !== parseInt(bathrooms)) return false
       }
-      
-      // Filtro por año de construcción
+
       if (yearBuilt !== 'all' && property.yearBuilt) {
         const year = property.yearBuilt
         const yearFilter = parseInt(yearBuilt.replace('+', ''))
         if (year < yearFilter) return false
       }
-      
-      // Filtro por características
+
       if (features.length > 0) {
-        const hasAllFeatures = features.every(feature => 
-          property.features.some(propFeature => 
+        const hasAllFeatures = features.every(feature =>
+          property.features.some(propFeature =>
             propFeature.toLowerCase().includes(feature.toLowerCase())
           )
         )
         if (!hasAllFeatures) return false
       }
-      
-      // Filtro por búsqueda (usar término debounced)
-      if (debouncedSearchTerm.trim() && 
-          !property.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) && 
-          !property.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) &&
-          !property.location.toLowerCase().includes(debouncedSearchTerm.toLowerCase())) return false
-      
+
+      if (debouncedSearchTerm.trim() &&
+        !property.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) &&
+        !property.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) &&
+        !property.location.toLowerCase().includes(debouncedSearchTerm.toLowerCase())) return false
+
       return property.status === 'disponible'
     })
   }, [currentProperties, selectedType, selectedLocation, currentPriceRange, areaRange, bedrooms, bathrooms, yearBuilt, features, debouncedSearchTerm, searchParams, isLoading])
 
-  // Track search events (usar término debounced)
   useEffect(() => {
     if (debouncedSearchTerm) {
       analytics.trackSearch(debouncedSearchTerm, filteredProperties.length, {
@@ -212,13 +182,11 @@ export default function Properties() {
     }
   }, [debouncedSearchTerm, filteredProperties.length, selectedType, selectedLocation, currentPriceRange, areaRange, bedrooms, bathrooms, yearBuilt, features, analytics])
 
-  // Memoizar propiedades destacadas
   const featuredProperties = useMemo(() => {
     return properties.filter(prop => prop.featured && prop.status === 'disponible')
   }, [properties])
 
   const formatPrice = (price: number): string => {
-    // Formato sin moneda específica para el filtro (aplica a todas las propiedades)
     return new Intl.NumberFormat('es-AR', {
       style: 'decimal',
       minimumFractionDigits: 0,
@@ -226,323 +194,283 @@ export default function Properties() {
     }).format(price)
   }
 
+  const selectStyle: React.CSSProperties = {
+    padding: '10px 14px',
+    border: '1px solid #e5e7eb',
+    borderRadius: '8px',
+    fontSize: '14px',
+    color: '#374151',
+    background: 'white',
+    cursor: 'pointer',
+    minWidth: '150px'
+  }
+
+  const labelStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    fontSize: '14px',
+    fontWeight: '500',
+    color: '#374151',
+    marginBottom: '8px'
+  }
+
   return (
-    <section className="section" id="propiedades">
-      <div className="container" style={{ maxWidth: '100%', padding: '0 20px' }}>
-        {/* Pestañas de Venta/Alquiler */}
-        <div className={styles.tabsContainer}>
-          <div className={styles.tabs}>
+    <section id="propiedades" style={{ padding: '60px 0', background: '#f8f9fa' }}>
+      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 20px' }}>
+        {/* Tabs */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '32px' }}>
+          <div style={{ display: 'flex', background: 'white', borderRadius: '12px', padding: '4px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
             <button
-              className={`${styles.tab} ${activeTab === 'venta' ? styles.active : ''}`}
               onClick={() => setActiveTab('venta')}
+              style={{
+                padding: '12px 32px',
+                border: 'none',
+                borderRadius: '8px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                background: activeTab === 'venta' ? 'linear-gradient(135deg, #2c5f7d 0%, #1a4158 100%)' : 'transparent',
+                color: activeTab === 'venta' ? 'white' : '#636e72'
+              }}
             >
-              🏠 En Venta
+              En Venta
             </button>
             <button
-              className={`${styles.tab} ${activeTab === 'alquiler' ? styles.active : ''}`}
               onClick={() => setActiveTab('alquiler')}
+              style={{
+                padding: '12px 32px',
+                border: 'none',
+                borderRadius: '8px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                background: activeTab === 'alquiler' ? 'linear-gradient(135deg, #2c5f7d 0%, #1a4158 100%)' : 'transparent',
+                color: activeTab === 'alquiler' ? 'white' : '#636e72'
+              }}
             >
-              🔑 En Alquiler
+              En Alquiler
             </button>
           </div>
         </div>
 
-        {/* Filtros Horizontales Rápidos */}
-        <div className={styles.quickFilters}>
-          <select
-            value={selectedType}
-            onChange={(e) => setSelectedType(e.target.value)}
-            className={styles.quickFilterSelect}
-          >
+        {/* Quick Filters */}
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '24px', alignItems: 'center' }}>
+          <select value={selectedType} onChange={(e) => setSelectedType(e.target.value)} style={selectStyle}>
             {types.map(type => (
-              <option key={type} value={type}>
-                {typeLabels[type]}
-              </option>
+              <option key={type} value={type}>{typeLabels[type]}</option>
             ))}
           </select>
 
-          <select
-            value={selectedLocation}
-            onChange={(e) => setSelectedLocation(e.target.value)}
-            className={styles.quickFilterSelect}
-          >
+          <select value={selectedLocation} onChange={(e) => setSelectedLocation(e.target.value)} style={selectStyle}>
             <option value="all">Todas las ubicaciones</option>
             {locations.filter(loc => loc !== 'all').map(location => (
-              <option key={location} value={location}>
-                {location}
-              </option>
+              <option key={location} value={location}>{location}</option>
             ))}
           </select>
 
-          <select
-            value={bedrooms}
-            onChange={(e) => setBedrooms(e.target.value)}
-            className={styles.quickFilterSelect}
-          >
+          <select value={bedrooms} onChange={(e) => setBedrooms(e.target.value)} style={selectStyle}>
             <option value="all">Cualquier habitación</option>
             {bedroomOptions.filter(opt => opt !== 'all').map(option => (
-              <option key={option} value={option}>
-                {option === '5+' ? '5+ hab.' : `${option} hab.`}
-              </option>
+              <option key={option} value={option}>{option === '5+' ? '5+ hab.' : `${option} hab.`}</option>
             ))}
           </select>
 
           <button
-            className={styles.advancedFiltersBtn}
-            onClick={() => {
-              const sidebar = document.querySelector(`.${styles.sidebarFilters}`)
-              sidebar?.classList.toggle(styles.visible)
+            onClick={() => setShowSidebar(!showSidebar)}
+            style={{
+              padding: '10px 20px',
+              background: showSidebar ? '#2c5f7d' : 'white',
+              color: showSidebar ? 'white' : '#2c5f7d',
+              border: '1px solid #2c5f7d',
+              borderRadius: '8px',
+              fontWeight: '500',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
             }}
           >
-            🔍 Filtros Avanzados
+            Filtros Avanzados
           </button>
 
           {(selectedType !== 'all' || selectedLocation !== 'all' || bedrooms !== 'all') && (
-            <button 
+            <button
               onClick={() => {
                 setSelectedType('all')
                 setSelectedLocation('all')
                 setBedrooms('all')
               }}
-              className={styles.clearQuickFiltersBtn}
+              style={{
+                padding: '10px 16px',
+                background: '#fee2e2',
+                color: '#dc2626',
+                border: 'none',
+                borderRadius: '8px',
+                fontWeight: '500',
+                cursor: 'pointer'
+              }}
             >
-              ✕ Limpiar
+              Limpiar
             </button>
           )}
         </div>
 
-        {/* Layout con Sidebar */}
-        <div className={styles.propertiesLayout}>
-          {/* Sidebar Izquierdo - Filtros */}
-          <aside className={styles.sidebarFilters}>
-            <div className={styles.filtersSection}>
-          <div className={styles.filtersHeader}>
-            <h4>Filtros Avanzados</h4>
-            <button 
-              onClick={handleClearAllFilters}
-              className={styles.clearAllBtn}
-            >
-              Limpiar todo
-            </button>
-          </div>
+        {/* Layout */}
+        <div style={{ display: 'flex', gap: '24px' }}>
+          {/* Sidebar */}
+          {showSidebar && (
+            <aside style={{
+              width: '300px',
+              flexShrink: 0,
+              background: 'white',
+              borderRadius: '16px',
+              padding: '24px',
+              height: 'fit-content',
+              position: 'sticky',
+              top: '100px',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                <h4 style={{ fontWeight: '600', color: '#1a4158', margin: 0 }}>Filtros Avanzados</h4>
+                <button
+                  onClick={handleClearAllFilters}
+                  style={{ fontSize: '14px', color: '#dc2626', background: 'none', border: 'none', cursor: 'pointer' }}
+                >
+                  Limpiar todo
+                </button>
+              </div>
 
-          <div className={styles.filtersGrid}>
-            {/* Búsqueda */}
-            <div className={styles.filterGroup}>
-              <label>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <path d="m21 21-4.35-4.35"></path>
-                </svg>
-                Buscar
-              </label>
-              <input
-                type="text"
-                placeholder="Ubicación, tipo..."
-                value={searchTerm}
-                onChange={handleSearchChange}
-                className={styles.filterSelect}
-              />
-            </div>
-
-            <div className={styles.filterGroup}>
-              <label>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                  <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                </svg>
-                Tipo de propiedad
-              </label>
-              <select 
-                value={selectedType} 
-                onChange={handleTypeChange}
-                className={styles.filterSelect}
-              >
-                {types.map(type => (
-                  <option key={type} value={type}>
-                    {typeLabels[type]}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className={styles.filterGroup}>
-              <label>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                  <circle cx="12" cy="10" r="3"></circle>
-                </svg>
-                Ubicación
-              </label>
-              <select 
-                value={selectedLocation} 
-                onChange={handleLocationChange}
-                className={styles.filterSelect}
-              >
-                {locations.map(location => (
-                  <option key={location} value={location}>
-                    {location === 'all' ? 'Todas las ubicaciones' : location}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className={styles.filterGroup}>
-              <label>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="12" y1="1" x2="12" y2="23"></line>
-                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                </svg>
-                Rango de precio
-              </label>
-              <div className={styles.priceRange}>
-                <div className={styles.priceDisplay}>
-                  <span className={styles.priceMin}>{formatPrice(currentPriceRange.min)}</span>
-                  <span className={styles.priceSeparator}>-</span>
-                  <span className={styles.priceMax}>{formatPrice(currentPriceRange.max)}</span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                {/* Search */}
+                <div>
+                  <label style={labelStyle}>Buscar</label>
+                  <input
+                    type="text"
+                    placeholder="Ubicación, tipo..."
+                    value={searchTerm}
+                    onChange={handleSearchChange}
+                    style={{ ...selectStyle, width: '100%', boxSizing: 'border-box' }}
+                  />
                 </div>
-                <input
-                  type="range"
-                  min="0"
-                  max={activeTab === 'venta' ? 200000000 : 500000}
-                  step={activeTab === 'venta' ? 5000000 : 10000}
-                  value={currentPriceRange.max}
-                  onChange={(e) => setPriceRange({ ...priceRange, max: parseInt(e.target.value) })}
-                  className={styles.priceSlider}
-                />
-              </div>
-            </div>
 
-            <div className={styles.filterGroup}>
-              <label>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                  <path d="M9 9h6v6H9z"></path>
-                </svg>
-                Área (m²)
-              </label>
-              <div className={styles.areaRange}>
-                <div className={styles.areaDisplay}>
-                  <span className={styles.areaMin}>{areaRange.min}m²</span>
-                  <span className={styles.areaSeparator}>-</span>
-                  <span className={styles.areaMax}>{areaRange.max}m²</span>
+                {/* Price Range */}
+                <div>
+                  <label style={labelStyle}>Rango de precio</label>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '14px', color: '#636e72' }}>
+                    <span>{formatPrice(currentPriceRange.min)}</span>
+                    <span>{formatPrice(currentPriceRange.max)}</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max={activeTab === 'venta' ? 200000000 : 500000}
+                    step={activeTab === 'venta' ? 5000000 : 10000}
+                    value={currentPriceRange.max}
+                    onChange={(e) => setPriceRange({ ...priceRange, max: parseInt(e.target.value) })}
+                    style={{ width: '100%', accentColor: '#2c5f7d' }}
+                  />
                 </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="1000"
-                  step="50"
-                  value={areaRange.max}
-                  onChange={(e) => setAreaRange({ ...areaRange, max: parseInt(e.target.value) })}
-                  className={styles.areaSlider}
-                />
+
+                {/* Area Range */}
+                <div>
+                  <label style={labelStyle}>Área (m²)</label>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '14px', color: '#636e72' }}>
+                    <span>{areaRange.min}m²</span>
+                    <span>{areaRange.max}m²</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1000"
+                    step="50"
+                    value={areaRange.max}
+                    onChange={(e) => setAreaRange({ ...areaRange, max: parseInt(e.target.value) })}
+                    style={{ width: '100%', accentColor: '#2c5f7d' }}
+                  />
+                </div>
+
+                {/* Bathrooms */}
+                <div>
+                  <label style={labelStyle}>Baños</label>
+                  <select
+                    value={bathrooms}
+                    onChange={(e) => setBathrooms(e.target.value)}
+                    style={{ ...selectStyle, width: '100%', boxSizing: 'border-box' }}
+                  >
+                    {bathroomOptions.map(option => (
+                      <option key={option} value={option}>
+                        {option === 'all' ? 'Cualquiera' : `${option} baño${option !== '1' ? 's' : ''}`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Year Built */}
+                <div>
+                  <label style={labelStyle}>Año de construcción</label>
+                  <select
+                    value={yearBuilt}
+                    onChange={(e) => setYearBuilt(e.target.value)}
+                    style={{ ...selectStyle, width: '100%', boxSizing: 'border-box' }}
+                  >
+                    {yearOptions.map(option => (
+                      <option key={option} value={option}>
+                        {option === 'all' ? 'Cualquiera' : option}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Features */}
+                <div>
+                  <label style={labelStyle}>Características</label>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                    {availableFeatures.map(feature => (
+                      <label
+                        key={feature}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '6px 12px',
+                          background: features.includes(feature) ? '#e0f2fe' : '#f3f4f6',
+                          borderRadius: '20px',
+                          fontSize: '13px',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s'
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={features.includes(feature)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setFeatures([...features, feature])
+                            } else {
+                              setFeatures(features.filter(f => f !== feature))
+                            }
+                          }}
+                          style={{ display: 'none' }}
+                        />
+                        <span style={{ color: features.includes(feature) ? '#0369a1' : '#636e72' }}>{feature}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
               </div>
-            </div>
+            </aside>
+          )}
 
-            <div className={styles.filterGroup}>
-              <label>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                  <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                </svg>
-                Dormitorios
-              </label>
-              <select 
-                value={bedrooms} 
-                onChange={handleBedroomsChange}
-                className={styles.filterSelect}
-              >
-                {bedroomOptions.map(option => (
-                  <option key={option} value={option}>
-                    {option === 'all' ? 'Cualquiera' : `${option} dormitorio${option !== '1' ? 's' : ''}`}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className={styles.filterGroup}>
-              <label>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                  <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                </svg>
-                Baños
-              </label>
-              <select 
-                value={bathrooms} 
-                onChange={(e) => setBathrooms(e.target.value)}
-                className={styles.filterSelect}
-              >
-                {bathroomOptions.map(option => (
-                  <option key={option} value={option}>
-                    {option === 'all' ? 'Cualquiera' : `${option} baño${option !== '1' ? 's' : ''}`}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className={styles.filterGroup}>
-              <label>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                  <line x1="16" y1="2" x2="16" y2="6"></line>
-                  <line x1="8" y1="2" x2="8" y2="6"></line>
-                  <line x1="3" y1="10" x2="21" y2="10"></line>
-                </svg>
-                Año de construcción
-              </label>
-              <select 
-                value={yearBuilt} 
-                onChange={(e) => setYearBuilt(e.target.value)}
-                className={styles.filterSelect}
-              >
-                {yearOptions.map(option => (
-                  <option key={option} value={option}>
-                    {option === 'all' ? 'Cualquiera' : option}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className={styles.filterGroup}>
-              <label>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M9 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-4"></path>
-                  <rect x="9" y="11" width="6" height="11"></rect>
-                  <path d="M9 7h6v4H9z"></path>
-                </svg>
-                Características
-              </label>
-              <div className={styles.featuresFilter}>
-                {availableFeatures.map(feature => (
-                  <label key={feature} className={styles.featureCheckbox}>
-                    <input
-                      type="checkbox"
-                      checked={features.includes(feature)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setFeatures([...features, feature])
-                        } else {
-                          setFeatures(features.filter(f => f !== feature))
-                        }
-                      }}
-                    />
-                    <span className={styles.featureLabel}>{feature}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          </div>
-            </div>
-          </aside>
-
-          {/* Contenido Principal */}
-          <main className={styles.mainContent}>
-            {/* Propiedades destacadas */}
+          {/* Main Content */}
+          <main style={{ flex: 1 }}>
+            {/* Featured Properties */}
             {featuredProperties.filter(prop => prop.operation === activeTab).length > 0 && (
-              <div className={styles.featuredSection}>
-                <h3 className={styles.featuredTitle}>⭐ Propiedades Destacadas</h3>
-                <div className={styles.featuredGrid}>
+              <div style={{ marginBottom: '40px' }}>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1a4158', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span>⭐</span> Propiedades Destacadas
+                </h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '24px' }}>
                   {featuredProperties.filter(prop => prop.operation === activeTab).map(property => (
                     <PropertyCard key={property.id} property={property} />
                   ))}
@@ -550,35 +478,49 @@ export default function Properties() {
               </div>
             )}
 
-            {/* Resultados */}
-            <div className={styles.resultsSection}>
-          <div className={styles.resultsHeader}>
-            <h3>
-              {filteredProperties.length} propiedad{filteredProperties.length !== 1 ? 'es' : ''} encontrada{filteredProperties.length !== 1 ? 's' : ''}
-            </h3>
-            {(selectedType !== 'all' || selectedLocation !== 'all' || debouncedSearchTerm || currentPriceRange.max < (activeTab === 'venta' ? 200000000 : 500000) || areaRange.max < 1000 || bedrooms !== 'all' || bathrooms !== 'all' || yearBuilt !== 'all' || features.length > 0) && (
-              <button 
-                onClick={clearFilters}
-                className={styles.clearFiltersBtn}
-              >
-                Limpiar filtros
-              </button>
-            )}
-          </div>
-
-          {filteredProperties.length > 0 ? (
-            <VirtualizedPropertyList 
-              properties={filteredProperties}
-              height={600}
-              itemHeight={450}
-            />
-          ) : (
-            <div className={styles.noResults}>
-              <p>No se encontraron propiedades con los filtros seleccionados.</p>
-              <p>Intenta ajustar tus criterios de búsqueda.</p>
+            {/* Results Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: '#1a4158', margin: 0 }}>
+                {filteredProperties.length} propiedad{filteredProperties.length !== 1 ? 'es' : ''} encontrada{filteredProperties.length !== 1 ? 's' : ''}
+              </h3>
+              {(selectedType !== 'all' || selectedLocation !== 'all' || debouncedSearchTerm || currentPriceRange.max < (activeTab === 'venta' ? 200000000 : 500000) || areaRange.max < 1000 || bedrooms !== 'all' || bathrooms !== 'all' || yearBuilt !== 'all' || features.length > 0) && (
+                <button
+                  onClick={clearFilters}
+                  style={{
+                    padding: '8px 16px',
+                    background: 'transparent',
+                    color: '#2c5f7d',
+                    border: '1px solid #2c5f7d',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Limpiar filtros
+                </button>
+              )}
             </div>
-          )}
-        </div>
+
+            {/* Results */}
+            {filteredProperties.length > 0 ? (
+              <VirtualizedPropertyList
+                properties={filteredProperties}
+                height={600}
+                itemHeight={450}
+              />
+            ) : (
+              <div style={{
+                textAlign: 'center',
+                padding: '60px 24px',
+                background: 'white',
+                borderRadius: '16px',
+                border: '2px dashed #e5e7eb'
+              }}>
+                <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔍</div>
+                <p style={{ color: '#636e72', fontSize: '1.1rem' }}>No se encontraron propiedades con los filtros seleccionados.</p>
+                <p style={{ color: '#9ca3af', marginTop: '8px' }}>Intenta ajustar tus criterios de búsqueda.</p>
+              </div>
+            )}
           </main>
         </div>
       </div>

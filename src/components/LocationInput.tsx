@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import styles from './LocationInput.module.css'
 
 interface LocationInputProps {
   value: string
@@ -110,7 +109,7 @@ export default function LocationInput({ value, onChange, placeholder = 'Buscar u
   }
 
   return (
-    <div className={styles.container}>
+    <div className="container">
       <input
         ref={inputRef}
         type="text"
@@ -118,16 +117,16 @@ export default function LocationInput({ value, onChange, placeholder = 'Buscar u
         onChange={handleInputChange}
         placeholder={isLoadingMaps ? 'Cargando Google Maps...' : placeholder}
         disabled={isLoadingMaps}
-        className={`${styles.input} ${error ? styles.error : ''}`}
+        className={`input ${error ? 'error' : ''}`}
       />
       {mapsError && (
-        <p className={styles.errorMessage}>
+        <p className="errorMessage">
           ⚠️ {mapsError}. La dirección se puede ingresar manualmente.
         </p>
       )}
-      {error && <p className={styles.errorMessage}>{error}</p>}
+      {error && <p className="errorMessage">{error}</p>}
       {!isLoadingMaps && !mapsError && (
-        <p className={styles.hint}>
+        <p className="hint">
           💡 Comienza a escribir para buscar con autocompletado
         </p>
       )}

@@ -7,7 +7,7 @@ import { useProperties } from '@/hooks/useProperties'
 import type { Property } from '@/data/properties'
 import PropertyForm from '@/components/PropertyForm'
 import Modal from '@/components/Modal'
-import styles from './page.module.css'
+
 
 export default function NewPropertyPage() {
   const router = useRouter()
@@ -30,7 +30,7 @@ export default function NewPropertyPage() {
 
   // Protección de ruta
   if (authLoading) {
-    return <div className={styles.loading}>Cargando...</div>
+    return <div className="loading">Cargando...</div>
   }
 
   if (!isAuthenticated) {
@@ -94,12 +94,12 @@ export default function NewPropertyPage() {
   }
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
+    <div className="container">
+      <div className="header">
         <h1>Agregar Nueva Propiedad</h1>
         <button
           onClick={() => router.push('/admin/propiedades')}
-          className={styles.cancelButton}
+          className="cancelButton"
         >
           ← Volver
         </button>

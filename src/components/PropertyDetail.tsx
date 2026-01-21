@@ -11,7 +11,10 @@ import PropertyFeatures from './PropertyFeatures'
 import PropertyLocationMap from './PropertyLocationMap'
 import { useAnalytics } from '@/hooks/useAnalytics'
 import { sanitizeText } from '@/lib/sanitize'
-import styles from './PropertyDetail.module.css'
+import { cn } from '@/lib/utils'
+import { MapPin, Share2, ChevronRight, Camera, Map } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 
 interface PropertyDetailProps {
   property: Property
@@ -21,18 +24,6 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
   const [activeView, setActiveView] = useState<'fotos' | 'mapa'>('fotos')
   const router = useRouter()
   const analytics = useAnalytics()
-
-  const handleWhatsApp = () => {
-    const message = `Hola, estoy interesado/a en ${property.title}`
-    const whatsappUrl = `https://wa.me/+543519999999?text=${encodeURIComponent(message)}`
-    window.open(whatsappUrl, '_blank')
-    analytics.trackContact('whatsapp', `property_detail_${property.id}`)
-  }
-
-  const handlePhone = () => {
-    window.location.href = 'tel:+543519999999'
-    analytics.trackContact('phone', `property_detail_${property.id}`)
-  }
 
   const getOperationLabel = (): string => {
     return property.operation === 'venta' ? 'Venta' : 'Alquiler'
@@ -51,32 +42,62 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
   }
 
   return (
-    <div className={styles.propertyDetail}>
-      {/* Header con título y acciones */}
-      <div className={styles.header}>
-        <div className={styles.headerContent}>
-          <div className={styles.headerInfo}>
-            <div className={styles.breadcrumb}>
-              <button 
-                className={styles.breadcrumbLink}
-                onClick={() => router.push('/propiedades')}
-              >
-                Propiedades
-              </button>
-              <span className={styles.breadcrumbSeparator}>/</span>
-              <span className={styles.breadcrumbCurrent}>{getTypeLabel()}</span>
+    <div className="max-w-[1400px] mx-auto px-4 sm:px-6 pt-6 pb-12">
+      {/* Header con titulo y acciones */}
+      <div className="mb-6">
+        {/* Breadcrumb */}
+        <nav className="flex items-center gap-1.5 mb-4 text-sm">
+          <button
+            className="text-brand-primary hover:text-brand-accent transition-colors font-medium"
+            onClick={() => router.push('/')}
+          >
+            Inicio
+          </button>
+          <ChevronRight className="w-4 h-4 text-muted" />
+          <button
+            className="text-brand-primary hover:text-brand-accent transition-colors font-medium"
+            onClick={() => router.push('/propiedades')}
+          >
+            Propiedades
+          </button>
+          <ChevronRight className="w-4 h-4 text-muted" />
+          <span className="text-muted">{getTypeLabel()}</span>
+        </nav>
+
+        <div className="flex justify-between items-start flex-wrap gap-4">
+          <div className="flex-1 min-w-[280px]">
+            {/* Title */}
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-brand-dark mb-3">
+              {property.title}
+            </h1>
+
+            {/* Subtitle with operation and location */}
+            <div className="flex flex-wrap items-center gap-3">
+              <Badge className={cn(
+                "text-sm font-semibold px-3 py-1",
+                property.operation === 'venta'
+                  ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100"
+                  : "bg-blue-100 text-blue-700 hover:bg-blue-100"
+              )}>
+                {getOperationLabel()}
+              </Badge>
+              <Badge variant="outline" className="text-sm font-medium px-3 py-1">
+                {getTypeLabel()}
+              </Badge>
+              <div className="flex items-center gap-1.5 text-muted">
+                <MapPin className="w-4 h-4" />
+                <span className="text-sm">{property.location}</span>
+              </div>
             </div>
-            <div className={styles.subtitle}>
-              <span className={styles.operation}>{getOperationLabel()}</span>
-              <span className={styles.separator}>•</span>
-              <span className={styles.location}>📍 {property.location}</span>
-            </div>
-            <h1 className={styles.highlightTitle}>{property.title}</h1>
           </div>
-          <div className={styles.headerActions}>
+
+          {/* Actions */}
+          <div className="flex items-center gap-2">
             <FavoriteButton propertyId={property.id} size="large" />
-            <button 
-              className={`${styles.shareBtn} button-press`}
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2 border-border hover:bg-surface"
               onClick={() => {
                 if (navigator.share) {
                   navigator.share({
@@ -90,30 +111,43 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
               }}
               aria-label="Compartir propiedad"
             >
-              📤 Compartir
-            </button>
+              <Share2 className="w-4 h-4" />
+              <span className="hidden sm:inline">Compartir</span>
+            </Button>
           </div>
         </div>
       </div>
 
       {/* Contenido principal */}
-      <div className={styles.mainContent}>
-        <div className={styles.contentLeft}>
-          {/* Galería de imágenes */}
-          <div className={styles.gallerySection}>
-            <div className={styles.viewTabs}>
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6 lg:gap-8">
+        <div className="flex flex-col gap-6">
+          {/* Galeria de imagenes */}
+          <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-border">
+            <div className="flex border-b border-border">
               <button
-                className={`${styles.viewTab} ${activeView === 'fotos' ? styles.active : ''}`}
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-2 py-3.5 px-4 text-sm font-medium transition-all border-b-2 -mb-px",
+                  activeView === 'fotos'
+                    ? "text-brand-primary border-brand-primary bg-brand-primary/5"
+                    : "text-muted border-transparent hover:text-foreground hover:bg-surface"
+                )}
                 onClick={() => setActiveView('fotos')}
               >
-                📸 Fotos {property.images.length > 0 && `(${property.images.length})`}
+                <Camera className="w-4 h-4" />
+                Fotos {property.images.length > 0 && `(${property.images.length})`}
               </button>
               {property.coordinates && (
                 <button
-                  className={`${styles.viewTab} ${activeView === 'mapa' ? styles.active : ''}`}
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-2 py-3.5 px-4 text-sm font-medium transition-all border-b-2 -mb-px",
+                    activeView === 'mapa'
+                      ? "text-brand-primary border-brand-primary bg-brand-primary/5"
+                      : "text-muted border-transparent hover:text-foreground hover:bg-surface"
+                  )}
                   onClick={() => setActiveView('mapa')}
                 >
-                  🗺️ Ubicación
+                  <Map className="w-4 h-4" />
+                  Ubicacion
                 </button>
               )}
             </div>
@@ -122,7 +156,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
               <PropertyImageGallery images={property.images} title={property.title} />
             ) : (
               property.coordinates && (
-                <PropertyLocationMap 
+                <PropertyLocationMap
                   latitude={property.coordinates.lat}
                   longitude={property.coordinates.lng}
                   propertyTitle={property.title}
@@ -131,47 +165,50 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
             )}
           </div>
 
-          {/* Métricas de la propiedad */}
+          {/* Metricas de la propiedad */}
           <PropertyMetrics property={property} />
 
-          {/* Descripción */}
-          <div className={styles.descriptionSection}>
-            <h2 className={styles.sectionTitle}>Descripción</h2>
-            <p className={styles.descriptionText}>{sanitizeText(property.description)}</p>
+          {/* Descripcion */}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-border">
+            <h2 className="text-lg font-semibold text-brand-dark mb-3">Descripcion</h2>
+            <p className="text-muted leading-relaxed m-0 whitespace-pre-line">{sanitizeText(property.description)}</p>
           </div>
 
-          {/* Características */}
+          {/* Caracteristicas */}
           <PropertyFeatures features={property.features} />
 
-          {/* Información adicional si existe */}
-          {property.yearBuilt && (
-            <div className={styles.additionalInfo}>
-              <h2 className={styles.sectionTitle}>Información Adicional</h2>
-              <div className={styles.infoGrid}>
+          {/* Informacion adicional si existe */}
+          {(property.yearBuilt || property.orientation || (property.floor && property.totalFloors) || property.expenses) && (
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-border">
+              <h2 className="text-lg font-semibold text-brand-dark mb-4">Informacion Adicional</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 {property.yearBuilt && (
-                  <div className={styles.infoItem}>
-                    <span className={styles.infoLabel}>Construcción:</span>
-                    <span className={styles.infoValue}>{new Date().getFullYear() - property.yearBuilt} años de antigüedad</span>
+                  <div className="p-3 bg-surface rounded-lg">
+                    <span className="text-xs text-muted block mb-1">Antiguedad</span>
+                    <span className="text-sm font-semibold text-brand-dark">
+                      {new Date().getFullYear() - property.yearBuilt} anos
+                    </span>
                   </div>
                 )}
                 {property.orientation && (
-                  <div className={styles.infoItem}>
-                    <span className={styles.infoLabel}>Orientación:</span>
-                    <span className={styles.infoValue}>{property.orientation}</span>
+                  <div className="p-3 bg-surface rounded-lg">
+                    <span className="text-xs text-muted block mb-1">Orientacion</span>
+                    <span className="text-sm font-semibold text-brand-dark">{property.orientation}</span>
                   </div>
                 )}
                 {property.floor && property.totalFloors && (
-                  <div className={styles.infoItem}>
-                    <span className={styles.infoLabel}>Piso:</span>
-                    <span className={styles.infoValue}>{property.floor} de {property.totalFloors}</span>
+                  <div className="p-3 bg-surface rounded-lg">
+                    <span className="text-xs text-muted block mb-1">Piso</span>
+                    <span className="text-sm font-semibold text-brand-dark">
+                      {property.floor} de {property.totalFloors}
+                    </span>
                   </div>
                 )}
                 {property.expenses && (
-                  <div className={styles.infoItem}>
-                    <span className={styles.infoLabel}>Expensas:</span>
-                    <span className={styles.infoValue}>
+                  <div className="p-3 bg-surface rounded-lg">
+                    <span className="text-xs text-muted block mb-1">Expensas</span>
+                    <span className="text-sm font-semibold text-brand-dark">
                       ${property.expenses.toLocaleString('es-AR')}
-                      {property.operation === 'alquiler' ? '/mes' : ''}
                     </span>
                   </div>
                 )}
@@ -181,12 +218,10 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
         </div>
 
         {/* Sidebar derecho */}
-        <div className={styles.sidebar}>
+        <div className="lg:sticky lg:top-24 h-fit space-y-6">
           <PropertySidebar property={property} />
         </div>
       </div>
     </div>
   )
 }
-
-

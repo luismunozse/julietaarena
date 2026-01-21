@@ -1,8 +1,18 @@
 'use client'
 
 import { useState } from 'react'
+import { Search, ChevronDown, ChevronUp, X } from 'lucide-react'
 import type { PropertyFilters } from '@/hooks/usePropertyFilters'
-import styles from './PropertyFilters.module.css'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Label } from '@/components/ui/label'
 
 interface PropertyFiltersProps {
   filters: PropertyFilters
@@ -20,161 +30,198 @@ export default function PropertyFilters({
   const [isExpanded, setIsExpanded] = useState(false)
 
   return (
-    <div className={styles.filtersContainer}>
-      <div className={styles.filtersHeader}>
-        <div className={styles.searchBox}>
-          <input
+    <div className="bg-white rounded-xl p-6 shadow-md mb-8">
+      <div className="flex gap-4 items-center flex-wrap md:flex-row flex-col">
+        <div className="flex-1 min-w-[300px] relative md:min-w-[300px] w-full">
+          <Input
             type="text"
             placeholder="Buscar por título, descripción, ubicación..."
             value={filters.search}
             onChange={(e) => onFilterChange('search', e.target.value)}
-            className={styles.searchInput}
+            className="pr-10"
           />
-          <span className={styles.searchIcon}>🔍</span>
+          <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none" />
         </div>
-        <div className={styles.filtersActions}>
-          <button
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
             onClick={() => setIsExpanded(!isExpanded)}
-            className={styles.toggleButton}
           >
-            {isExpanded ? '▲' : '▼'} Filtros Avanzados
-          </button>
+            {isExpanded ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+            Filtros Avanzados
+          </Button>
           {hasActiveFilters && (
-            <button
+            <Button
+              variant="outline"
               onClick={onClearFilters}
-              className={styles.clearButton}
+              className="border-destructive text-destructive hover:bg-destructive/10 hover:text-destructive"
             >
+              <X className="h-4 w-4" />
               Limpiar Filtros
-            </button>
+            </Button>
           )}
         </div>
       </div>
 
       {isExpanded && (
-        <div className={styles.advancedFilters}>
-          <div className={styles.filterRow}>
-            <div className={styles.filterGroup}>
-              <label>Tipo</label>
-              <select
+        <div className="mt-6 pt-6 border-t border-border">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+            <div className="flex flex-col gap-2">
+              <Label className="text-sm font-semibold text-muted-foreground">
+                Tipo
+              </Label>
+              <Select
                 value={filters.type}
-                onChange={(e) => onFilterChange('type', e.target.value)}
-                className={styles.filterSelect}
+                onValueChange={(value) => onFilterChange('type', value)}
               >
-                <option value="all">Todos los tipos</option>
-                <option value="casa">Casas</option>
-                <option value="departamento">Departamentos</option>
-                <option value="terreno">Terrenos</option>
-                <option value="local">Locales</option>
-                <option value="oficina">Oficinas</option>
-                <option value="cochera">Cocheras</option>
-              </select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Todos los tipos" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los tipos</SelectItem>
+                  <SelectItem value="casa">Casas</SelectItem>
+                  <SelectItem value="departamento">Departamentos</SelectItem>
+                  <SelectItem value="terreno">Terrenos</SelectItem>
+                  <SelectItem value="local">Locales</SelectItem>
+                  <SelectItem value="oficina">Oficinas</SelectItem>
+                  <SelectItem value="cochera">Cocheras</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
-            <div className={styles.filterGroup}>
-              <label>Operación</label>
-              <select
+            <div className="flex flex-col gap-2">
+              <Label className="text-sm font-semibold text-muted-foreground">
+                Operación
+              </Label>
+              <Select
                 value={filters.operation}
-                onChange={(e) => onFilterChange('operation', e.target.value)}
-                className={styles.filterSelect}
+                onValueChange={(value) => onFilterChange('operation', value)}
               >
-                <option value="all">Todas las operaciones</option>
-                <option value="venta">Venta</option>
-                <option value="alquiler">Alquiler</option>
-              </select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Todas las operaciones" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas las operaciones</SelectItem>
+                  <SelectItem value="venta">Venta</SelectItem>
+                  <SelectItem value="alquiler">Alquiler</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
-            <div className={styles.filterGroup}>
-              <label>Estado</label>
-              <select
+            <div className="flex flex-col gap-2">
+              <Label className="text-sm font-semibold text-muted-foreground">
+                Estado
+              </Label>
+              <Select
                 value={filters.status}
-                onChange={(e) => onFilterChange('status', e.target.value)}
-                className={styles.filterSelect}
+                onValueChange={(value) => onFilterChange('status', value)}
               >
-                <option value="all">Todos los estados</option>
-                <option value="disponible">Disponible</option>
-                <option value="reservado">Reservado</option>
-                <option value="vendido">Vendido</option>
-              </select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Todos los estados" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los estados</SelectItem>
+                  <SelectItem value="disponible">Disponible</SelectItem>
+                  <SelectItem value="reservado">Reservado</SelectItem>
+                  <SelectItem value="vendido">Vendido</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
-            <div className={styles.filterGroup}>
-              <label>Destacada</label>
-              <select
+            <div className="flex flex-col gap-2">
+              <Label className="text-sm font-semibold text-muted-foreground">
+                Destacada
+              </Label>
+              <Select
                 value={filters.featured}
-                onChange={(e) => onFilterChange('featured', e.target.value)}
-                className={styles.filterSelect}
+                onValueChange={(value) => onFilterChange('featured', value)}
               >
-                <option value="all">Todas</option>
-                <option value="yes">Solo destacadas</option>
-                <option value="no">No destacadas</option>
-              </select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Todas" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas</SelectItem>
+                  <SelectItem value="yes">Solo destacadas</SelectItem>
+                  <SelectItem value="no">No destacadas</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
-          <div className={styles.filterRow}>
-            <div className={styles.filterGroup}>
-              <label>Precio Mínimo</label>
-              <input
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-semibold text-muted-foreground">
+                Precio Mínimo
+              </label>
+              <Input
                 type="number"
                 placeholder="0"
                 value={filters.priceMin}
                 onChange={(e) => onFilterChange('priceMin', e.target.value)}
-                className={styles.filterInput}
               />
             </div>
 
-            <div className={styles.filterGroup}>
-              <label>Precio Máximo</label>
-              <input
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-semibold text-muted-foreground">
+                Precio Máximo
+              </label>
+              <Input
                 type="number"
                 placeholder="Sin límite"
                 value={filters.priceMax}
                 onChange={(e) => onFilterChange('priceMax', e.target.value)}
-                className={styles.filterInput}
               />
             </div>
 
-            <div className={styles.filterGroup}>
-              <label>Área Mínima (m²)</label>
-              <input
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-semibold text-muted-foreground">
+                Área Mínima (m²)
+              </label>
+              <Input
                 type="number"
                 placeholder="0"
                 value={filters.areaMin}
                 onChange={(e) => onFilterChange('areaMin', e.target.value)}
-                className={styles.filterInput}
               />
             </div>
 
-            <div className={styles.filterGroup}>
-              <label>Área Máxima (m²)</label>
-              <input
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-semibold text-muted-foreground">
+                Área Máxima (m²)
+              </label>
+              <Input
                 type="number"
                 placeholder="Sin límite"
                 value={filters.areaMax}
                 onChange={(e) => onFilterChange('areaMax', e.target.value)}
-                className={styles.filterInput}
               />
             </div>
           </div>
 
-          <div className={styles.filterRow}>
-            <div className={styles.filterGroup}>
-              <label>Fecha Desde</label>
-              <input
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-semibold text-muted-foreground">
+                Fecha Desde
+              </label>
+              <Input
                 type="date"
                 value={filters.dateFrom}
                 onChange={(e) => onFilterChange('dateFrom', e.target.value)}
-                className={styles.filterInput}
               />
             </div>
 
-            <div className={styles.filterGroup}>
-              <label>Fecha Hasta</label>
-              <input
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-semibold text-muted-foreground">
+                Fecha Hasta
+              </label>
+              <Input
                 type="date"
                 value={filters.dateTo}
                 onChange={(e) => onFilterChange('dateTo', e.target.value)}
-                className={styles.filterInput}
               />
             </div>
           </div>
@@ -183,4 +230,3 @@ export default function PropertyFilters({
     </div>
   )
 }
-

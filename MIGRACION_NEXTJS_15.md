@@ -84,3 +84,4 @@ Las siguientes APIs ahora son asíncronas:
 - [Guía de Migración Next.js 15](https://nextjs.org/docs/app/guides/upgrading/version-15)
 - [React 19 Upgrade Guide](https://react.dev/blog/2024/04/25/react-19-upgrade-guide)
 - [Next.js 15 Release Notes](https://nextjs.org/blog/next-15)
+

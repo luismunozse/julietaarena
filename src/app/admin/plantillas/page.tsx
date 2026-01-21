@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import Modal from '@/components/Modal'
 import Pagination from '@/components/admin/Pagination'
 import { useAuth } from '@/hooks/useAuth'
-import styles from './page.module.css'
+
 
 interface PropertyTemplate {
   id: string
@@ -142,9 +142,9 @@ export default function PlantillasPage() {
 
   if (isLoading) {
     return (
-      <div className={styles.container}>
-        <div className={styles.loading}>
-          <div className={styles.spinner}></div>
+      <div className="container">
+        <div className="loading">
+          <div className="spinner"></div>
           <p>Cargando plantillas...</p>
         </div>
       </div>
@@ -152,22 +152,22 @@ export default function PlantillasPage() {
   }
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
+    <div className="container">
+      <div className="header">
         <div>
-          <h1 className={styles.title}>Plantillas de Propiedades</h1>
-          <p className={styles.subtitle}>Crea y gestiona plantillas para acelerar la creación de propiedades</p>
+          <h1 className="title">Plantillas de Propiedades</h1>
+          <p className="subtitle">Crea y gestiona plantillas para acelerar la creación de propiedades</p>
         </div>
-        <div className={styles.headerActions}>
+        <div className="headerActions">
           <button
             onClick={handleCreateFromProperty}
-            className={styles.createFromPropertyButton}
+            className="createFromPropertyButton"
           >
             Crear desde Propiedad
           </button>
           <button
             onClick={() => setShowCreateModal(true)}
-            className={styles.createButton}
+            className="createButton"
           >
             + Nueva Plantilla
           </button>
@@ -180,54 +180,54 @@ export default function PlantillasPage() {
         render={(paginatedItems) => (
           <>
             {paginatedItems.length === 0 ? (
-              <div className={styles.empty}>
-                <p className={styles.emptyIcon}>📄</p>
-                <p className={styles.emptyText}>No hay plantillas creadas</p>
-                <p className={styles.emptySubtext}>
+              <div className="empty">
+                <p className="emptyIcon">📄</p>
+                <p className="emptyText">No hay plantillas creadas</p>
+                <p className="emptySubtext">
                   Crea plantillas desde propiedades existentes para reutilizar información común
                 </p>
               </div>
             ) : (
-              <div className={styles.templatesGrid}>
+              <div className="templatesGrid">
                 {paginatedItems.map((template) => (
-                  <div key={template.id} className={styles.templateCard}>
-                    <div className={styles.templateHeader}>
-                      <h3 className={styles.templateName}>{template.name}</h3>
-                      <span className={`${styles.statusBadge} ${template.is_active ? styles.statusActive : styles.statusInactive}`}>
+                  <div key={template.id} className="templateCard">
+                    <div className="templateHeader">
+                      <h3 className="templateName">{template.name}</h3>
+                      <span className={`statusBadge ${template.is_active ? 'statusActive' : 'statusInactive'}`}>
                         {template.is_active ? 'Activa' : 'Inactiva'}
                       </span>
                     </div>
                     
                     {template.description && (
-                      <p className={styles.templateDescription}>{template.description}</p>
+                      <p className="templateDescription">{template.description}</p>
                     )}
 
-                    <div className={styles.templateMeta}>
-                      <span className={styles.categoryBadge}>
+                    <div className="templateMeta">
+                      <span className="categoryBadge">
                         {getCategoryLabel(template.category)}
                       </span>
-                      <span className={styles.usageCount}>
+                      <span className="usageCount">
                         Usada {template.usage_count} veces
                       </span>
                     </div>
 
-                    <div className={styles.templateActions}>
+                    <div className="templateActions">
                       <button
                         onClick={() => handleUseTemplate(template)}
-                        className={styles.useButton}
+                        className="useButton"
                         disabled={!template.is_active}
                       >
                         Usar Plantilla
                       </button>
                       <button
                         onClick={() => handleToggleActive(template)}
-                        className={styles.toggleButton}
+                        className="toggleButton"
                       >
                         {template.is_active ? 'Desactivar' : 'Activar'}
                       </button>
                       <button
                         onClick={() => handleDeleteTemplate(template)}
-                        className={styles.deleteButton}
+                        className="deleteButton"
                       >
                         Eliminar
                       </button>
@@ -249,24 +249,24 @@ export default function PlantillasPage() {
           type="alert"
           message=""
         >
-          <div className={styles.modalContent}>
-            <p className={styles.modalInfo}>
+          <div className="modalContent">
+            <p className="modalInfo">
               Para crear una plantilla completa, primero crea o edita una propiedad y luego
               guárdala como plantilla desde allí.
             </p>
-            <div className={styles.modalActions}>
+            <div className="modalActions">
               <button
                 onClick={() => {
                   setShowCreateModal(false)
                   router.push('/admin/propiedades/nueva')
                 }}
-                className={styles.createPropertyButton}
+                className="createPropertyButton"
               >
                 Ir a Crear Propiedad
               </button>
               <button
                 onClick={() => setShowCreateModal(false)}
-                className={styles.cancelButton}
+                className="cancelButton"
               >
                 Cancelar
               </button>
@@ -277,3 +277,4 @@ export default function PlantillasPage() {
     </div>
   )
 }
+

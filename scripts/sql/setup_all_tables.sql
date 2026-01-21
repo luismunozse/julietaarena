@@ -257,3 +257,4 @@ COMMENT ON COLUMN user_roles.permissions IS 'JSON con permisos granulares por se
 -- =====================================================
 -- Script completado exitosamente
 -- =====================================================
+

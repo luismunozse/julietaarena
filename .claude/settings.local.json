@@ -4,7 +4,22 @@
       "Bash(npm run build:*)",
       "Bash(npm i:*)",
       "Bash(npm run test:coverage:*)",
-      "Bash(npm test:*)"
+      "Bash(npm test:*)",
+      "Bash(dir:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tailwindcss:*)",
+      "Bash(npx shadcn@latest init:*)",
+      "Bash(npx shadcn@latest add:*)",
+      "Bash(npx tsc:*)",
+      "Bash(nslookup:*)",
+      "Bash(npm ls:*)",
+      "Bash(powershell -Command \"Get-ChildItem -Path . -Recurse -Filter ''*.module.css'' | Remove-Item -Force\")",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\LUIS\\\\Desktop\\\\julietaarena\\\\src\" -Filter \"*.module.css\" -Recurse)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(ls:*)",
+      "Bash(findstr:*)",
+      "Bash(git checkout:*)",
+      "Bash(npm uninstall:*)"
     ]
   }
 }

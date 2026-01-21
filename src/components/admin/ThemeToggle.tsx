@@ -1,7 +1,20 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import styles from './ThemeToggle.module.css'
+import { useState, useEffect, CSSProperties } from 'react'
+
+const toggleStyle: CSSProperties = {
+  width: '40px',
+  height: '40px',
+  backgroundColor: 'rgba(44, 95, 125, 0.1)',
+  border: 'none',
+  borderRadius: '50%',
+  cursor: 'pointer',
+  fontSize: '1.25rem',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  transition: 'all 0.2s',
+}
 
 export default function ThemeToggle() {
   const [isDark, setIsDark] = useState(false)
@@ -11,7 +24,7 @@ export default function ThemeToggle() {
     const saved = localStorage.getItem('admin-theme')
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
     const shouldBeDark = saved === 'dark' || (!saved && prefersDark)
-    
+
     setIsDark(shouldBeDark)
     applyTheme(shouldBeDark)
   }, [])
@@ -32,9 +45,8 @@ export default function ThemeToggle() {
   }
 
   return (
-    <button onClick={toggleTheme} className={styles.toggle} title={isDark ? 'Modo claro' : 'Modo oscuro'}>
+    <button onClick={toggleTheme} style={toggleStyle} title={isDark ? 'Modo claro' : 'Modo oscuro'}>
       {isDark ? '☀️' : '🌙'}
     </button>
   )
 }
-

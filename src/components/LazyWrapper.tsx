@@ -1,7 +1,6 @@
 'use client'
 
-import { Suspense, ReactNode } from 'react'
-import styles from './LazyWrapper.module.css'
+import { Suspense, ReactNode, CSSProperties } from 'react'
 
 interface LazyWrapperProps {
   children: ReactNode
@@ -9,9 +8,31 @@ interface LazyWrapperProps {
   height?: string
 }
 
-export default function LazyWrapper({ 
-  children, 
-  fallback = <div className={styles.skeleton} />,
+const skeletonStyle: CSSProperties = {
+  width: '100%',
+  height: '200px',
+  backgroundColor: '#e5e7eb',
+  borderRadius: '16px',
+  animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+}
+
+function DefaultSkeleton() {
+  return (
+    <>
+      <div style={skeletonStyle} />
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+      `}</style>
+    </>
+  )
+}
+
+export default function LazyWrapper({
+  children,
+  fallback = <DefaultSkeleton />,
   height = '200px'
 }: LazyWrapperProps) {
   return (

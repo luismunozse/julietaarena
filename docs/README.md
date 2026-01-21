@@ -95,3 +95,4 @@ Los scripts SQL están organizados en `scripts/sql/`:
 - Los scripts SQL con datos sensibles están en `.gitignore`
 - Para más información sobre el proyecto, consulta el [README.md](../README.md) principal
 
+

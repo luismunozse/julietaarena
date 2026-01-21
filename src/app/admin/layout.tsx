@@ -7,41 +7,94 @@ import { useAuth } from '@/hooks/useAuth'
 import { useAdminKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import Modal from '@/components/Modal'
 import KeyboardShortcuts from '@/components/admin/KeyboardShortcuts'
-import ThemeToggle from '@/components/admin/ThemeToggle'
-import styles from './layout.module.css'
+import {
+  LayoutDashboard,
+  Home,
+  Plus,
+  MessageSquare,
+  Mail,
+  BarChart3,
+  Users,
+  FileText,
+  FileCode,
+  Database,
+  Settings,
+  Globe,
+  LogOut,
+  ChevronLeft,
+  ChevronRight,
+  Building2,
+} from 'lucide-react'
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarInset,
+  SidebarTrigger,
+  SidebarSeparator,
+} from '@/components/ui/sidebar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { cn } from '@/lib/utils'
 
 interface AdminLayoutProps {
   children: ReactNode
 }
 
+const menuItems = [
+  { path: '/admin', icon: LayoutDashboard, label: 'Dashboard', exact: true },
+  { path: '/admin/propiedades', icon: Home, label: 'Propiedades', exact: true },
+  { path: '/admin/propiedades/nueva', icon: Plus, label: 'Nueva Propiedad', exact: true },
+  { path: '/admin/consultas', icon: MessageSquare, label: 'Consultas', exact: false },
+  { path: '/admin/contactos', icon: Mail, label: 'Contactos', exact: false },
+  { path: '/admin/analytics', icon: BarChart3, label: 'Analytics', exact: false },
+  { path: '/admin/usuarios', icon: Users, label: 'Usuarios', exact: false },
+  { path: '/admin/logs', icon: FileText, label: 'Logs', exact: false },
+  { path: '/admin/plantillas', icon: FileCode, label: 'Plantillas', exact: false },
+  { path: '/admin/backup', icon: Database, label: 'Backup', exact: false },
+  { path: '/admin/configuracion', icon: Settings, label: 'Configuración', exact: false },
+]
+
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const router = useRouter()
   const pathname = usePathname()
   const { isAuthenticated, isLoading, user, logout } = useAuth()
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [showLogoutModal, setShowLogoutModal] = useState(false)
-  
-  // Activar atajos de teclado
+
   useAdminKeyboardShortcuts()
 
   useEffect(() => {
-    // Solo redirigir si ya terminó de cargar y no está autenticado
     if (!isLoading && !isAuthenticated) {
       router.push(`/login?redirect=${encodeURIComponent(pathname)}`)
     }
   }, [isAuthenticated, isLoading, router, pathname])
 
-  // Mostrar loading mientras verifica la sesión
   if (isLoading) {
     return (
-      <div className={styles.loadingContainer}>
-        <div className={styles.loadingSpinner}></div>
-        <p>Verificando sesión...</p>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          <p className="text-muted-foreground">Verificando sesión...</p>
+        </div>
       </div>
     )
   }
 
-  // No renderizar nada mientras redirige
   if (!isAuthenticated) {
     return null
   }
@@ -55,20 +108,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     router.push('/login')
   }
 
-  const menuItems = [
-    { path: '/admin', icon: '📊', label: 'Dashboard', exact: true },
-    { path: '/admin/propiedades', icon: '🏠', label: 'Propiedades', exact: true },
-    { path: '/admin/propiedades/nueva', icon: '➕', label: 'Nueva Propiedad', exact: true },
-    { path: '/admin/consultas', icon: '💬', label: 'Consultas', exact: false },
-    { path: '/admin/contactos', icon: '📧', label: 'Contactos', exact: false },
-    { path: '/admin/analytics', icon: '📈', label: 'Analytics', exact: false },
-    { path: '/admin/usuarios', icon: '👥', label: 'Usuarios', exact: false },
-    { path: '/admin/logs', icon: '📋', label: 'Logs', exact: false },
-    { path: '/admin/plantillas', icon: '📄', label: 'Plantillas', exact: false },
-    { path: '/admin/backup', icon: '💾', label: 'Backup', exact: false },
-    { path: '/admin/configuracion', icon: '⚙️', label: 'Configuración', exact: false },
-  ]
-
   const isActive = (path: string, exact: boolean) => {
     if (exact) {
       return pathname === path
@@ -77,96 +116,137 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   }
 
   return (
-    <div className={styles.adminLayout}>
-      {/* Sidebar */}
-      <aside className={`${styles.sidebar} ${sidebarCollapsed ? styles.collapsed : ''}`}>
-        {/* Logo/Header */}
-        <div className={styles.sidebarHeader}>
-          <div className={styles.logo}>
-            <span className={styles.logoIcon}>🏘️</span>
-            {!sidebarCollapsed && (
-              <div className={styles.logoText}>
-                <h2>Julieta Arena</h2>
-                <p>Admin Panel</p>
-              </div>
-            )}
-          </div>
-          <button
-            className={styles.toggleButton}
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            title={sidebarCollapsed ? 'Expandir' : 'Contraer'}
-          >
-            {sidebarCollapsed ? '→' : '←'}
-          </button>
-        </div>
-
-        {/* User Info */}
-        <div className={styles.userSection}>
-          <div className={styles.userAvatar}>
-            {(user?.name || user?.email || 'A').charAt(0).toUpperCase()}
-          </div>
-          {!sidebarCollapsed && (
-            <div className={styles.userName}>
-              <p className={styles.userNameText}>{user?.name || 'Admin'}</p>
-              <p className={styles.userEmail}>{user?.email}</p>
+    <SidebarProvider>
+      <Sidebar collapsible="icon" className="border-r">
+        {/* Header */}
+        <SidebarHeader className="border-b px-4 py-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <Building2 className="h-5 w-5" />
             </div>
-          )}
-        </div>
-
-        {/* Navigation */}
-        <nav className={styles.navigation}>
-          <div className={styles.navSection}>
-            {!sidebarCollapsed && <p className={styles.navTitle}>MENÚ PRINCIPAL</p>}
-            {menuItems.map((item) => (
-              <Link
-                key={item.path}
-                href={item.path}
-                className={`${styles.navItem} ${isActive(item.path, item.exact) ? styles.active : ''}`}
-                title={item.label}
-              >
-                <span className={styles.navIcon}>{item.icon}</span>
-                {!sidebarCollapsed && <span className={styles.navLabel}>{item.label}</span>}
-              </Link>
-            ))}
+            <div className="flex flex-col group-data-[collapsible=icon]:hidden">
+              <span className="font-semibold text-sm">Julieta Arena</span>
+              <span className="text-xs text-muted-foreground">Admin Panel</span>
+            </div>
           </div>
+        </SidebarHeader>
 
-          <div className={styles.navSection}>
-            {!sidebarCollapsed && <p className={styles.navTitle}>ACCIONES</p>}
-            <Link
-              href="/"
-              className={styles.navItem}
-              title="Ver Sitio"
-            >
-              <span className={styles.navIcon}>🌐</span>
-              {!sidebarCollapsed && <span className={styles.navLabel}>Ver Sitio</span>}
-            </Link>
-            {!sidebarCollapsed && (
-              <div style={{ padding: '0.5rem', display: 'flex', justifyContent: 'center' }}>
-                <ThemeToggle />
-              </div>
-            )}
-            <button
-              onClick={handleLogoutClick}
-              className={`${styles.navItem} ${styles.logoutItem}`}
-              title="Cerrar Sesión"
-              type="button"
-            >
-              <span className={styles.navIcon}>🚪</span>
-              {!sidebarCollapsed && <span className={styles.navLabel}>Cerrar Sesión</span>}
-            </button>
-          </div>
-        </nav>
-      </aside>
+        {/* Content */}
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupLabel>Menú Principal</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {menuItems.map((item) => (
+                  <SidebarMenuItem key={item.path}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive(item.path, item.exact)}
+                      tooltip={item.label}
+                    >
+                      <Link href={item.path}>
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+
+          <SidebarSeparator />
+
+          <SidebarGroup>
+            <SidebarGroupLabel>Acciones</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild tooltip="Ver Sitio">
+                    <Link href="/" target="_blank">
+                      <Globe className="h-4 w-4" />
+                      <span>Ver Sitio</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+
+        {/* Footer */}
+        <SidebarFooter className="border-t">
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <SidebarMenuButton
+                    size="lg"
+                    className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                  >
+                    <Avatar className="h-8 w-8 rounded-lg">
+                      <AvatarFallback className="rounded-lg bg-primary text-primary-foreground">
+                        {(user?.name || user?.email || 'A').charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
+                      <span className="truncate font-semibold">{user?.name || 'Admin'}</span>
+                      <span className="truncate text-xs text-muted-foreground">{user?.email}</span>
+                    </div>
+                  </SidebarMenuButton>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+                  side="bottom"
+                  align="end"
+                  sideOffset={4}
+                >
+                  <div className="flex items-center gap-2 px-2 py-1.5">
+                    <Avatar className="h-8 w-8 rounded-lg">
+                      <AvatarFallback className="rounded-lg bg-primary text-primary-foreground">
+                        {(user?.name || user?.email || 'A').charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="grid flex-1 text-left text-sm leading-tight">
+                      <span className="truncate font-semibold">{user?.name || 'Admin'}</span>
+                      <span className="truncate text-xs text-muted-foreground">{user?.email}</span>
+                    </div>
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/configuracion" className="cursor-pointer">
+                      <Settings className="mr-2 h-4 w-4" />
+                      Configuración
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogoutClick} className="text-destructive cursor-pointer">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Cerrar Sesión
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarFooter>
+      </Sidebar>
 
       {/* Main Content */}
-      <main className={styles.mainContent}>
-        {children}
-      </main>
+      <SidebarInset>
+        <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
+          <SidebarTrigger className="-ml-1" />
+          <div className="h-4 w-px bg-border" />
+          <div className="flex-1" />
+        </header>
+        <main className="flex-1 overflow-auto p-6">
+          {children}
+        </main>
+      </SidebarInset>
 
-      {/* Componentes globales */}
+      {/* Global Components */}
       <KeyboardShortcuts />
 
-      {/* Modal de Logout */}
+      {/* Logout Modal */}
       <Modal
         isOpen={showLogoutModal}
         onClose={() => setShowLogoutModal(false)}
@@ -175,6 +255,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         message="¿Estás seguro de que deseas cerrar sesión?"
         type="confirm"
       />
-    </div>
+    </SidebarProvider>
   )
 }

@@ -1,8 +1,7 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, CSSProperties } from 'react'
 import { Property } from '@/data/properties'
-import styles from './GoogleMaps.module.css'
 
 interface GoogleMapsProps {
   properties: Property[]
@@ -33,28 +32,134 @@ const ZONE_COORDINATES: Record<string, { lat: number; lng: number }> = {
 
 const sanitizeUrl = (url: string) => url.replace(/"/g, '&quot;').replace(/'/g, '&#39;')
 
-export default function GoogleMaps({ 
-  properties, 
-  selectedProperty, 
+// Inline styles
+const inlineStyles: Record<string, CSSProperties> = {
+  mapContainer: {
+    position: 'relative',
+    width: '100%',
+    borderRadius: '16px',
+    overflow: 'hidden',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+  },
+  map: {
+    width: '100%',
+    height: '100%',
+  },
+  mapError: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100%',
+    backgroundColor: '#f8f9fa',
+    color: '#636e72',
+    textAlign: 'center',
+    padding: '2rem',
+  },
+  mapLoading: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f8f9fa',
+    color: '#636e72',
+  },
+  loadingSpinner: {
+    width: '40px',
+    height: '40px',
+    border: '4px solid #e5e7eb',
+    borderTopColor: '#2c5f7d',
+    borderRadius: '50%',
+    animation: 'spin 1s linear infinite',
+    marginBottom: '1rem',
+  },
+}
+
+// Info window styles as CSS string for injection
+const infoWindowStyles = `
+  .gm-info-window {
+    padding: 0;
+    max-width: 280px;
+    font-family: inherit;
+  }
+  .gm-info-image {
+    width: 100%;
+    height: 120px;
+    background-size: cover;
+    background-position: center;
+    background-color: #e5e7eb;
+    border-radius: 8px 8px 0 0;
+  }
+  .gm-info-content {
+    padding: 12px;
+  }
+  .gm-info-content h3 {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a4158;
+  }
+  .gm-info-location {
+    margin: 0 0 4px 0;
+    font-size: 12px;
+    color: #636e72;
+  }
+  .gm-info-price {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #2c5f7d;
+  }
+  .gm-info-details {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+    font-size: 12px;
+    color: #636e72;
+  }
+  .gm-info-button {
+    width: 100%;
+    padding: 8px 16px;
+    background-color: #2c5f7d;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+  }
+  .gm-info-button:hover {
+    background-color: #1a4158;
+  }
+`
+
+export default function GoogleMaps({
+  properties,
+  selectedProperty,
   onPropertySelect,
-  height = '500px' 
+  height = '500px'
 }: GoogleMapsProps) {
   const mapRef = useRef<HTMLDivElement>(null)
   const [map, setMap] = useState<any>(null)
   const markersRef = useRef<any[]>([])
   const [isLoaded, setIsLoaded] = useState(false)
 
-  const getPropertyIcon = (property: Property) => {
-    const icons = {
-      casa: '🏠',
-      departamento: '🏢',
-      terreno: '🏞️',
-      local: '🏪',
-      oficina: '🏢',
-      cochera: '🅿️'
+  // Inject info window styles
+  useEffect(() => {
+    const styleId = 'google-maps-info-styles'
+    if (!document.getElementById(styleId)) {
+      const styleEl = document.createElement('style')
+      styleEl.id = styleId
+      styleEl.textContent = infoWindowStyles
+      document.head.appendChild(styleEl)
     }
-    return icons[property.type] || '🏠'
-  }
+  }, [])
 
   const getPropertyColor = (property: Property) => {
     return property.operation === 'venta' ? '#2c5f7d' : '#e8b86d'
@@ -95,18 +200,18 @@ export default function GoogleMaps({
 
       const infoWindow = new window.google.maps.InfoWindow({
         content: `
-          <div class="${styles.infoWindow}">
-            <div class="${styles.infoImage}" ${imageUrl ? `style="background-image:url('${imageUrl}')"` : ''}></div>
-            <div class="${styles.infoContent}">
+          <div class="gm-info-window">
+            <div class="gm-info-image" ${imageUrl ? `style="background-image:url('${imageUrl}')"` : ''}></div>
+            <div class="gm-info-content">
               <h3>${property.title}</h3>
-              <p class="${styles.infoLocation}">📍 ${property.location}</p>
-              <p class="${styles.infoPrice}">${formatPrice(property.price)}${property.operation === 'alquiler' ? '/mes' : ''}</p>
-              <div class="${styles.infoDetails}">
+              <p class="gm-info-location">📍 ${property.location}</p>
+              <p class="gm-info-price">${formatPrice(property.price)}${property.operation === 'alquiler' ? '/mes' : ''}</p>
+              <div class="gm-info-details">
                 <span>${property.area}m²</span>
                 ${property.bedrooms ? `<span>🛏️ ${property.bedrooms}</span>` : ''}
                 ${property.bathrooms ? `<span>🚿 ${property.bathrooms}</span>` : ''}
               </div>
-              <button onclick="window.selectProperty('${property.id}')" class="${styles.infoButton}">
+              <button onclick="window.selectProperty('${property.id}')" class="gm-info-button">
                 Ver Detalles
               </button>
             </div>
@@ -191,7 +296,7 @@ export default function GoogleMaps({
     if (selectedProperty && map) {
       const location = selectedProperty.location.split(',')[0].trim()
       const coords = ZONE_COORDINATES[location] || CORDOBA_CENTER
-      
+
       map.setCenter(coords)
       map.setZoom(15)
     }
@@ -199,8 +304,8 @@ export default function GoogleMaps({
 
   if (!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) {
     return (
-      <div className={styles.mapContainer} style={{ height }}>
-        <div className={styles.mapError}>
+      <div style={{ ...inlineStyles.mapContainer, height }}>
+        <div style={inlineStyles.mapError}>
           <h3>Mapa no disponible</h3>
           <p>Google Maps API key no configurada</p>
         </div>
@@ -209,14 +314,19 @@ export default function GoogleMaps({
   }
 
   return (
-    <div className={styles.mapContainer} style={{ height }}>
-      <div ref={mapRef} className={styles.map} />
+    <div style={{ ...inlineStyles.mapContainer, height }}>
+      <div ref={mapRef} style={inlineStyles.map} />
       {!isLoaded && (
-        <div className={styles.mapLoading}>
-          <div className={styles.loadingSpinner}></div>
+        <div style={inlineStyles.mapLoading}>
+          <div style={inlineStyles.loadingSpinner}></div>
           <p>Cargando mapa...</p>
         </div>
       )}
+      <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   )
 }

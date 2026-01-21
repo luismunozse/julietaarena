@@ -1,7 +1,16 @@
 'use client'
 
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
 import { usePagination } from '@/hooks/usePagination'
-import styles from './Pagination.module.css'
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 interface PaginationProps<T> {
   items: T[]
@@ -40,78 +49,102 @@ export default function Pagination<T>({
   return (
     <>
       {render(paginatedItems)}
-      
+
       {totalPages > 1 && (
-        <div className={styles.pagination}>
-          <div className={styles.paginationInfo}>
+        <div
+          className={cn(
+            'flex justify-between items-center p-6 bg-white rounded-lg mt-8 flex-wrap gap-4',
+            'max-md:flex-col max-md:items-stretch'
+          )}
+        >
+          <div
+            className={cn(
+              'flex items-center gap-4 text-muted-foreground text-sm',
+              'max-md:justify-between max-md:w-full'
+            )}
+          >
             <span>
               Mostrando {(currentPage - 1) * currentItemsPerPage + 1} - {Math.min(currentPage * currentItemsPerPage, totalItems)} de {totalItems}
             </span>
-            <select
-              value={currentItemsPerPage}
-              onChange={(e) => {
-                setItemsPerPage(Number(e.target.value))
+            <Select
+              value={String(currentItemsPerPage)}
+              onValueChange={(value) => {
+                setItemsPerPage(Number(value))
                 handlePageChange(1)
               }}
-              className={styles.itemsPerPageSelect}
             >
-              <option value={10}>10 por página</option>
-              <option value={25}>25 por página</option>
-              <option value={50}>50 por página</option>
-              <option value={100}>100 por página</option>
-            </select>
+              <SelectTrigger className="w-[140px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10">10 por página</SelectItem>
+                <SelectItem value="25">25 por página</SelectItem>
+                <SelectItem value="50">50 por página</SelectItem>
+                <SelectItem value="100">100 por página</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
-          <div className={styles.paginationControls}>
-            <button
+          <div
+            className={cn(
+              'flex items-center gap-2',
+              'max-md:w-full max-md:justify-center max-md:flex-wrap'
+            )}
+          >
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => {
                 goToFirst()
                 handlePageChange(1)
               }}
               disabled={!hasPreviousPage}
-              className={styles.paginationButton}
             >
-              ««
-            </button>
-            <button
+              <ChevronsLeft className="size-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => {
                 goToPrevious()
                 handlePageChange(currentPage - 1)
               }}
               disabled={!hasPreviousPage}
-              className={styles.paginationButton}
             >
-              « Anterior
-            </button>
-            
-            <span className={styles.pageInfo}>
-              Página {currentPage} de {totalPages}
+              <ChevronLeft className="size-4" />
+              <span className="max-sm:hidden">Anterior</span>
+            </Button>
+
+            <span className="px-4 font-semibold text-muted-foreground">
+              Pagina {currentPage} de {totalPages}
             </span>
-            
-            <button
+
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => {
                 goToNext()
                 handlePageChange(currentPage + 1)
               }}
               disabled={!hasNextPage}
-              className={styles.paginationButton}
             >
-              Siguiente »
-            </button>
-            <button
+              <span className="max-sm:hidden">Siguiente</span>
+              <ChevronRight className="size-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => {
                 goToLast()
                 handlePageChange(totalPages)
               }}
               disabled={!hasNextPage}
-              className={styles.paginationButton}
             >
-              »»
-            </button>
+              <ChevronsRight className="size-4" />
+            </Button>
           </div>
         </div>
       )}
     </>
   )
 }
-

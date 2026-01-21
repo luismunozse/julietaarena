@@ -58,3 +58,4 @@ export function exportToJSON(properties: Property[], filename = 'propiedades') {
   document.body.removeChild(link)
 }
 
+

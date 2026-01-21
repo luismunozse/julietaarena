@@ -122,3 +122,4 @@ export async function isAdmin(userId: string): Promise<boolean> {
     return false
   }
 }
+

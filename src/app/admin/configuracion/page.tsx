@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useToast } from '@/components/ToastContainer'
-import styles from './page.module.css'
+
 
 interface SiteSettings {
   contactPhone: string
@@ -15,9 +15,6 @@ interface SiteSettings {
   twitterUrl: string
   defaultCurrency: 'ARS' | 'USD'
   googleMapsApiKey: string
-  emailjsServiceId: string
-  emailjsTemplateId: string
-  emailjsPublicKey: string
   siteTitle: string
   siteDescription: string
   siteKeywords: string
@@ -37,9 +34,6 @@ export default function ConfiguracionPage() {
     twitterUrl: '',
     defaultCurrency: 'ARS',
     googleMapsApiKey: '',
-    emailjsServiceId: '',
-    emailjsTemplateId: '',
-    emailjsPublicKey: '',
     siteTitle: '',
     siteDescription: '',
     siteKeywords: '',
@@ -83,24 +77,24 @@ export default function ConfiguracionPage() {
 
   if (isLoading) {
     return (
-      <div className={styles.container}>
-        <div className={styles.loading}>Cargando configuración...</div>
+      <div className="container">
+        <div className="loading">Cargando configuración...</div>
       </div>
     )
   }
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
+    <div className="container">
+      <div className="header">
         <h1>Configuración del Sitio</h1>
         <p>Gestiona la configuración general del sitio web</p>
       </div>
 
-      <div className={styles.settingsGrid}>
+      <div className="settingsGrid">
         {/* Información de Contacto */}
-        <div className={styles.settingsSection}>
+        <div className="settingsSection">
           <h2>📞 Información de Contacto</h2>
-          <div className={styles.formGroup}>
+          <div className="formGroup">
             <label>Teléfono</label>
             <input
               type="text"
@@ -109,7 +103,7 @@ export default function ConfiguracionPage() {
               placeholder="+54 9 11 1234-5678"
             />
           </div>
-          <div className={styles.formGroup}>
+          <div className="formGroup">
             <label>Email</label>
             <input
               type="email"
@@ -118,7 +112,7 @@ export default function ConfiguracionPage() {
               placeholder="contacto@julietaarena.com"
             />
           </div>
-          <div className={styles.formGroup}>
+          <div className="formGroup">
             <label>Dirección</label>
             <textarea
               value={settings.contactAddress}
@@ -130,9 +124,9 @@ export default function ConfiguracionPage() {
         </div>
 
         {/* Redes Sociales */}
-        <div className={styles.settingsSection}>
+        <div className="settingsSection">
           <h2>🌐 Redes Sociales</h2>
-          <div className={styles.formGroup}>
+          <div className="formGroup">
             <label>Facebook</label>
             <input
               type="url"
@@ -141,7 +135,7 @@ export default function ConfiguracionPage() {
               placeholder="https://facebook.com/..."
             />
           </div>
-          <div className={styles.formGroup}>
+          <div className="formGroup">
             <label>Instagram</label>
             <input
               type="url"
@@ -150,7 +144,7 @@ export default function ConfiguracionPage() {
               placeholder="https://instagram.com/..."
             />
           </div>
-          <div className={styles.formGroup}>
+          <div className="formGroup">
             <label>LinkedIn</label>
             <input
               type="url"
@@ -159,7 +153,7 @@ export default function ConfiguracionPage() {
               placeholder="https://linkedin.com/..."
             />
           </div>
-          <div className={styles.formGroup}>
+          <div className="formGroup">
             <label>Twitter</label>
             <input
               type="url"
@@ -171,9 +165,9 @@ export default function ConfiguracionPage() {
         </div>
 
         {/* Configuración General */}
-        <div className={styles.settingsSection}>
+        <div className="settingsSection">
           <h2>⚙️ Configuración General</h2>
-          <div className={styles.formGroup}>
+          <div className="formGroup">
             <label>Moneda por Defecto</label>
             <select
               value={settings.defaultCurrency}
@@ -186,9 +180,9 @@ export default function ConfiguracionPage() {
         </div>
 
         {/* SEO */}
-        <div className={styles.settingsSection}>
+        <div className="settingsSection">
           <h2>🔍 SEO</h2>
-          <div className={styles.formGroup}>
+          <div className="formGroup">
             <label>Título del Sitio</label>
             <input
               type="text"
@@ -197,7 +191,7 @@ export default function ConfiguracionPage() {
               placeholder="Julieta Arena - Martillera Pública"
             />
           </div>
-          <div className={styles.formGroup}>
+          <div className="formGroup">
             <label>Descripción</label>
             <textarea
               value={settings.siteDescription}
@@ -206,7 +200,7 @@ export default function ConfiguracionPage() {
               rows={3}
             />
           </div>
-          <div className={styles.formGroup}>
+          <div className="formGroup">
             <label>Palabras Clave</label>
             <input
               type="text"
@@ -218,9 +212,9 @@ export default function ConfiguracionPage() {
         </div>
 
         {/* Integraciones */}
-        <div className={styles.settingsSection}>
+        <div className="settingsSection">
           <h2>🔗 Integraciones</h2>
-          <div className={styles.formGroup}>
+          <div className="formGroup">
             <label>Google Maps API Key</label>
             <input
               type="text"
@@ -229,41 +223,14 @@ export default function ConfiguracionPage() {
               placeholder="AIza..."
             />
           </div>
-          <div className={styles.formGroup}>
-            <label>EmailJS Service ID</label>
-            <input
-              type="text"
-              value={settings.emailjsServiceId}
-              onChange={(e) => handleChange('emailjsServiceId', e.target.value)}
-              placeholder="service_xxxxx"
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label>EmailJS Template ID</label>
-            <input
-              type="text"
-              value={settings.emailjsTemplateId}
-              onChange={(e) => handleChange('emailjsTemplateId', e.target.value)}
-              placeholder="template_xxxxx"
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label>EmailJS Public Key</label>
-            <input
-              type="text"
-              value={settings.emailjsPublicKey}
-              onChange={(e) => handleChange('emailjsPublicKey', e.target.value)}
-              placeholder="xxxxx"
-            />
-          </div>
         </div>
       </div>
 
-      <div className={styles.actions}>
+      <div className="actions">
         <button
           onClick={saveSettings}
           disabled={isSaving}
-          className={styles.saveButton}
+          className="saveButton"
         >
           {isSaving ? 'Guardando...' : '💾 Guardar Configuración'}
         </button>

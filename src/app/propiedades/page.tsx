@@ -1,6 +1,5 @@
 import SearchHero from '@/components/SearchHero'
 import FeaturedProperties from '@/components/FeaturedProperties'
-import styles from './page.module.css'
 
 export const metadata = {
   title: 'Buscar Propiedades | Julieta Arena - Martillera Pública',
@@ -10,7 +9,7 @@ export const metadata = {
 
 export default function PropiedadesPage() {
   return (
-    <main className={styles.pageContainer}>
+    <main className="min-h-screen bg-surface">
       <SearchHero />
       <FeaturedProperties />
     </main>

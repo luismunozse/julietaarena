@@ -1,7 +1,6 @@
 'use client'
 
 import { Property } from '@/data/properties'
-import styles from './MapPlaceholder.module.css'
 
 interface MapPlaceholderProps {
   properties: Property[]
@@ -10,13 +9,12 @@ interface MapPlaceholderProps {
   height?: string
 }
 
-export default function MapPlaceholder({ 
-  properties, 
-  selectedProperty, 
+export default function MapPlaceholder({
+  properties,
+  selectedProperty,
   onPropertySelect,
-  height = '500px' 
+  height = '500px'
 }: MapPlaceholderProps) {
-  // Coordenadas aproximadas para diferentes zonas
   const zoneCoordinates: { [key: string]: { lat: number; lng: number } } = {
     'Villa Allende': { lat: -31.3000, lng: -64.3000 },
     'Nueva Córdoba': { lat: -31.4200, lng: -64.1900 },
@@ -55,74 +53,133 @@ export default function MapPlaceholder({
   }
 
   return (
-    <div className={styles.mapContainer} style={{ height }}>
-      <div className={styles.mapHeader}>
-        <h3>📍 Ubicación de Propiedades</h3>
-        <p>Mapa interactivo de propiedades en Córdoba</p>
+    <div
+      style={{
+        height,
+        background: 'white',
+        borderRadius: '16px',
+        overflow: 'hidden',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+        display: 'flex',
+        flexDirection: 'column'
+      }}
+    >
+      {/* Header */}
+      <div
+        style={{
+          padding: '16px 20px',
+          borderBottom: '1px solid #e5e7eb',
+          background: 'linear-gradient(135deg, #2c5f7d 0%, #1a4158 100%)'
+        }}
+      >
+        <h3 style={{ color: 'white', margin: 0, fontSize: '1.1rem', fontWeight: '600' }}>
+          📍 Ubicación de Propiedades
+        </h3>
+        <p style={{ color: 'rgba(255,255,255,0.8)', margin: '4px 0 0 0', fontSize: '0.9rem' }}>
+          Mapa interactivo de propiedades en Córdoba
+        </p>
       </div>
-      
-      <div className={styles.mapContent}>
-        <div className={styles.mapArea}>
-          <div className={styles.mapBackground}>
-            <div className={styles.mapTitle}>Córdoba, Argentina</div>
-            <div className={styles.mapSubtitle}>Zona de propiedades</div>
-          </div>
-          
-          <div className={styles.propertiesList}>
-            {properties.slice(0, 6).map((property, index) => {
-              const location = property.location.split(',')[0].trim()
-              const coords = zoneCoordinates[location] || zoneCoordinates['Centro']
-              
-              return (
-                <div 
-                  key={property.id}
-                  className={`${styles.propertyMarker} ${selectedProperty?.id === property.id ? styles.selected : ''}`}
-                  style={{
-                    left: `${20 + (index * 12)}%`,
-                    top: `${30 + (index % 3) * 20}%`
-                  }}
-                  onClick={() => onPropertySelect?.(property)}
-                >
-                  <div 
-                    className={styles.markerIcon}
-                    style={{ backgroundColor: getPropertyColor(property) }}
-                  >
-                    {getPropertyIcon(property)}
-                  </div>
-                  <div className={styles.markerTooltip}>
-                    <div className={styles.tooltipTitle}>{property.title}</div>
-                    <div className={styles.tooltipPrice}>
-                      {formatPrice(property.price)}{property.operation === 'alquiler' ? '/mes' : ''}
-                    </div>
-                    <div className={styles.tooltipLocation}>📍 {property.location}</div>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
+
+      {/* Map Content */}
+      <div style={{ flex: 1, position: 'relative', background: '#e8f4f8' }}>
+        {/* Map Area */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column'
+          }}
+        >
+          <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#2c5f7d' }}>Córdoba, Argentina</div>
+          <div style={{ fontSize: '1rem', color: '#636e72' }}>Zona de propiedades</div>
         </div>
-        
-        <div className={styles.mapLegend}>
-          <div className={styles.legendItem}>
-            <div className={styles.legendColor} style={{ backgroundColor: '#2c5f7d' }}></div>
-            <span>En Venta</span>
+
+        {/* Property Markers */}
+        {properties.slice(0, 6).map((property, index) => (
+          <div
+            key={property.id}
+            onClick={() => onPropertySelect?.(property)}
+            style={{
+              position: 'absolute',
+              left: `${20 + (index * 12)}%`,
+              top: `${30 + (index % 3) * 20}%`,
+              cursor: 'pointer',
+              zIndex: selectedProperty?.id === property.id ? 10 : 1
+            }}
+          >
+            <div
+              style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                background: getPropertyColor(property),
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '20px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                border: selectedProperty?.id === property.id ? '3px solid white' : 'none',
+                transform: selectedProperty?.id === property.id ? 'scale(1.2)' : 'scale(1)',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              {getPropertyIcon(property)}
+            </div>
           </div>
-          <div className={styles.legendItem}>
-            <div className={styles.legendColor} style={{ backgroundColor: '#28a745' }}></div>
-            <span>En Alquiler</span>
-          </div>
-          <div className={styles.legendItem}>
-            <div className={styles.legendColor} style={{ backgroundColor: '#e8b86d' }}></div>
-            <span>Destacadas</span>
-          </div>
+        ))}
+      </div>
+
+      {/* Legend */}
+      <div
+        style={{
+          padding: '12px 20px',
+          borderTop: '1px solid #e5e7eb',
+          display: 'flex',
+          gap: '20px',
+          flexWrap: 'wrap'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#2c5f7d' }} />
+          <span style={{ fontSize: '13px', color: '#636e72' }}>En Venta</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#28a745' }} />
+          <span style={{ fontSize: '13px', color: '#636e72' }}>En Alquiler</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#e8b86d' }} />
+          <span style={{ fontSize: '13px', color: '#636e72' }}>Destacadas</span>
         </div>
       </div>
-      
-      <div className={styles.mapFooter}>
-        <p>💡 Para ver el mapa interactivo completo, configura la API de Google Maps</p>
-        <button 
-          className={styles.setupButton}
+
+      {/* Footer */}
+      <div
+        style={{
+          padding: '16px 20px',
+          borderTop: '1px solid #e5e7eb',
+          background: '#f8f9fa',
+          textAlign: 'center'
+        }}
+      >
+        <p style={{ color: '#636e72', margin: '0 0 12px 0', fontSize: '14px' }}>
+          💡 Para ver el mapa interactivo completo, configura la API de Google Maps
+        </p>
+        <button
           onClick={() => window.open('https://console.cloud.google.com/', '_blank')}
+          style={{
+            padding: '10px 20px',
+            background: 'linear-gradient(135deg, #2c5f7d 0%, #1a4158 100%)',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            fontWeight: '500',
+            cursor: 'pointer',
+            fontSize: '14px'
+          }}
         >
           Configurar Google Maps API
         </button>

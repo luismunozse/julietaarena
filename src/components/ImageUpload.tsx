@@ -3,7 +3,6 @@
 import { useState, useRef, useCallback, type DragEvent } from 'react'
 import Image from 'next/image'
 import { uploadPropertyImage, deletePropertyImage, getPublicImageUrl } from '@/lib/storage'
-import styles from './ImageUpload.module.css'
 
 interface ImageUploadProps {
   images: string[]
@@ -227,11 +226,11 @@ export default function ImageUpload({
   }, [resetDragState])
 
   return (
-    <div className={styles.container}>
+    <div className="container">
       {/* Zona de subida */}
       <div
         ref={dropZoneRef}
-        className={`${styles.dropZone} ${isDragging ? styles.dragging : ''} ${uploading ? styles.uploading : ''}`}
+        className={`dropZone ${isDragging ? 'dragging' : ''} ${uploading ? 'uploading' : ''}`}
         onDragEnter={handleDragEnter}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -244,26 +243,26 @@ export default function ImageUpload({
           accept="image/*"
           multiple
           onChange={handleFileSelect}
-          className={styles.hiddenInput}
+          className="hiddenInput"
           disabled={uploading || images.length >= maxImages}
         />
 
-        <div className={styles.dropZoneContent}>
+        <div className="dropZoneContent">
           {uploading ? (
             <>
-              <div className={styles.spinner}></div>
+              <div className="spinner"></div>
               <p>Subiendo imágenes...</p>
             </>
           ) : (
             <>
-              <div className={styles.uploadIcon}>📸</div>
-              <p className={styles.uploadText}>
+              <div className="uploadIcon">📸</div>
+              <p className="uploadText">
                 <strong>Haz clic o arrastra imágenes aquí</strong>
               </p>
-              <p className={styles.uploadHint}>
+              <p className="uploadHint">
                 Máximo {maxImages} imágenes • {maxSizeMB}MB por imagen
               </p>
-              <p className={styles.uploadHint}>
+              <p className="uploadHint">
                 Formatos: JPG, PNG, WebP
               </p>
             </>
@@ -272,10 +271,10 @@ export default function ImageUpload({
       </div>
 
       {/* Opción alternativa: URL */}
-      <div className={styles.urlOption}>
+      <div className="urlOption">
         <details>
           <summary>O agregar desde URL</summary>
-          <div className={styles.urlInput}>
+          <div className="urlInput">
             <input
               type="url"
               placeholder="https://ejemplo.com/imagen.jpg"
@@ -303,18 +302,18 @@ export default function ImageUpload({
 
       {/* Mensaje de error */}
       {error && (
-        <div className={styles.error}>
+        <div className="error">
           ⚠️ {error}
         </div>
       )}
 
       {/* Vista previa de imágenes */}
       {images.length > 0 && (
-        <div className={styles.imagesGrid}>
+        <div className="imagesGrid">
           {images.map((image, index) => {
-            const previewClasses = [styles.imagePreview]
-            if (draggingIndex === index) previewClasses.push(styles.imagePreviewDragging)
-            if (dragOverIndex === index && draggingIndex !== index) previewClasses.push(styles.imagePreviewDropTarget)
+            const previewClasses = ['imagePreview']
+            if (draggingIndex === index) previewClasses.push('imagePreviewDragging')
+            if (dragOverIndex === index && draggingIndex !== index) previewClasses.push('imagePreviewDropTarget')
 
             return (
               <div
@@ -332,13 +331,13 @@ export default function ImageUpload({
                   alt={`Imagen ${index + 1}`}
                   fill
                   sizes="(max-width: 768px) 45vw, 150px"
-                  className={styles.previewImage}
+                  className="previewImage"
                   unoptimized
                   onError={() => setBrokenPreviews((prev) => ({ ...prev, [image]: true }))}
                 />
-                <div className={styles.imageOverlay}>
-                  <span className={styles.imageNumber}>{index + 1}</span>
-                  <div className={styles.imageActions}>
+                <div className="imageOverlay">
+                  <span className="imageNumber">{index + 1}</span>
+                  <div className="imageActions">
                     {index > 0 && (
                       <button
                         type="button"
@@ -346,7 +345,7 @@ export default function ImageUpload({
                           e.stopPropagation()
                           handleMoveImage(index, index - 1)
                         }}
-                        className={styles.moveButton}
+                        className="moveButton"
                         title="Mover hacia arriba"
                       >
                         ↑
@@ -359,7 +358,7 @@ export default function ImageUpload({
                           e.stopPropagation()
                           handleMoveImage(index, index + 1)
                         }}
-                        className={styles.moveButton}
+                        className="moveButton"
                         title="Mover hacia abajo"
                       >
                         ↓
@@ -371,7 +370,7 @@ export default function ImageUpload({
                         e.stopPropagation()
                         handleRemoveImage(index)
                       }}
-                      className={styles.removeButton}
+                      className="removeButton"
                       title="Eliminar"
                     >
                       ✕
@@ -386,17 +385,17 @@ export default function ImageUpload({
 
       {/* Información */}
       {images.length > 0 && (
-        <div className={styles.info}>
+        <div className="info">
           <p>
             {images.length} {images.length === 1 ? 'imagen' : 'imágenes'} agregada{images.length === 1 ? '' : 's'}
             {images.length > 0 && images[0]?.startsWith('data:') && (
-              <span className={styles.warning}>
+              <span className="warning">
                 {' • '}Las imágenes se guardan temporalmente. Para producción, configura Cloudinary o un servicio de almacenamiento.
               </span>
             )}
           </p>
           {images.length > 1 && (
-            <p className={styles.reorderHint}>
+            <p className="reorderHint">
               Arrastra las miniaturas para reordenar. La primera imagen se usa como portada.
             </p>
           )}

@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react'
 import GoogleMaps from './GoogleMaps'
-import styles from './PropertyMap.module.css'
 import { Property } from '@/data/properties'
 
 interface PropertyMapProps {
@@ -16,22 +15,220 @@ interface MapMarker {
   position: { lat: number; lng: number }
 }
 
-// Coordenadas aproximadas de Córdoba y alrededores
+// Coordenadas aproximadas de Cordoba y alrededores
 const cordobaCoordinates = {
   lat: -31.4201,
   lng: -64.1888
 }
 
-// Coordenadas aproximadas para diferentes zonas de Córdoba
+// Coordenadas aproximadas para diferentes zonas de Cordoba
 const zoneCoordinates: { [key: string]: { lat: number; lng: number } } = {
   'Villa Allende': { lat: -31.3000, lng: -64.3000 },
-  'Nueva Córdoba': { lat: -31.4200, lng: -64.1900 },
+  'Nueva Cordoba': { lat: -31.4200, lng: -64.1900 },
   'Carlos Paz': { lat: -31.4240, lng: -64.4978 },
   'Centro': { lat: -31.4201, lng: -64.1888 },
   'Barrio Norte': { lat: -31.4000, lng: -64.1800 },
-  'Barrio Jardín': { lat: -31.4100, lng: -64.2000 },
-  'Barrio Güemes': { lat: -31.4300, lng: -64.2000 },
+  'Barrio Jardin': { lat: -31.4100, lng: -64.2000 },
+  'Barrio Guemes': { lat: -31.4300, lng: -64.2000 },
   'Torre Empresarial': { lat: -31.4150, lng: -64.1850 }
+}
+
+const inlineStyles = {
+  mapSection: {
+    padding: '4rem 0',
+  } as React.CSSProperties,
+  mapContainer: {
+    backgroundColor: '#fff',
+    borderRadius: '16px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+    overflow: 'hidden',
+  } as React.CSSProperties,
+  mapFilters: {
+    display: 'flex',
+    flexWrap: 'wrap' as const,
+    gap: '1rem',
+    padding: '1rem',
+    borderBottom: '1px solid #e5e7eb',
+    backgroundColor: '#f8f9fa',
+  } as React.CSSProperties,
+  filterGroup: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '0.25rem',
+    minWidth: '180px',
+  } as React.CSSProperties,
+  filterSelect: {
+    padding: '0.5rem 1rem',
+    borderRadius: '8px',
+    border: '1px solid #e5e7eb',
+    fontSize: '0.9rem',
+    backgroundColor: '#fff',
+    cursor: 'pointer',
+    outline: 'none',
+  } as React.CSSProperties,
+  mapWrapper: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 320px',
+    gap: 0,
+  } as React.CSSProperties,
+  propertyList: {
+    borderLeft: '1px solid #e5e7eb',
+    padding: '1rem',
+    overflowY: 'auto' as const,
+    backgroundColor: '#f8f9fa',
+    maxHeight: '600px',
+  } as React.CSSProperties,
+  propertyCards: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '1rem',
+    marginTop: '1rem',
+  } as React.CSSProperties,
+  propertyCard: {
+    backgroundColor: '#fff',
+    borderRadius: '12px',
+    overflow: 'hidden',
+    border: '1px solid #e5e7eb',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+  } as React.CSSProperties,
+  propertyCardSelected: {
+    backgroundColor: '#fff',
+    borderRadius: '12px',
+    overflow: 'hidden',
+    border: '2px solid #2c5f7d',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+  } as React.CSSProperties,
+  propertyImage: {
+    position: 'relative' as const,
+    height: '100px',
+    backgroundColor: '#f8f9fa',
+  } as React.CSSProperties,
+  placeholderImage: {
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f8f9fa',
+  } as React.CSSProperties,
+  propertyTypeIcon: {
+    fontSize: '2rem',
+  } as React.CSSProperties,
+  propertyType: {
+    position: 'absolute' as const,
+    top: '0.5rem',
+    left: '0.5rem',
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    color: '#fff',
+    padding: '0.25rem 0.5rem',
+    borderRadius: '4px',
+    fontSize: '0.75rem',
+  } as React.CSSProperties,
+  propertyInfo: {
+    padding: '0.75rem',
+  } as React.CSSProperties,
+  propertyTitle: {
+    fontSize: '0.9rem',
+    fontWeight: 600,
+    color: '#1a4158',
+    margin: '0 0 0.25rem 0',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap' as const,
+  } as React.CSSProperties,
+  propertyLocation: {
+    fontSize: '0.8rem',
+    color: '#636e72',
+    margin: '0 0 0.5rem 0',
+  } as React.CSSProperties,
+  propertyPrice: {
+    fontSize: '1rem',
+    fontWeight: 700,
+    color: '#2c5f7d',
+    margin: '0 0 0.5rem 0',
+  } as React.CSSProperties,
+  propertyDetails: {
+    display: 'flex',
+    gap: '0.75rem',
+    fontSize: '0.75rem',
+    color: '#636e72',
+  } as React.CSSProperties,
+  propertyModal: {
+    position: 'fixed' as const,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1000,
+    padding: '1rem',
+  } as React.CSSProperties,
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: '16px',
+    maxWidth: '600px',
+    width: '100%',
+    maxHeight: '90vh',
+    overflow: 'auto' as const,
+    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+  } as React.CSSProperties,
+  modalHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '1rem 1.5rem',
+    borderBottom: '1px solid #e5e7eb',
+  } as React.CSSProperties,
+  closeModal: {
+    background: 'none',
+    border: 'none',
+    fontSize: '1.5rem',
+    cursor: 'pointer',
+    color: '#636e72',
+    padding: '0.25rem',
+  } as React.CSSProperties,
+  modalBody: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '1.5rem',
+    padding: '1.5rem',
+  } as React.CSSProperties,
+  modalImage: {
+    height: '200px',
+    backgroundColor: '#f8f9fa',
+    borderRadius: '8px',
+    overflow: 'hidden',
+  } as React.CSSProperties,
+  modalInfo: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '1rem',
+  } as React.CSSProperties,
+  modalPrice: {
+    fontSize: '1.5rem',
+    fontWeight: 700,
+    color: '#2c5f7d',
+  } as React.CSSProperties,
+  modalDetails: {
+    fontSize: '0.9rem',
+    color: '#1a4158',
+  } as React.CSSProperties,
+  modalDescription: {
+    fontSize: '0.9rem',
+    color: '#636e72',
+    lineHeight: 1.6,
+    margin: 0,
+  } as React.CSSProperties,
+  modalActions: {
+    display: 'flex',
+    gap: '1rem',
+    marginTop: '1rem',
+  } as React.CSSProperties,
 }
 
 export default function PropertyMap({ properties = [], height = '600px' }: PropertyMapProps) {
@@ -46,8 +243,8 @@ export default function PropertyMap({ properties = [], height = '600px' }: Prope
     const markers: MapMarker[] = properties.map((property, index) => {
       const location = property.location.split(',')[0].trim()
       const coords = zoneCoordinates[location] || cordobaCoordinates
-      
-      // Agregar pequeña variación para evitar superposición
+
+      // Agregar pequena variacion para evitar superposicion
       const lat = coords.lat + (Math.random() - 0.5) * 0.01
       const lng = coords.lng + (Math.random() - 0.5) * 0.01
 
@@ -57,7 +254,7 @@ export default function PropertyMap({ properties = [], height = '600px' }: Prope
         position: { lat, lng }
       }
     })
-    
+
     setMapMarkers(markers)
   }, [properties])
 
@@ -96,24 +293,24 @@ export default function PropertyMap({ properties = [], height = '600px' }: Prope
   }
 
   return (
-    <section className={`section ${styles.mapSection}`} id="mapa">
+    <section className="section" style={inlineStyles.mapSection} id="mapa">
       <div className="container">
         <div className="section-header">
-          <h2 className="section-title">Ubicación de Propiedades</h2>
+          <h2 className="section-title">Ubicacion de Propiedades</h2>
           <p className="section-subtitle">
-            Explora nuestras propiedades en el mapa interactivo de Córdoba
+            Explora nuestras propiedades en el mapa interactivo de Cordoba
           </p>
         </div>
 
-        <div className={styles.mapContainer}>
-          <div className={styles.mapFilters}>
-            <div className={styles.filterGroup}>
-              <label htmlFor="typeFilter">Tipo de Propiedad</label>
+        <div style={inlineStyles.mapContainer}>
+          <div style={inlineStyles.mapFilters}>
+            <div style={inlineStyles.filterGroup}>
+              <label htmlFor="typeFilter" style={{ fontSize: '0.85rem', color: '#1a4158', fontWeight: 500 }}>Tipo de Propiedad</label>
               <select
                 id="typeFilter"
                 value={filterType}
                 onChange={(e) => setFilterType(e.target.value)}
-                className={styles.filterSelect}
+                style={inlineStyles.filterSelect}
               >
                 <option value="all">Todos los tipos</option>
                 <option value="casa">Casas</option>
@@ -125,13 +322,13 @@ export default function PropertyMap({ properties = [], height = '600px' }: Prope
               </select>
             </div>
 
-            <div className={styles.filterGroup}>
-              <label htmlFor="operationFilter">Operación</label>
+            <div style={inlineStyles.filterGroup}>
+              <label htmlFor="operationFilter" style={{ fontSize: '0.85rem', color: '#1a4158', fontWeight: 500 }}>Operacion</label>
               <select
                 id="operationFilter"
                 value={filterOperation}
                 onChange={(e) => setFilterOperation(e.target.value)}
-                className={styles.filterSelect}
+                style={inlineStyles.filterSelect}
               >
                 <option value="all">Todas las operaciones</option>
                 <option value="venta">Venta</option>
@@ -140,7 +337,7 @@ export default function PropertyMap({ properties = [], height = '600px' }: Prope
             </div>
           </div>
 
-          <div className={styles.mapWrapper} style={{ height }}>
+          <div style={{ ...inlineStyles.mapWrapper, height }}>
             <GoogleMaps
               properties={filteredMarkers.map(marker => marker.property)}
               selectedProperty={selectedProperty}
@@ -148,43 +345,41 @@ export default function PropertyMap({ properties = [], height = '600px' }: Prope
               height={height}
             />
 
-            <div className={styles.propertyList}>
-              <h4>Propiedades ({filteredMarkers.length})</h4>
-              <div className={styles.propertyCards}>
+            <div style={inlineStyles.propertyList}>
+              <h4 style={{ margin: 0, color: '#1a4158', fontWeight: 600 }}>Propiedades ({filteredMarkers.length})</h4>
+              <div style={inlineStyles.propertyCards}>
                 {filteredMarkers.map((marker) => (
                   <div
                     key={marker.id}
-                    className={`${styles.propertyCard} ${
-                      selectedProperty?.id === marker.property.id ? styles.propertyCardSelected : ''
-                    }`}
+                    style={selectedProperty?.id === marker.property.id ? inlineStyles.propertyCardSelected : inlineStyles.propertyCard}
                     onClick={() => setSelectedProperty(marker.property)}
                   >
-                    <div className={styles.propertyImage}>
-                      <div className={styles.placeholderImage}>
-                        <span className={styles.propertyTypeIcon}>
+                    <div style={inlineStyles.propertyImage}>
+                      <div style={inlineStyles.placeholderImage}>
+                        <span style={inlineStyles.propertyTypeIcon}>
                           {getPropertyIcon(marker.property)}
                         </span>
                       </div>
-                      <div className={styles.propertyType}>
+                      <div style={inlineStyles.propertyType}>
                         {getPropertyIcon(marker.property)}
                       </div>
                     </div>
-                    
-                    <div className={styles.propertyInfo}>
-                      <h5>{marker.property.title}</h5>
-                      <p className={styles.propertyLocation}>{marker.property.location}</p>
-                      <p className={styles.propertyPrice}>
+
+                    <div style={inlineStyles.propertyInfo}>
+                      <h5 style={inlineStyles.propertyTitle}>{marker.property.title}</h5>
+                      <p style={inlineStyles.propertyLocation}>{marker.property.location}</p>
+                      <p style={inlineStyles.propertyPrice}>
                         {formatPrice(marker.property.price)}
                         {marker.property.operation === 'alquiler' && '/mes'}
                       </p>
-                      <div className={styles.propertyDetails}>
+                      <div style={inlineStyles.propertyDetails}>
                         {marker.property.bedrooms && (
                           <span>🛏️ {marker.property.bedrooms}</span>
                         )}
                         {marker.property.bathrooms && (
                           <span>🚿 {marker.property.bathrooms}</span>
                         )}
-                        <span>📐 {marker.property.area}m²</span>
+                        <span>📐 {marker.property.area}m2</span>
                       </div>
                     </div>
                   </div>
@@ -195,48 +390,48 @@ export default function PropertyMap({ properties = [], height = '600px' }: Prope
         </div>
 
         {selectedProperty && (
-          <div className={styles.propertyModal}>
-            <div className={styles.modalContent}>
-              <div className={styles.modalHeader}>
-                <h3>{selectedProperty.title}</h3>
+          <div style={inlineStyles.propertyModal}>
+            <div style={inlineStyles.modalContent}>
+              <div style={inlineStyles.modalHeader}>
+                <h3 style={{ margin: 0, color: '#1a4158' }}>{selectedProperty.title}</h3>
                 <button
-                  className={styles.closeModal}
+                  style={inlineStyles.closeModal}
                   onClick={() => setSelectedProperty(null)}
                 >
                   ✕
                 </button>
               </div>
-              
-              <div className={styles.modalBody}>
-                <div className={styles.modalImage}>
-                  <div className={styles.placeholderImage}>
-                    <span className={styles.propertyTypeIcon}>
+
+              <div style={inlineStyles.modalBody}>
+                <div style={inlineStyles.modalImage}>
+                  <div style={inlineStyles.placeholderImage}>
+                    <span style={inlineStyles.propertyTypeIcon}>
                       {getPropertyIcon(selectedProperty)}
                     </span>
                   </div>
                 </div>
-                
-                <div className={styles.modalInfo}>
-                  <div className={styles.modalPrice}>
+
+                <div style={inlineStyles.modalInfo}>
+                  <div style={inlineStyles.modalPrice}>
                     {formatPrice(selectedProperty.price)}
                     {selectedProperty.operation === 'alquiler' && '/mes'}
                   </div>
-                  
-                  <div className={styles.modalDetails}>
-                    <p><strong>Ubicación:</strong> {selectedProperty.location}</p>
-                    <p><strong>Tipo:</strong> {selectedProperty.type}</p>
-                    <p><strong>Área:</strong> {selectedProperty.area}m²</p>
+
+                  <div style={inlineStyles.modalDetails}>
+                    <p style={{ margin: '0.25rem 0' }}><strong>Ubicacion:</strong> {selectedProperty.location}</p>
+                    <p style={{ margin: '0.25rem 0' }}><strong>Tipo:</strong> {selectedProperty.type}</p>
+                    <p style={{ margin: '0.25rem 0' }}><strong>Area:</strong> {selectedProperty.area}m2</p>
                     {selectedProperty.bedrooms && (
-                      <p><strong>Dormitorios:</strong> {selectedProperty.bedrooms}</p>
+                      <p style={{ margin: '0.25rem 0' }}><strong>Dormitorios:</strong> {selectedProperty.bedrooms}</p>
                     )}
                     {selectedProperty.bathrooms && (
-                      <p><strong>Baños:</strong> {selectedProperty.bathrooms}</p>
+                      <p style={{ margin: '0.25rem 0' }}><strong>Banos:</strong> {selectedProperty.bathrooms}</p>
                     )}
                   </div>
-                  
-                  <p className={styles.modalDescription}>{selectedProperty.description}</p>
-                  
-                  <div className={styles.modalActions}>
+
+                  <p style={inlineStyles.modalDescription}>{selectedProperty.description}</p>
+
+                  <div style={inlineStyles.modalActions}>
                     <a href="#contacto" className="btn btn-primary">
                       Consultar
                     </a>

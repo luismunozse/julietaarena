@@ -58,3 +58,4 @@ COMMENT ON COLUMN audit_logs.entity_type IS 'Tipo de entidad afectada: property,
 COMMENT ON COLUMN audit_logs.changes IS 'JSON con los cambios realizados';
 COMMENT ON COLUMN audit_logs.old_values IS 'Valores anteriores antes del cambio';
 COMMENT ON COLUMN audit_logs.new_values IS 'Valores nuevos después del cambio';
+

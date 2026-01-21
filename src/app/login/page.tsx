@@ -3,7 +3,11 @@
 import { Suspense, useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
-import styles from './page.module.css'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Lock, Mail, Loader2, ShieldAlert, AlertCircle, Building2 } from 'lucide-react'
 
 function LoginForm() {
   const router = useRouter()
@@ -18,7 +22,6 @@ function LoginForm() {
   const redirectTo = searchParams.get('redirect') || '/admin/propiedades'
 
   useEffect(() => {
-    // Si ya está autenticado, redirigir
     if (!isLoading && isAuthenticated) {
       router.push(redirectTo)
     }
@@ -46,77 +49,127 @@ function LoginForm() {
 
   if (isLoading) {
     return (
-      <div className={styles.container}>
-        <div className={styles.loading}>Cargando...</div>
+      <div className="flex items-center justify-center gap-3">
+        <Loader2 className="h-6 w-6 animate-spin text-white" />
+        <span className="text-white text-lg">Cargando...</span>
       </div>
     )
   }
 
   if (isAuthenticated) {
-    return null // Ya se redirige en el useEffect
+    return null
   }
 
   return (
-    <div className={styles.container}>
-      <div className={styles.loginBox}>
-        <div className={styles.header}>
-          <h1>Panel de Administración</h1>
-          <p>Julieta Arena - Servicios Inmobiliarios</p>
-        </div>
-
-        <form onSubmit={handleSubmit} className={styles.form}>
-          <div className={styles.field}>
-            <label>Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@julietaarena.com.ar"
-              required
-              autoFocus
-            />
+    <div className="w-full max-w-md mx-4">
+      <Card className="border-0 shadow-2xl bg-white/95 backdrop-blur-sm">
+        <CardHeader className="space-y-1 text-center pb-2">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-brand-primary to-brand-accent">
+            <Building2 className="h-7 w-7 text-white" />
           </div>
+          <CardTitle className="text-2xl font-bold text-brand-accent">
+            Panel de Administración
+          </CardTitle>
+          <CardDescription className="text-muted-foreground">
+            Julieta Arena - Servicios Inmobiliarios
+          </CardDescription>
+        </CardHeader>
 
-          <div className={styles.field}>
-            <label>Contraseña</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-              minLength={6}
-            />
-          </div>
-
-          {error && (
-            <div className={styles.error}>
-              ⚠️ {error}
+        <CardContent className="pt-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-sm font-medium text-foreground">
+                Email
+              </Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="admin@julietaarena.com.ar"
+                  required
+                  autoFocus
+                  className="pl-10 h-11"
+                />
+              </div>
             </div>
-          )}
 
-          <button
-            type="submit"
-            className={styles.submitButton}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? '⏳ Iniciando sesión...' : '🔐 Iniciar Sesión'}
-          </button>
-        </form>
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-sm font-medium text-foreground">
+                Contraseña
+              </Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  minLength={6}
+                  className="pl-10 h-11"
+                />
+              </div>
+            </div>
 
-        <div className={styles.info}>
-          <p>🔒 <strong>Acceso Restringido</strong></p>
-          <p>Solo los administradores autorizados pueden acceder a este panel.</p>
-          <p className={styles.note}>Los usuarios administradores deben ser creados por el administrador del sistema desde el panel de Supabase.</p>
-        </div>
-      </div>
+            {error && (
+              <div className="flex items-start gap-3 p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
+                <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                <span>{error}</span>
+              </div>
+            )}
+
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full h-11 bg-gradient-to-r from-brand-primary to-brand-accent hover:from-brand-primary/90 hover:to-brand-accent/90 text-white font-semibold"
+              size="lg"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Iniciando sesión...
+                </>
+              ) : (
+                <>
+                  <Lock className="h-4 w-4" />
+                  Iniciar Sesión
+                </>
+              )}
+            </Button>
+          </form>
+        </CardContent>
+
+        <CardFooter className="flex-col gap-2 pt-2">
+          <div className="w-full p-4 bg-muted/50 rounded-lg">
+            <div className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
+              <ShieldAlert className="h-4 w-4 text-brand-primary" />
+              Acceso Restringido
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Solo los administradores autorizados pueden acceder a este panel.
+              Los usuarios deben ser creados desde el panel de Supabase.
+            </p>
+          </div>
+        </CardFooter>
+      </Card>
     </div>
   )
 }
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className={styles.container}><div className={styles.loading}>Cargando...</div></div>}>
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center gap-3">
+          <Loader2 className="h-6 w-6 animate-spin text-white" />
+          <span className="text-white text-lg">Cargando...</span>
+        </div>
+      }
+    >
       <LoginForm />
     </Suspense>
   )

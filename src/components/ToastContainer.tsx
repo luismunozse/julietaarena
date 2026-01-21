@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react'
 import Toast, { ToastType } from './Toast'
-import styles from './ToastContainer.module.css'
+import { cn } from '@/lib/utils'
 
 interface ToastItem {
   id: string
@@ -43,7 +43,7 @@ export function ToastProvider({ children }: ToastProviderProps) {
   const showToast = useCallback((message: string, type: ToastType, duration = 5000) => {
     const id = `toast-${Date.now()}-${Math.random()}`
     const newToast: ToastItem = { id, message, type, duration }
-    
+
     setToasts(prev => {
       // Limitar a máximo 3 toasts simultáneos
       const updatedToasts = [...prev, newToast]
@@ -73,7 +73,13 @@ export function ToastProvider({ children }: ToastProviderProps) {
   return (
     <ToastContext.Provider value={{ showToast, success, error, warning, info }}>
       {children}
-      <div className={styles.toastContainer}>
+      <div
+        className={cn(
+          'fixed top-20 right-5 z-[9999] flex flex-col gap-3 pointer-events-none',
+          'max-sm:top-[70px] max-sm:right-5 max-sm:left-5 max-sm:items-stretch',
+          '[&>*]:pointer-events-auto'
+        )}
+      >
         {toasts.map(toast => (
           <Toast
             key={toast.id}
@@ -88,4 +94,3 @@ export function ToastProvider({ children }: ToastProviderProps) {
     </ToastContext.Provider>
   )
 }
-

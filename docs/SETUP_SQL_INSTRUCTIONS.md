@@ -218,3 +218,4 @@ Una vez ejecutados los scripts exitosamente:
 ## 📞 Soporte
 
 Si encuentras algún problema, revisa los logs de Supabase o consulta la documentación oficial de Supabase.
+

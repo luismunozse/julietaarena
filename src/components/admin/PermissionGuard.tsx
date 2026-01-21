@@ -1,10 +1,11 @@
 'use client'
 
 import { useEffect, useState, ReactNode } from 'react'
+import { ShieldAlert } from 'lucide-react'
 import { hasPermission, isAdmin } from '@/lib/permissions'
 import type { Permission, Section } from '@/lib/permissions'
 import { useAuth } from '@/hooks/useAuth'
-import styles from './PermissionGuard.module.css'
+import { cn } from '@/lib/utils'
 
 interface PermissionGuardProps {
   section: Section
@@ -41,7 +42,7 @@ export default function PermissionGuard({
         return
       }
 
-      // Verificar permiso específico
+      // Verificar permiso especifico
       const hasPerm = await hasPermission(user.id, section, permission)
       setHasAccess(hasPerm)
       setIsLoading(false)
@@ -57,8 +58,13 @@ export default function PermissionGuard({
   if (!hasAccess) {
     if (showMessage) {
       return (
-        <div className={styles.noPermission}>
-          <p>No tienes permisos para realizar esta acción.</p>
+        <div className={cn(
+          "p-5 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-center"
+        )}>
+          <div className="flex items-center justify-center gap-2">
+            <ShieldAlert className="h-5 w-5" />
+            <p className="m-0 font-medium">No tienes permisos para realizar esta accion.</p>
+          </div>
         </div>
       )
     }

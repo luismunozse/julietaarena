@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { Property } from '@/data/properties'
 import { useProperties } from '@/hooks/useProperties'
 import PropertyCard from './PropertyCard'
 import PropertyCardList from './PropertyCardList'
@@ -11,17 +10,49 @@ import SkeletonLoader from './SkeletonLoader'
 import EmptyState from './EmptyState'
 import { useAnalytics } from '@/hooks/useAnalytics'
 import { useUXMetrics } from '@/hooks/useUXMetrics'
-import styles from './PropertiesResults.module.css'
+import {
+  Search, X, ChevronDown, ChevronUp, Grid3X3, List, MapPin,
+  Home, Key, SlidersHorizontal, RotateCcw
+} from 'lucide-react'
+
+/* =============================================================================
+   TYPES
+============================================================================= */
 
 type ViewMode = 'grid' | 'list' | 'map'
-
 type OperationTab = 'venta' | 'alquiler'
+
+/* =============================================================================
+   CONSTANTS
+============================================================================= */
+
+const PROPERTY_TYPES = [
+  { value: 'all', label: 'Todos los tipos' },
+  { value: 'casa', label: 'Casa' },
+  { value: 'departamento', label: 'Departamento' },
+  { value: 'terreno', label: 'Terreno' },
+  { value: 'local', label: 'Local Comercial' },
+  { value: 'oficina', label: 'Oficina' },
+  { value: 'cochera', label: 'Cochera' }
+]
+
+const SORT_OPTIONS = [
+  { value: 'recent', label: 'Más recientes' },
+  { value: 'price-asc', label: 'Precio: menor a mayor' },
+  { value: 'price-desc', label: 'Precio: mayor a menor' },
+  { value: 'area-asc', label: 'Área: menor a mayor' },
+  { value: 'area-desc', label: 'Área: mayor a menor' }
+]
+
+/* =============================================================================
+   MAIN COMPONENT
+============================================================================= */
 
 export default function PropertiesResults() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { properties, isLoading: propertiesLoading } = useProperties()
-  
+
   const [activeTab, setActiveTab] = useState<OperationTab>('venta')
   const [selectedType, setSelectedType] = useState<string>('all')
   const [selectedLocation, setSelectedLocation] = useState<string>('all')
@@ -29,7 +60,7 @@ export default function PropertiesResults() {
   const [searchTerm, setSearchTerm] = useState('')
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
 
-  // Filtros avanzados
+  // Advanced filters
   const [minPrice, setMinPrice] = useState<string>('')
   const [maxPrice, setMaxPrice] = useState<string>('')
   const [bedrooms, setBedrooms] = useState<string>('all')
@@ -41,7 +72,6 @@ export default function PropertiesResults() {
   const analytics = useAnalytics()
   const hasTrackedResults = useRef(false)
 
-  // Track UX metrics
   const { trackCustomMetric, trackEmptyState } = useUXMetrics({
     componentName: 'PropertiesResults',
     trackLoadTime: true,
@@ -57,12 +87,10 @@ export default function PropertiesResults() {
         params.set(key, value)
       }
     })
-
     const query = params.toString()
     router.push(`/propiedades/resultado${query ? `?${query}` : ''}`)
   }
 
-  // Leer parámetros de la URL - solo cuando cambian los searchParams
   useEffect(() => {
     const operation = searchParams?.get('operation')
     const type = searchParams?.get('type')
@@ -71,13 +99,7 @@ export default function PropertiesResults() {
     if (operation === 'venta' || operation === 'alquiler') {
       setActiveTab(operation)
     }
-
-    if (type && type !== 'all') {
-      setSelectedType(type)
-    } else {
-      setSelectedType('all')
-    }
-
+    setSelectedType(type && type !== 'all' ? type : 'all')
     if (location) {
       setSelectedLocation(location)
       setSearchTerm(location)
@@ -94,18 +116,8 @@ export default function PropertiesResults() {
     }
   }, [propertiesLoading, properties.length, trackCustomMetric])
 
-  const types = [
-    { value: 'all', label: 'Todos los tipos' },
-    { value: 'casa', label: 'Casa' },
-    { value: 'departamento', label: 'Departamento' },
-    { value: 'terreno', label: 'Terreno' },
-    { value: 'local', label: 'Local Comercial' },
-    { value: 'oficina', label: 'Oficina' },
-    { value: 'cochera', label: 'Cochera' }
-  ]
-
   const currentProperties = useMemo(() => {
-    return properties.filter(prop => 
+    return properties.filter(prop =>
       prop.operation === activeTab && prop.status === 'disponible'
     )
   }, [properties, activeTab])
@@ -117,37 +129,27 @@ export default function PropertiesResults() {
       const featured = searchParams?.get('featured')
 
       return currentProperties.filter(property => {
-        // Solo mostrar propiedades disponibles
         if (property.status !== 'disponible') return false
-
-        // Filtro por destacadas (si viene en URL)
         if (featured === 'true' && !property.featured) return false
-
-        // Filtro por tipo
         if (selectedType !== 'all' && property.type !== selectedType) return false
 
-        // Filtro por ubicación/búsqueda
         if (searchTerm && searchTerm.trim()) {
           const searchLower = searchTerm.toLowerCase().trim()
           const titleMatch = property.title.toLowerCase().includes(searchLower)
           const locationMatch = property.location.toLowerCase().includes(searchLower)
           const descriptionMatch = property.description.toLowerCase().includes(searchLower)
-
           if (!titleMatch && !locationMatch && !descriptionMatch) return false
         }
 
-        // Filtro por ubicación específica si está seleccionada
         if (selectedLocation !== 'all' && selectedLocation) {
           const locationLower = property.location.toLowerCase()
           const selectedLower = selectedLocation.toLowerCase()
           if (!locationLower.includes(selectedLower)) return false
         }
 
-        // Filtro por rango de precio
         if (minPrice && property.price < parseFloat(minPrice)) return false
         if (maxPrice && property.price > parseFloat(maxPrice)) return false
 
-        // Filtro por dormitorios
         if (bedrooms !== 'all') {
           const bedroomsNum = parseInt(bedrooms)
           if (bedrooms === '4+') {
@@ -157,7 +159,6 @@ export default function PropertiesResults() {
           }
         }
 
-        // Filtro por baños
         if (bathrooms !== 'all') {
           const bathroomsNum = parseInt(bathrooms)
           if (bathrooms === '3+') {
@@ -167,7 +168,6 @@ export default function PropertiesResults() {
           }
         }
 
-        // Filtro por área
         if (minArea && property.area < parseFloat(minArea)) return false
         if (maxArea && property.area > parseFloat(maxArea)) return false
 
@@ -179,20 +179,14 @@ export default function PropertiesResults() {
     }
   }, [currentProperties, selectedType, selectedLocation, searchTerm, searchParams, propertiesLoading, minPrice, maxPrice, bedrooms, bathrooms, minArea, maxArea])
 
-  // Ordenar propiedades
   const sortedProperties = useMemo(() => {
     return [...filteredProperties].sort((a, b) => {
       switch (sortBy) {
-        case 'price-asc':
-          return a.price - b.price
-        case 'price-desc':
-          return b.price - a.price
-        case 'area-asc':
-          return a.area - b.area
-        case 'area-desc':
-          return b.area - a.area
-        default:
-          return 0
+        case 'price-asc': return a.price - b.price
+        case 'price-desc': return b.price - a.price
+        case 'area-asc': return a.area - b.area
+        case 'area-desc': return b.area - a.area
+        default: return 0
       }
     })
   }, [filteredProperties, sortBy])
@@ -201,16 +195,7 @@ export default function PropertiesResults() {
     if (tab === activeTab) return
     setActiveTab(tab)
     pushParams({ operation: tab })
-    analytics.trackEvent({
-      event: 'properties_tab_change',
-      category: 'properties',
-      action: 'switch_operation',
-      label: tab
-    })
-  }
-
-  const handleSearchChange = (value: string) => {
-    setSearchTerm(value)
+    analytics.trackEvent({ event: 'properties_tab_change', category: 'properties', action: 'switch_operation', label: tab })
   }
 
   const handleClearFilters = () => {
@@ -225,456 +210,249 @@ export default function PropertiesResults() {
     setMinArea('')
     setMaxArea('')
     pushParams({ type: null, location: null, featured: null })
-    analytics.trackEvent({
-      event: 'properties_filters_reset',
-      category: 'properties',
-      action: 'reset_filters'
-    })
   }
 
-  const hasActiveFilters = () => {
-    return selectedType !== 'all' || searchTerm || minPrice || maxPrice ||
-           bedrooms !== 'all' || bathrooms !== 'all' || minArea || maxArea
-  }
+  const hasActiveFilters = selectedType !== 'all' || searchTerm || minPrice || maxPrice || bedrooms !== 'all' || bathrooms !== 'all' || minArea || maxArea
 
-  const removeFilter = (filterName: string) => {
-    switch (filterName) {
-      case 'type':
-        setSelectedType('all')
-        break
-      case 'search':
-        setSearchTerm('')
-        break
-      case 'minPrice':
-        setMinPrice('')
-        break
-      case 'maxPrice':
-        setMaxPrice('')
-        break
-      case 'bedrooms':
-        setBedrooms('all')
-        break
-      case 'bathrooms':
-        setBathrooms('all')
-        break
-      case 'minArea':
-        setMinArea('')
-        break
-      case 'maxArea':
-        setMaxArea('')
-        break
-    }
-  };
-
-  const handleViewModeChange = (mode: ViewMode) => {
-    setViewMode(mode)
-    analytics.trackEvent({
-      event: 'properties_view_mode',
-      category: 'properties',
-      action: 'change_view',
-      label: mode
-    })
-  };
+  const inputClasses = "w-full h-11 px-4 text-sm bg-white border border-border rounded-lg outline-none transition-all duration-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20"
+  const selectClasses = "h-11 px-3 text-sm bg-white border border-border rounded-lg outline-none cursor-pointer transition-all duration-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20"
 
   return (
-    <div className={styles.resultsPage}>
-      {/* Hero Header */}
-      <div className={styles.heroHeader}>
-        <div className="container">
+    <div className="min-h-screen bg-surface">
+      {/* Header */}
+      <div className="bg-gradient-to-br from-brand-dark via-brand-accent to-brand-primary py-8">
+        <div className="max-w-7xl mx-auto px-6">
           {/* Breadcrumbs */}
-          <nav className={styles.breadcrumbs} aria-label="breadcrumb">
-            <button
-              className={styles.breadcrumbLink}
-              onClick={() => router.push('/')}
-            >
+          <nav className="flex items-center gap-2 text-sm text-white/60 mb-4">
+            <button onClick={() => router.push('/')} className="hover:text-white transition-colors">
               Inicio
             </button>
-            <span className={styles.breadcrumbSeparator}>/</span>
-            <button
-              className={styles.breadcrumbLink}
-              onClick={() => router.push('/propiedades')}
-            >
+            <span>/</span>
+            <button onClick={() => router.push('/propiedades')} className="hover:text-white transition-colors">
               Propiedades
             </button>
-            <span className={styles.breadcrumbSeparator}>/</span>
-            <span className={styles.breadcrumbCurrent}>
-              {activeTab === 'venta' ? 'En Venta' : 'En Alquiler'}
-            </span>
+            <span>/</span>
+            <span className="text-white">{activeTab === 'venta' ? 'En Venta' : 'En Alquiler'}</span>
           </nav>
 
-          <h1 className={styles.pageTitle}>
-            {activeTab === 'venta' ? '🏠 Propiedades en Venta' : '🔑 Propiedades en Alquiler'}
+          <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-3">
+            {activeTab === 'venta' ? <Home className="w-7 h-7" /> : <Key className="w-7 h-7" />}
+            Propiedades en {activeTab === 'venta' ? 'Venta' : 'Alquiler'}
           </h1>
           {searchTerm && (
-            <p className={styles.searchInfo}>
-              Resultados para: <strong>{searchTerm}</strong>
+            <p className="text-white/70 mt-2">
+              Resultados para: <strong className="text-white">{searchTerm}</strong>
             </p>
           )}
         </div>
       </div>
 
-      <div className={styles.tabsContainer}>
-        <div className={styles.tabs} role="tablist" aria-label="Tipo de operación">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === 'venta'}
-            className={`${styles.tab} ${activeTab === 'venta' ? styles.active : ''}`}
-            onClick={() => handleTabChange('venta')}
-          >
-            <span aria-hidden="true">🏠</span> Comprar
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === 'alquiler'}
-            className={`${styles.tab} ${activeTab === 'alquiler' ? styles.active : ''}`}
-            onClick={() => handleTabChange('alquiler')}
-          >
-            <span aria-hidden="true">🔑</span> Alquilar
-          </button>
+      {/* Tabs */}
+      <div className="bg-white border-b border-border sticky top-0 z-20">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex gap-1">
+            <button
+              onClick={() => handleTabChange('venta')}
+              className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === 'venta'
+                  ? 'border-brand-primary text-brand-primary'
+                  : 'border-transparent text-muted hover:text-foreground'
+              }`}
+            >
+              <Home className="w-4 h-4" />
+              Comprar
+            </button>
+            <button
+              onClick={() => handleTabChange('alquiler')}
+              className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === 'alquiler'
+                  ? 'border-brand-primary text-brand-primary'
+                  : 'border-transparent text-muted hover:text-foreground'
+              }`}
+            >
+              <Key className="w-4 h-4" />
+              Alquilar
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="container">
-        {/* Filtros Rápidos y Controles de Vista */}
-        <section className={styles.filtersPanel}>
-          <div className={styles.quickFilters}>
-            <div className={styles.filterGroup}>
-              <label htmlFor="searchInput">Buscar</label>
-              <div className={styles.searchField}>
+      {/* Content */}
+      <div className="max-w-7xl mx-auto px-6 py-6">
+        {/* Filters */}
+        <div className="bg-white rounded-xl border border-border p-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Search */}
+            <div className="relative sm:col-span-2 lg:col-span-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
               <input
-                id="searchInput"
                 type="search"
-                placeholder="Ej: Nueva Córdoba, 3 dormitorios, casa"
+                placeholder="Buscar ubicación..."
                 value={searchTerm}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                className={styles.searchInput}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className={`${inputClasses} pl-10`}
               />
               {searchTerm && (
                 <button
-                  type="button"
-                  className={styles.clearSearchBtn}
-                  aria-label="Limpiar búsqueda"
-                  onClick={() => handleSearchChange('')}
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-foreground"
                 >
-                  ×
+                  <X className="w-4 h-4" />
                 </button>
               )}
             </div>
-          </div>
 
-          <div className={styles.filterGroup}>
-            <label htmlFor="typeFilter">Tipo de propiedad</label>
+            {/* Type */}
             <select
-              id="typeFilter"
               value={selectedType}
               onChange={(e) => setSelectedType(e.target.value)}
-              className={styles.filterSelect}
+              className={selectClasses}
             >
-              {types.map(type => (
-                <option key={type.value} value={type.value}>
-                  {type.label}
-                </option>
+              {PROPERTY_TYPES.map(type => (
+                <option key={type.value} value={type.value}>{type.label}</option>
               ))}
             </select>
-          </div>
 
-          <div className={styles.filterGroup}>
-            <label htmlFor="sortFilter">Ordenar</label>
+            {/* Sort */}
             <select
-              id="sortFilter"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className={styles.filterSelect}
+              className={selectClasses}
             >
-              <option value="recent">Más recientes</option>
-              <option value="price-asc">Precio: menor a mayor</option>
-              <option value="price-desc">Precio: mayor a menor</option>
-              <option value="area-asc">Área: menor a mayor</option>
-              <option value="area-desc">Área: mayor a menor</option>
+              {SORT_OPTIONS.map(option => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
             </select>
-          </div>
 
-            {/* Botón de Filtros Avanzados */}
-            <div className={styles.filterGroup}>
-              <button
-                type="button"
-                className={styles.advancedFiltersToggle}
-                onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-              >
-                {showAdvancedFilters ? '▲' : '▼'} Filtros avanzados
-              </button>
-            </div>
-          </div>
-
-          {/* Panel de Filtros Avanzados */}
-          {showAdvancedFilters && (
-            <div className={styles.advancedFiltersPanel}>
-              <div className={styles.advancedFiltersGrid}>
-                {/* Rango de Precio */}
-                <div className={styles.filterGroup}>
-                  <label>Rango de precio</label>
-                  <div className={styles.rangeInputs}>
-                    <input
-                      type="number"
-                      placeholder="Mín"
-                      value={minPrice}
-                      onChange={(e) => setMinPrice(e.target.value)}
-                      className={styles.rangeInput}
-                    />
-                    <span className={styles.rangeSeparator}>-</span>
-                    <input
-                      type="number"
-                      placeholder="Máx"
-                      value={maxPrice}
-                      onChange={(e) => setMaxPrice(e.target.value)}
-                      className={styles.rangeInput}
-                    />
-                  </div>
-                </div>
-
-                {/* Dormitorios */}
-                <div className={styles.filterGroup}>
-                  <label htmlFor="bedroomsFilter">Dormitorios</label>
-                  <select
-                    id="bedroomsFilter"
-                    value={bedrooms}
-                    onChange={(e) => setBedrooms(e.target.value)}
-                    className={styles.filterSelect}
-                  >
-                    <option value="all">Cualquiera</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4+">4+</option>
-                  </select>
-                </div>
-
-                {/* Baños */}
-                <div className={styles.filterGroup}>
-                  <label htmlFor="bathroomsFilter">Baños</label>
-                  <select
-                    id="bathroomsFilter"
-                    value={bathrooms}
-                    onChange={(e) => setBathrooms(e.target.value)}
-                    className={styles.filterSelect}
-                  >
-                    <option value="all">Cualquiera</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3+">3+</option>
-                  </select>
-                </div>
-
-                {/* Rango de Área */}
-                <div className={styles.filterGroup}>
-                  <label>Área (m²)</label>
-                  <div className={styles.rangeInputs}>
-                    <input
-                      type="number"
-                      placeholder="Mín"
-                      value={minArea}
-                      onChange={(e) => setMinArea(e.target.value)}
-                      className={styles.rangeInput}
-                    />
-                    <span className={styles.rangeSeparator}>-</span>
-                    <input
-                      type="number"
-                      placeholder="Máx"
-                      value={maxArea}
-                      onChange={(e) => setMaxArea(e.target.value)}
-                      className={styles.rangeInput}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Badges de Filtros Activos */}
-          {hasActiveFilters() && (
-            <div className={styles.activeFilters}>
-              <span className={styles.activeFiltersLabel}>Filtros activos:</span>
-              <div className={styles.filterBadges}>
-                {selectedType !== 'all' && (
-                  <button
-                    type="button"
-                    className={styles.filterBadge}
-                    onClick={() => removeFilter('type')}
-                  >
-                    Tipo: {types.find(t => t.value === selectedType)?.label}
-                    <span className={styles.badgeRemove}>×</span>
-                  </button>
-                )}
-                {searchTerm && (
-                  <button
-                    type="button"
-                    className={styles.filterBadge}
-                    onClick={() => removeFilter('search')}
-                  >
-                    Buscar: {searchTerm}
-                    <span className={styles.badgeRemove}>×</span>
-                  </button>
-                )}
-                {minPrice && (
-                  <button
-                    type="button"
-                    className={styles.filterBadge}
-                    onClick={() => removeFilter('minPrice')}
-                  >
-                    Precio mín: ${parseFloat(minPrice).toLocaleString()}
-                    <span className={styles.badgeRemove}>×</span>
-                  </button>
-                )}
-                {maxPrice && (
-                  <button
-                    type="button"
-                    className={styles.filterBadge}
-                    onClick={() => removeFilter('maxPrice')}
-                  >
-                    Precio máx: ${parseFloat(maxPrice).toLocaleString()}
-                    <span className={styles.badgeRemove}>×</span>
-                  </button>
-                )}
-                {bedrooms !== 'all' && (
-                  <button
-                    type="button"
-                    className={styles.filterBadge}
-                    onClick={() => removeFilter('bedrooms')}
-                  >
-                    Dormitorios: {bedrooms}
-                    <span className={styles.badgeRemove}>×</span>
-                  </button>
-                )}
-                {bathrooms !== 'all' && (
-                  <button
-                    type="button"
-                    className={styles.filterBadge}
-                    onClick={() => removeFilter('bathrooms')}
-                  >
-                    Baños: {bathrooms}
-                    <span className={styles.badgeRemove}>×</span>
-                  </button>
-                )}
-                {minArea && (
-                  <button
-                    type="button"
-                    className={styles.filterBadge}
-                    onClick={() => removeFilter('minArea')}
-                  >
-                    Área mín: {parseFloat(minArea).toLocaleString()} m²
-                    <span className={styles.badgeRemove}>×</span>
-                  </button>
-                )}
-                {maxArea && (
-                  <button
-                    type="button"
-                    className={styles.filterBadge}
-                    onClick={() => removeFilter('maxArea')}
-                  >
-                    Área máx: {parseFloat(maxArea).toLocaleString()} m²
-                    <span className={styles.badgeRemove}>×</span>
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-
-            <div className={styles.toolbar}>
-              <div className={styles.resultsCount}>
-                {sortedProperties.length} propiedad{sortedProperties.length !== 1 ? 'es' : ''} encontrada{sortedProperties.length !== 1 ? 's' : ''}
-              </div>
-
-            <div className={styles.viewModeButtons}>
-              <button
-                className={`${styles.viewModeBtn} ${viewMode === 'grid' ? styles.active : ''}`}
-                onClick={() => handleViewModeChange('grid')}
-                title="Vista en grilla"
-              >
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                  <rect x="2" y="2" width="6" height="6" rx="1"/>
-                  <rect x="12" y="2" width="6" height="6" rx="1"/>
-                  <rect x="2" y="12" width="6" height="6" rx="1"/>
-                  <rect x="12" y="12" width="6" height="6" rx="1"/>
-                </svg>
-              </button>
-              <button
-                className={`${styles.viewModeBtn} ${viewMode === 'list' ? styles.active : ''}`}
-                onClick={() => handleViewModeChange('list')}
-                title="Vista en lista"
-              >
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                  <rect x="2" y="3" width="16" height="3" rx="1"/>
-                  <rect x="2" y="9" width="16" height="3" rx="1"/>
-                  <rect x="2" y="15" width="16" height="3" rx="1"/>
-                </svg>
-              </button>
-              <button
-                className={`${styles.viewModeBtn} ${viewMode === 'map' ? styles.active : ''}`}
-                onClick={() => handleViewModeChange('map')}
-                title="Vista en mapa"
-              >
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M10 2C6.69 2 4 4.69 4 8c0 4.5 6 10 6 10s6-5.5 6-10c0-3.31-2.69-6-6-6zm0 8.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                </svg>
-              </button>
-            </div>
-
+            {/* Advanced Filters Toggle */}
             <button
-              type="button"
-              className={styles.clearFiltersBtn}
-              onClick={handleClearFilters}
-              disabled={selectedType === 'all' && sortBy === 'recent' && !searchTerm}
+              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+              className="flex items-center justify-center gap-2 h-11 px-4 text-sm font-medium text-brand-primary bg-brand-primary/10 rounded-lg hover:bg-brand-primary/20 transition-colors"
             >
-              Restablecer filtros
+              <SlidersHorizontal className="w-4 h-4" />
+              Filtros
+              {showAdvancedFilters ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </button>
-            </div>
-        </section>
+          </div>
 
-        {/* Resultados */}
+          {/* Advanced Filters Panel */}
+          {showAdvancedFilters && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 mt-4 border-t border-border">
+              {/* Price Range */}
+              <div>
+                <label className="block text-xs font-medium text-muted mb-1.5">Precio</label>
+                <div className="flex items-center gap-2">
+                  <input type="number" placeholder="Mín" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} className={`${inputClasses} text-center`} />
+                  <span className="text-muted">-</span>
+                  <input type="number" placeholder="Máx" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} className={`${inputClasses} text-center`} />
+                </div>
+              </div>
+
+              {/* Bedrooms */}
+              <div>
+                <label className="block text-xs font-medium text-muted mb-1.5">Dormitorios</label>
+                <select value={bedrooms} onChange={(e) => setBedrooms(e.target.value)} className={`${selectClasses} w-full`}>
+                  <option value="all">Cualquiera</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4+">4+</option>
+                </select>
+              </div>
+
+              {/* Bathrooms */}
+              <div>
+                <label className="block text-xs font-medium text-muted mb-1.5">Baños</label>
+                <select value={bathrooms} onChange={(e) => setBathrooms(e.target.value)} className={`${selectClasses} w-full`}>
+                  <option value="all">Cualquiera</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3+">3+</option>
+                </select>
+              </div>
+
+              {/* Area Range */}
+              <div>
+                <label className="block text-xs font-medium text-muted mb-1.5">Área (m²)</label>
+                <div className="flex items-center gap-2">
+                  <input type="number" placeholder="Mín" value={minArea} onChange={(e) => setMinArea(e.target.value)} className={`${inputClasses} text-center`} />
+                  <span className="text-muted">-</span>
+                  <input type="number" placeholder="Máx" value={maxArea} onChange={(e) => setMaxArea(e.target.value)} className={`${inputClasses} text-center`} />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Toolbar */}
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+          <p className="text-sm text-muted">
+            <span className="font-semibold text-foreground">{sortedProperties.length}</span> propiedad{sortedProperties.length !== 1 ? 'es' : ''} encontrada{sortedProperties.length !== 1 ? 's' : ''}
+          </p>
+
+          <div className="flex items-center gap-2">
+            {/* View Mode Buttons */}
+            <div className="flex bg-white rounded-lg border border-border p-1">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`p-2 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-brand-primary text-white' : 'text-muted hover:text-foreground'}`}
+                title="Vista grilla"
+              >
+                <Grid3X3 className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`p-2 rounded-md transition-colors ${viewMode === 'list' ? 'bg-brand-primary text-white' : 'text-muted hover:text-foreground'}`}
+                title="Vista lista"
+              >
+                <List className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setViewMode('map')}
+                className={`p-2 rounded-md transition-colors ${viewMode === 'map' ? 'bg-brand-primary text-white' : 'text-muted hover:text-foreground'}`}
+                title="Vista mapa"
+              >
+                <MapPin className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Reset Filters */}
+            {hasActiveFilters && (
+              <button
+                onClick={handleClearFilters}
+                className="flex items-center gap-2 px-4 py-2 text-sm text-muted hover:text-foreground transition-colors"
+              >
+                <RotateCcw className="w-4 h-4" />
+                Limpiar filtros
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Results */}
         {propertiesLoading ? (
-          <SkeletonLoader 
-            type={viewMode === 'list' ? 'list' : 'card'} 
-            count={viewMode === 'map' ? 1 : 6} 
-          />
+          <SkeletonLoader type={viewMode === 'list' ? 'list' : 'card'} count={viewMode === 'map' ? 1 : 6} />
         ) : sortedProperties.length > 0 ? (
           <>
-            {/* Vista en Grilla */}
             {viewMode === 'grid' && (
-              <div className={styles.propertiesGrid}>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {sortedProperties.map(property => (
                   <PropertyCard key={property.id} property={property} />
                 ))}
               </div>
             )}
 
-            {/* Vista en Lista */}
             {viewMode === 'list' && (
-              <div className={styles.propertiesList}>
+              <div className="space-y-4">
                 {sortedProperties.map(property => (
                   <PropertyCardList key={property.id} property={property} />
                 ))}
               </div>
             )}
 
-            {/* Vista en Mapa */}
             {viewMode === 'map' && (
-              <div className={styles.mapView}>
-                {sortedProperties.length === 0 ? (
-                  <EmptyState
-                    icon="📍"
-                    title="No hay propiedades para mostrar en el mapa"
-                    description="No se encontraron propiedades con coordenadas geográficas para mostrar en el mapa."
-                    actionLabel="Volver a la búsqueda"
-                    onAction={() => router.push('/propiedades')}
-                  />
-                ) : (
-                  <PropertyMap 
-                    properties={sortedProperties}
-                    height="calc(100vh - 400px)"
-                  />
-                )}
+              <div className="bg-white rounded-xl border border-border overflow-hidden" style={{ height: 'calc(100vh - 350px)', minHeight: '400px' }}>
+                <PropertyMap properties={sortedProperties} height="100%" />
               </div>
             )}
           </>

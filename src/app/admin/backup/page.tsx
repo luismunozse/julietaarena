@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useToast } from '@/components/ToastContainer'
 import { createBackup, downloadBackup, restoreBackup, loadBackupFile, type BackupData } from '@/lib/backup'
 import Modal from '@/components/Modal'
-import styles from './page.module.css'
+
 
 export default function BackupPage() {
   const [isLoading, setIsLoading] = useState(false)
@@ -61,39 +61,39 @@ export default function BackupPage() {
   }
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
+    <div className="container">
+      <div className="header">
         <div>
-          <h1 className={styles.title}>Backup y Restore</h1>
-          <p className={styles.subtitle}>Crea copias de seguridad y restaura datos del sistema</p>
+          <h1 className="title">Backup y Restore</h1>
+          <p className="subtitle">Crea copias de seguridad y restaura datos del sistema</p>
         </div>
       </div>
 
-      <div className={styles.actionsGrid}>
-        <div className={styles.actionCard}>
-          <div className={styles.actionIcon}>💾</div>
-          <h3 className={styles.actionTitle}>Crear Backup</h3>
-          <p className={styles.actionDescription}>
+      <div className="actionsGrid">
+        <div className="actionCard">
+          <div className="actionIcon">💾</div>
+          <h3 className="actionTitle">Crear Backup</h3>
+          <p className="actionDescription">
             Descarga una copia completa de todas las propiedades, consultas, contactos y plantillas
           </p>
           <button
             onClick={handleCreateBackup}
-            className={styles.actionButton}
+            className="actionButton"
             disabled={isLoading}
           >
             {isLoading ? 'Creando...' : 'Crear Backup'}
           </button>
         </div>
 
-        <div className={styles.actionCard}>
-          <div className={styles.actionIcon}>📥</div>
-          <h3 className={styles.actionTitle}>Restaurar Backup</h3>
-          <p className={styles.actionDescription}>
+        <div className="actionCard">
+          <div className="actionIcon">📥</div>
+          <h3 className="actionTitle">Restaurar Backup</h3>
+          <p className="actionDescription">
             Restaura datos desde un archivo de backup anterior. Esto sobrescribirá los datos actuales.
           </p>
           <button
             onClick={() => setShowRestoreModal(true)}
-            className={styles.actionButton}
+            className="actionButton"
             disabled={isLoading}
           >
             Restaurar Backup
@@ -101,9 +101,9 @@ export default function BackupPage() {
         </div>
       </div>
 
-      <div className={styles.infoSection}>
-        <h3 className={styles.infoTitle}>Información Importante</h3>
-        <ul className={styles.infoList}>
+      <div className="infoSection">
+        <h3 className="infoTitle">Información Importante</h3>
+        <ul className="infoList">
           <li>Los backups incluyen todas las propiedades, consultas, contactos y plantillas</li>
           <li>Los backups se guardan en formato JSON</li>
           <li>Restaurar un backup sobrescribirá los datos actuales</li>
@@ -124,27 +124,27 @@ export default function BackupPage() {
           type="alert"
           message=""
         >
-          <div className={styles.modalContent}>
-            <p className={styles.modalWarning}>
+          <div className="modalContent">
+            <p className="modalWarning">
               ⚠️ Restaurar un backup sobrescribirá todos los datos actuales. Asegúrate de tener un backup reciente.
             </p>
-            <div className={styles.fileInput}>
+            <div className="fileInput">
               <label htmlFor="backup-file">Seleccionar archivo de backup:</label>
               <input
                 id="backup-file"
                 type="file"
                 accept=".json"
                 onChange={handleFileSelect}
-                className={styles.input}
+                className="input"
               />
               {backupFile && (
-                <p className={styles.fileName}>Archivo seleccionado: {backupFile.name}</p>
+                <p className="fileName">Archivo seleccionado: {backupFile.name}</p>
               )}
             </div>
-            <div className={styles.modalActions}>
+            <div className="modalActions">
               <button
                 onClick={handleRestore}
-                className={styles.restoreButton}
+                className="restoreButton"
                 disabled={isLoading || !backupFile}
               >
                 {isLoading ? 'Restaurando...' : 'Restaurar'}
@@ -154,7 +154,7 @@ export default function BackupPage() {
                   setShowRestoreModal(false)
                   setBackupFile(null)
                 }}
-                className={styles.cancelButton}
+                className="cancelButton"
                 disabled={isLoading}
               >
                 Cancelar
@@ -166,3 +166,4 @@ export default function BackupPage() {
     </div>
   )
 }
+

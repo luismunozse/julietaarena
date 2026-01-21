@@ -27,3 +27,4 @@ COMMENT ON COLUMN property_inquiries.tags IS 'Array de etiquetas para categoriza
 COMMENT ON COLUMN property_inquiries.assigned_to IS 'ID del usuario asignado a esta consulta';
 COMMENT ON COLUMN contact_inquiries.tags IS 'Array de etiquetas para categorizar el contacto';
 COMMENT ON COLUMN contact_inquiries.assigned_to IS 'ID del usuario asignado a este contacto';
+

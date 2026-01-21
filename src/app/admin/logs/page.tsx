@@ -5,17 +5,52 @@ import { getAllAuditLogs, type AuditLog, type ActionType, type EntityType } from
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale/es'
 import Pagination from '@/components/admin/Pagination'
-import styles from './page.module.css'
+import AdminPageHeader from '@/components/admin/AdminPageHeader'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { X } from 'lucide-react'
+
+const actionLabels: Record<string, string> = {
+  create: 'Creado',
+  update: 'Actualizado',
+  delete: 'Eliminado',
+  assign: 'Asignación',
+  status_change: 'Cambio de estado',
+  tag_add: 'Etiqueta agregada',
+  tag_remove: 'Etiqueta removida'
+}
+
+const actionIcons: Record<string, string> = {
+  create: '➕',
+  update: '✏️',
+  delete: '🗑️',
+  assign: '👤',
+  status_change: '🔄',
+  tag_add: '🏷️',
+  tag_remove: '🏷️'
+}
+
+const entityLabels: Record<string, string> = {
+  property: 'Propiedad',
+  property_inquiry: 'Consulta de Propiedad',
+  contact_inquiry: 'Contacto',
+  user: 'Usuario',
+  template: 'Plantilla'
+}
 
 export default function LogsPage() {
   const [logs, setLogs] = useState<AuditLog[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [filters, setFilters] = useState<{
-    action_type: string
-    entity_type: string
-    start_date: string
-    end_date: string
-  }>({
+  const [filters, setFilters] = useState({
     action_type: '',
     entity_type: '',
     start_date: '',
@@ -44,43 +79,6 @@ export default function LogsPage() {
     void loadLogs()
   }, [loadLogs])
 
-  const getActionLabel = (actionType: string): string => {
-    const labels: Record<string, string> = {
-      create: 'Creado',
-      update: 'Actualizado',
-      delete: 'Eliminado',
-      assign: 'Asignación',
-      status_change: 'Cambio de estado',
-      tag_add: 'Etiqueta agregada',
-      tag_remove: 'Etiqueta removida'
-    }
-    return labels[actionType] || actionType
-  }
-
-  const getActionIcon = (actionType: string): string => {
-    const icons: Record<string, string> = {
-      create: '➕',
-      update: '✏️',
-      delete: '🗑️',
-      assign: '👤',
-      status_change: '🔄',
-      tag_add: '🏷️',
-      tag_remove: '🏷️'
-    }
-    return icons[actionType] || '📝'
-  }
-
-  const getEntityLabel = (entityType: string): string => {
-    const labels: Record<string, string> = {
-      property: 'Propiedad',
-      property_inquiry: 'Consulta de Propiedad',
-      contact_inquiry: 'Contacto',
-      user: 'Usuario',
-      template: 'Plantilla'
-    }
-    return labels[entityType] || entityType
-  }
-
   const formatDate = (dateString: string): string => {
     try {
       return format(new Date(dateString), "d 'de' MMMM 'de' yyyy 'a las' HH:mm", { locale: es })
@@ -90,94 +88,96 @@ export default function LogsPage() {
   }
 
   const clearFilters = () => {
-    setFilters({
-      action_type: '',
-      entity_type: '',
-      start_date: '',
-      end_date: ''
-    })
+    setFilters({ action_type: '', entity_type: '', start_date: '', end_date: '' })
   }
 
   if (isLoading) {
     return (
-      <div className={styles.container}>
-        <div className={styles.loading}>
-          <div className={styles.spinner}></div>
-          <p>Cargando logs...</p>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2c5f7d] mx-auto mb-4" />
+          <p className="text-muted-foreground">Cargando logs...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <div>
-          <h1 className={styles.title}>Logs de Actividad</h1>
-          <p className={styles.subtitle}>Registro de todas las acciones del sistema</p>
-        </div>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-200 p-6 md:p-8">
+      <AdminPageHeader
+        title="Logs de Actividad"
+        subtitle="Registro de todas las acciones del sistema"
+      />
 
       {/* Filtros */}
-      <div className={styles.filters}>
-        <div className={styles.filterGroup}>
-          <label>Tipo de acción</label>
-          <select
-            value={filters.action_type}
-            onChange={(e) => setFilters({ ...filters, action_type: e.target.value })}
-            className={styles.select}
-          >
-            <option value="">Todas</option>
-            <option value="create">Crear</option>
-            <option value="update">Actualizar</option>
-            <option value="delete">Eliminar</option>
-            <option value="assign">Asignar</option>
-            <option value="status_change">Cambio de estado</option>
-            <option value="tag_add">Agregar etiqueta</option>
-            <option value="tag_remove">Remover etiqueta</option>
-          </select>
-        </div>
+      <Card className="mb-6 p-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+          <div className="space-y-2">
+            <Label>Tipo de acción</Label>
+            <Select
+              value={filters.action_type}
+              onValueChange={(value) => setFilters({ ...filters, action_type: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Todas" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas</SelectItem>
+                <SelectItem value="create">Crear</SelectItem>
+                <SelectItem value="update">Actualizar</SelectItem>
+                <SelectItem value="delete">Eliminar</SelectItem>
+                <SelectItem value="assign">Asignar</SelectItem>
+                <SelectItem value="status_change">Cambio de estado</SelectItem>
+                <SelectItem value="tag_add">Agregar etiqueta</SelectItem>
+                <SelectItem value="tag_remove">Remover etiqueta</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-        <div className={styles.filterGroup}>
-          <label>Tipo de entidad</label>
-          <select
-            value={filters.entity_type}
-            onChange={(e) => setFilters({ ...filters, entity_type: e.target.value })}
-            className={styles.select}
-          >
-            <option value="">Todas</option>
-            <option value="property">Propiedad</option>
-            <option value="property_inquiry">Consulta</option>
-            <option value="contact_inquiry">Contacto</option>
-            <option value="user">Usuario</option>
-            <option value="template">Plantilla</option>
-          </select>
-        </div>
+          <div className="space-y-2">
+            <Label>Tipo de entidad</Label>
+            <Select
+              value={filters.entity_type}
+              onValueChange={(value) => setFilters({ ...filters, entity_type: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Todas" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas</SelectItem>
+                <SelectItem value="property">Propiedad</SelectItem>
+                <SelectItem value="property_inquiry">Consulta</SelectItem>
+                <SelectItem value="contact_inquiry">Contacto</SelectItem>
+                <SelectItem value="user">Usuario</SelectItem>
+                <SelectItem value="template">Plantilla</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-        <div className={styles.filterGroup}>
-          <label>Fecha desde</label>
-          <input
-            type="date"
-            value={filters.start_date}
-            onChange={(e) => setFilters({ ...filters, start_date: e.target.value })}
-            className={styles.input}
-          />
-        </div>
+          <div className="space-y-2">
+            <Label>Fecha desde</Label>
+            <Input
+              type="date"
+              value={filters.start_date}
+              onChange={(e) => setFilters({ ...filters, start_date: e.target.value })}
+            />
+          </div>
 
-        <div className={styles.filterGroup}>
-          <label>Fecha hasta</label>
-          <input
-            type="date"
-            value={filters.end_date}
-            onChange={(e) => setFilters({ ...filters, end_date: e.target.value })}
-            className={styles.input}
-          />
-        </div>
+          <div className="space-y-2">
+            <Label>Fecha hasta</Label>
+            <Input
+              type="date"
+              value={filters.end_date}
+              onChange={(e) => setFilters({ ...filters, end_date: e.target.value })}
+            />
+          </div>
 
-        <button onClick={clearFilters} className={styles.clearButton}>
-          Limpiar filtros
-        </button>
-      </div>
+          <Button variant="outline" onClick={clearFilters}>
+            <X className="h-4 w-4 mr-2" />
+            Limpiar filtros
+          </Button>
+        </div>
+      </Card>
 
       {/* Lista de logs */}
       <Pagination
@@ -186,46 +186,51 @@ export default function LogsPage() {
         render={(paginatedItems) => (
           <>
             {paginatedItems.length === 0 ? (
-              <div className={styles.empty}>
-                <p className={styles.emptyIcon}>📋</p>
-                <p className={styles.emptyText}>No hay logs con los filtros seleccionados</p>
-              </div>
+              <Card className="text-center p-12">
+                <p className="text-4xl mb-4">📋</p>
+                <p className="text-muted-foreground">No hay logs con los filtros seleccionados</p>
+              </Card>
             ) : (
-              <div className={styles.logsList}>
+              <div className="space-y-3">
                 {paginatedItems.map((log) => (
-                  <div key={log.id} className={styles.logItem}>
-                    <div className={styles.logHeader}>
-                      <span className={styles.actionIcon}>{getActionIcon(log.action_type)}</span>
-                      <div className={styles.logInfo}>
-                        <span className={styles.actionLabel}>{getActionLabel(log.action_type)}</span>
-                        <span className={styles.entityLabel}>{getEntityLabel(log.entity_type)}</span>
-                      </div>
-                      <span className={styles.date}>{formatDate(log.created_at)}</span>
-                    </div>
-
-                    {log.user_email && (
-                      <div className={styles.logUser}>
-                        Por: <strong>{log.user_email}</strong>
-                      </div>
-                    )}
-
-                    {log.description && (
-                      <div className={styles.logDescription}>{log.description}</div>
-                    )}
-
-                    {log.old_values && log.new_values && (
-                      <div className={styles.logChanges}>
-                        <div className={styles.changeItem}>
-                          <span className={styles.changeLabel}>Antes:</span>
-                          <pre className={styles.changeValue}>{JSON.stringify(log.old_values, null, 2)}</pre>
+                  <Card key={log.id} className="overflow-hidden">
+                    <CardContent className="p-4">
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-2">
+                        <div className="flex items-center gap-3">
+                          <span className="text-2xl">{actionIcons[log.action_type] || '📝'}</span>
+                          <div>
+                            <span className="font-semibold text-[#1a4158]">{actionLabels[log.action_type] || log.action_type}</span>
+                            <span className="text-muted-foreground mx-2">·</span>
+                            <span className="text-muted-foreground">{entityLabels[log.entity_type] || log.entity_type}</span>
+                          </div>
                         </div>
-                        <div className={styles.changeItem}>
-                          <span className={styles.changeLabel}>Después:</span>
-                          <pre className={styles.changeValue}>{JSON.stringify(log.new_values, null, 2)}</pre>
-                        </div>
+                        <span className="text-sm text-muted-foreground">{formatDate(log.created_at)}</span>
                       </div>
-                    )}
-                  </div>
+
+                      {log.user_email && (
+                        <p className="text-sm text-muted-foreground mb-2">
+                          Por: <strong>{log.user_email}</strong>
+                        </p>
+                      )}
+
+                      {log.description && (
+                        <p className="text-sm mb-2">{log.description}</p>
+                      )}
+
+                      {log.old_values && log.new_values && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3 pt-3 border-t">
+                          <div>
+                            <p className="text-xs font-semibold text-muted-foreground mb-1">Antes:</p>
+                            <pre className="text-xs bg-red-50 p-2 rounded overflow-auto max-h-32">{JSON.stringify(log.old_values, null, 2)}</pre>
+                          </div>
+                          <div>
+                            <p className="text-xs font-semibold text-muted-foreground mb-1">Después:</p>
+                            <pre className="text-xs bg-green-50 p-2 rounded overflow-auto max-h-32">{JSON.stringify(log.new_values, null, 2)}</pre>
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
             )}

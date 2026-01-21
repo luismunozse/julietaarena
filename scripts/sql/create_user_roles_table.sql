@@ -72,3 +72,4 @@ CREATE POLICY "Solo admins pueden gestionar roles"
 COMMENT ON TABLE user_roles IS 'Gestiona roles y permisos granulares de usuarios del panel admin';
 COMMENT ON COLUMN user_roles.role IS 'Rol principal: admin (acceso total), editor (puede editar), viewer (solo lectura)';
 COMMENT ON COLUMN user_roles.permissions IS 'JSON con permisos granulares por sección del panel';
+

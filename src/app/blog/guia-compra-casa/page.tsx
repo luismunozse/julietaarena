@@ -1,7 +1,6 @@
 import { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
-import styles from './page.module.css'
 
 export const metadata: Metadata = {
   title: 'Guía Completa para Comprar tu Primera Casa - Julieta Arena',
@@ -16,196 +15,307 @@ export const metadata: Metadata = {
 
 export default function GuiaCompraCasaPage() {
   return (
-    <main className={styles.pageContainer}>
+    <main style={{ minHeight: '100vh', backgroundColor: '#f8f9fa', paddingTop: '2rem', paddingBottom: '4rem' }}>
       <div className="container">
-        <div className={styles.articleHeader}>
-          <div className={styles.breadcrumb}>
-            <Link href="/blog">Blog</Link> / <span>Guía para Comprar tu Primera Casa</span>
+        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+          <div style={{
+            fontSize: '0.9rem',
+            color: '#636e72',
+            marginBottom: '1.5rem'
+          }}>
+            <Link href="/blog" style={{ color: '#2c5f7d', textDecoration: 'none' }}>Blog</Link> / <span>Guía para Comprar tu Primera Casa</span>
           </div>
-          
-          <div className={styles.articleMeta}>
-            <span className={styles.category}>Consejos Legales</span>
-            <span className={styles.readTime}>8 min lectura</span>
-            <span className={styles.date}>15 de Diciembre, 2024</span>
+
+          <div style={{
+            display: 'flex',
+            gap: '1rem',
+            flexWrap: 'wrap' as const,
+            alignItems: 'center',
+            marginBottom: '1rem'
+          }}>
+            <span style={{
+              backgroundColor: '#2c5f7d',
+              color: '#fff',
+              padding: '0.25rem 0.75rem',
+              borderRadius: '20px',
+              fontSize: '0.8rem',
+              fontWeight: 500
+            }}>Consejos Legales</span>
+            <span style={{ color: '#636e72', fontSize: '0.9rem' }}>8 min lectura</span>
+            <span style={{ color: '#636e72', fontSize: '0.9rem' }}>15 de Diciembre, 2024</span>
           </div>
-          
-          <h1 className={styles.articleTitle}>
+
+          <h1 style={{
+            fontSize: '2.5rem',
+            fontWeight: 700,
+            color: '#1a4158',
+            marginBottom: '1rem',
+            lineHeight: 1.2
+          }}>
             Guía Completa para Comprar tu Primera Casa
           </h1>
-          
-          <p className={styles.articleExcerpt}>
-            Comprar tu primera casa es uno de los pasos más importantes en la vida. 
+
+          <p style={{
+            fontSize: '1.25rem',
+            color: '#636e72',
+            marginBottom: '2rem',
+            lineHeight: 1.6
+          }}>
+            Comprar tu primera casa es uno de los pasos más importantes en la vida.
             Te guiamos paso a paso para que tomes la mejor decisión.
           </p>
-          
-          <div className={styles.authorInfo}>
-            <div className={styles.authorAvatar}>
+
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem',
+            marginBottom: '2rem'
+          }}>
+            <div style={{
+              width: '50px',
+              height: '50px',
+              borderRadius: '50%',
+              overflow: 'hidden'
+            }}>
               <Image
                 src="/images/perfil.jpeg"
                 alt="Julieta Arena"
                 width={50}
                 height={50}
-                className={styles.avatar}
+                style={{ objectFit: 'cover', width: '100%', height: '100%' }}
               />
             </div>
-            <div className={styles.authorDetails}>
-              <h4>Julieta Arena</h4>
-              <p>Martillera Pública</p>
+            <div>
+              <h4 style={{ margin: 0, color: '#1a4158', fontWeight: 600 }}>Julieta Arena</h4>
+              <p style={{ margin: 0, color: '#636e72', fontSize: '0.9rem' }}>Martillera Pública</p>
             </div>
           </div>
         </div>
 
-        <div className={styles.articleImage}>
+        <div style={{
+          maxWidth: '800px',
+          margin: '0 auto 2rem',
+          borderRadius: '16px',
+          overflow: 'hidden',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
+        }}>
           <Image
             src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&h=400&fit=crop"
             alt="Casa familiar moderna"
             width={800}
             height={400}
-            className={styles.image}
+            style={{ width: '100%', height: 'auto', display: 'block' }}
           />
         </div>
 
-        <article className={styles.articleContent}>
-          <h2>1. Evaluación de tu Situación Financiera</h2>
-          <p>
-            Antes de comenzar a buscar una casa, es fundamental que evalúes tu situación financiera actual. 
+        <article style={{
+          maxWidth: '800px',
+          margin: '0 auto',
+          backgroundColor: '#fff',
+          padding: '2.5rem',
+          borderRadius: '16px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
+        }}>
+          <h2 style={{ color: '#1a4158', fontSize: '1.5rem', marginTop: 0, marginBottom: '1rem' }}>1. Evaluación de tu Situación Financiera</h2>
+          <p style={{ color: '#636e72', lineHeight: 1.8, marginBottom: '1rem' }}>
+            Antes de comenzar a buscar una casa, es fundamental que evalúes tu situación financiera actual.
             Esto incluye analizar tus ingresos, gastos, ahorros y deudas existentes.
           </p>
-          
-          <h3>Puntos clave a considerar:</h3>
-          <ul>
-            <li><strong>Ingresos estables:</strong> Asegúrate de tener una fuente de ingresos confiable</li>
-            <li><strong>Capacidad de ahorro:</strong> Debes poder ahorrar al menos el 20% del valor de la propiedad</li>
-            <li><strong>Historial crediticio:</strong> Un buen historial te ayudará a obtener mejores tasas de interés</li>
-            <li><strong>Gastos mensuales:</strong> No destines más del 30% de tus ingresos al pago de la hipoteca</li>
+
+          <h3 style={{ color: '#1a4158', fontSize: '1.25rem', marginBottom: '0.75rem' }}>Puntos clave a considerar:</h3>
+          <ul style={{ color: '#636e72', lineHeight: 1.8, marginBottom: '1.5rem', paddingLeft: '1.5rem' }}>
+            <li><strong style={{ color: '#1a4158' }}>Ingresos estables:</strong> Asegúrate de tener una fuente de ingresos confiable</li>
+            <li><strong style={{ color: '#1a4158' }}>Capacidad de ahorro:</strong> Debes poder ahorrar al menos el 20% del valor de la propiedad</li>
+            <li><strong style={{ color: '#1a4158' }}>Historial crediticio:</strong> Un buen historial te ayudará a obtener mejores tasas de interés</li>
+            <li><strong style={{ color: '#1a4158' }}>Gastos mensuales:</strong> No destines más del 30% de tus ingresos al pago de la hipoteca</li>
           </ul>
 
-          <h2>2. Búsqueda y Selección de la Propiedad</h2>
-          <p>
-            Una vez que tengas clara tu situación financiera, es momento de comenzar la búsqueda. 
+          <h2 style={{ color: '#1a4158', fontSize: '1.5rem', marginBottom: '1rem' }}>2. Búsqueda y Selección de la Propiedad</h2>
+          <p style={{ color: '#636e72', lineHeight: 1.8, marginBottom: '1.5rem' }}>
+            Una vez que tengas clara tu situación financiera, es momento de comenzar la búsqueda.
             Define tus prioridades: ubicación, tamaño, características específicas y presupuesto máximo.
           </p>
 
-          <div className={styles.tipBox}>
-            <h4>💡 Consejo Profesional</h4>
-            <p>
-              Siempre visita la propiedad en diferentes horarios y días de la semana para evaluar 
+          <div style={{
+            backgroundColor: '#e8f4f8',
+            border: '1px solid #2c5f7d',
+            borderRadius: '12px',
+            padding: '1.5rem',
+            marginBottom: '1.5rem'
+          }}>
+            <h4 style={{ color: '#2c5f7d', marginTop: 0, marginBottom: '0.5rem' }}>Consejo Profesional</h4>
+            <p style={{ color: '#1a4158', margin: 0, lineHeight: 1.6 }}>
+              Siempre visita la propiedad en diferentes horarios y días de la semana para evaluar
               el ruido, tráfico y ambiente del vecindario.
             </p>
           </div>
 
-          <h2>3. Proceso Legal y Documentación</h2>
-          <p>
-            El proceso legal es crucial para proteger tu inversión. Como martillera pública, 
+          <h2 style={{ color: '#1a4158', fontSize: '1.5rem', marginBottom: '1rem' }}>3. Proceso Legal y Documentación</h2>
+          <p style={{ color: '#636e72', lineHeight: 1.8, marginBottom: '1rem' }}>
+            El proceso legal es crucial para proteger tu inversión. Como martillera pública,
             te recomiendo seguir estos pasos:
           </p>
 
-          <ol>
-            <li><strong>Verificación de títulos:</strong> Asegúrate de que el vendedor tenga la propiedad libre de gravámenes</li>
-            <li><strong>Inspección técnica:</strong> Contrata un profesional para evaluar el estado de la construcción</li>
-            <li><strong>Escrituración:</strong> El proceso de transferencia debe realizarse ante escribano público</li>
-            <li><strong>Registro de la propiedad:</strong> Actualización en el registro inmobiliario</li>
+          <ol style={{ color: '#636e72', lineHeight: 1.8, marginBottom: '1.5rem', paddingLeft: '1.5rem' }}>
+            <li><strong style={{ color: '#1a4158' }}>Verificación de títulos:</strong> Asegúrate de que el vendedor tenga la propiedad libre de gravámenes</li>
+            <li><strong style={{ color: '#1a4158' }}>Inspección técnica:</strong> Contrata un profesional para evaluar el estado de la construcción</li>
+            <li><strong style={{ color: '#1a4158' }}>Escrituración:</strong> El proceso de transferencia debe realizarse ante escribano público</li>
+            <li><strong style={{ color: '#1a4158' }}>Registro de la propiedad:</strong> Actualización en el registro inmobiliario</li>
           </ol>
 
-          <h2>4. Financiamiento y Hipoteca</h2>
-          <p>
-            Existen varias opciones de financiamiento disponibles. Es importante comparar 
+          <h2 style={{ color: '#1a4158', fontSize: '1.5rem', marginBottom: '1rem' }}>4. Financiamiento y Hipoteca</h2>
+          <p style={{ color: '#636e72', lineHeight: 1.8, marginBottom: '1rem' }}>
+            Existen varias opciones de financiamiento disponibles. Es importante comparar
             diferentes entidades financieras y sus condiciones.
           </p>
 
-          <h3>Tipos de financiamiento:</h3>
-          <ul>
-            <li><strong>Hipoteca tradicional:</strong> Préstamo a largo plazo con garantía hipotecaria</li>
-            <li><strong>Procrear:</strong> Programa del gobierno para vivienda familiar</li>
-            <li><strong>Fideicomiso:</strong> Alternativa para aquellos que no califican para hipoteca tradicional</li>
+          <h3 style={{ color: '#1a4158', fontSize: '1.25rem', marginBottom: '0.75rem' }}>Tipos de financiamiento:</h3>
+          <ul style={{ color: '#636e72', lineHeight: 1.8, marginBottom: '1.5rem', paddingLeft: '1.5rem' }}>
+            <li><strong style={{ color: '#1a4158' }}>Hipoteca tradicional:</strong> Préstamo a largo plazo con garantía hipotecaria</li>
+            <li><strong style={{ color: '#1a4158' }}>Procrear:</strong> Programa del gobierno para vivienda familiar</li>
+            <li><strong style={{ color: '#1a4158' }}>Fideicomiso:</strong> Alternativa para aquellos que no califican para hipoteca tradicional</li>
           </ul>
 
-          <h2>5. Costos Adicionales a Considerar</h2>
-          <p>
+          <h2 style={{ color: '#1a4158', fontSize: '1.5rem', marginBottom: '1rem' }}>5. Costos Adicionales a Considerar</h2>
+          <p style={{ color: '#636e72', lineHeight: 1.8, marginBottom: '1rem' }}>
             Además del precio de la propiedad, debes considerar varios costos adicionales:
           </p>
 
-          <div className={styles.costsTable}>
-            <div className={styles.costItem}>
-              <span>Escrituración</span>
-              <span>2-3% del valor</span>
-            </div>
-            <div className={styles.costItem}>
-              <span>Impuestos de sellos</span>
-              <span>1-2% del valor</span>
-            </div>
-            <div className={styles.costItem}>
-              <span>Registro de la propiedad</span>
-              <span>$50.000 - $100.000</span>
-            </div>
-            <div className={styles.costItem}>
-              <span>Seguro de título</span>
-              <span>$30.000 - $60.000</span>
-            </div>
-            <div className={styles.costItem}>
-              <span>Inspección técnica</span>
-              <span>$80.000 - $150.000</span>
-            </div>
+          <div style={{
+            backgroundColor: '#f8f9fa',
+            borderRadius: '12px',
+            padding: '1rem',
+            marginBottom: '1.5rem'
+          }}>
+            {[
+              { label: 'Escrituración', value: '2-3% del valor' },
+              { label: 'Impuestos de sellos', value: '1-2% del valor' },
+              { label: 'Registro de la propiedad', value: '$50.000 - $100.000' },
+              { label: 'Seguro de título', value: '$30.000 - $60.000' },
+              { label: 'Inspección técnica', value: '$80.000 - $150.000' }
+            ].map((item, index) => (
+              <div key={index} style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                padding: '0.75rem 0',
+                borderBottom: index < 4 ? '1px solid #e5e7eb' : 'none'
+              }}>
+                <span style={{ color: '#636e72' }}>{item.label}</span>
+                <span style={{ color: '#1a4158', fontWeight: 600 }}>{item.value}</span>
+              </div>
+            ))}
           </div>
 
-          <h2>Conclusión</h2>
-          <p>
-            Comprar tu primera casa es un proceso que requiere paciencia, investigación y asesoramiento profesional. 
+          <h2 style={{ color: '#1a4158', fontSize: '1.5rem', marginBottom: '1rem' }}>Conclusión</h2>
+          <p style={{ color: '#636e72', lineHeight: 1.8, marginBottom: '1.5rem' }}>
+            Comprar tu primera casa es un proceso que requiere paciencia, investigación y asesoramiento profesional.
             No dudes en consultar con profesionales del sector para tomar la mejor decisión.
           </p>
 
-          <div className={styles.ctaBox}>
-            <h3>¿Necesitas asesoramiento profesional?</h3>
-            <p>Como martillera pública, puedo ayudarte en todo el proceso de compra de tu vivienda.</p>
-            <Link href="/#contacto" className="btn btn-primary">
+          <div style={{
+            backgroundColor: '#2c5f7d',
+            color: '#fff',
+            borderRadius: '16px',
+            padding: '2rem',
+            textAlign: 'center' as const
+          }}>
+            <h3 style={{ color: '#fff', marginTop: 0, marginBottom: '0.5rem' }}>¿Necesitas asesoramiento profesional?</h3>
+            <p style={{ color: 'rgba(255,255,255,0.9)', marginBottom: '1rem' }}>Como martillera pública, puedo ayudarte en todo el proceso de compra de tu vivienda.</p>
+            <Link href="/#contacto" className="btn btn-primary" style={{
+              backgroundColor: '#e8b86d',
+              color: '#1a4158',
+              padding: '0.75rem 1.5rem',
+              borderRadius: '8px',
+              textDecoration: 'none',
+              fontWeight: 600,
+              display: 'inline-block'
+            }}>
               Consultar Ahora
             </Link>
           </div>
         </article>
 
-        <div className={styles.articleFooter}>
-          <div className={styles.tags}>
-            <span className={styles.tagLabel}>Etiquetas:</span>
-            <span className={styles.tag}>#primera-casa</span>
-            <span className={styles.tag}>#financiamiento</span>
-            <span className={styles.tag}>#consejos-legales</span>
-            <span className={styles.tag}>#proceso-legal</span>
+        <div style={{
+          maxWidth: '800px',
+          margin: '2rem auto 0',
+          backgroundColor: '#fff',
+          padding: '1.5rem 2rem',
+          borderRadius: '16px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
+        }}>
+          <div style={{
+            display: 'flex',
+            flexWrap: 'wrap' as const,
+            alignItems: 'center',
+            gap: '0.5rem',
+            marginBottom: '1rem'
+          }}>
+            <span style={{ color: '#636e72', fontWeight: 500 }}>Etiquetas:</span>
+            {['#primera-casa', '#financiamiento', '#consejos-legales', '#proceso-legal'].map((tag) => (
+              <span key={tag} style={{
+                backgroundColor: '#f8f9fa',
+                color: '#2c5f7d',
+                padding: '0.25rem 0.75rem',
+                borderRadius: '20px',
+                fontSize: '0.85rem'
+              }}>{tag}</span>
+            ))}
           </div>
-          
-          <div className={styles.shareButtons}>
-            <span>Compartir:</span>
-            <button className={styles.shareBtn}>Facebook</button>
-            <button className={styles.shareBtn}>Twitter</button>
-            <button className={styles.shareBtn}>LinkedIn</button>
-            <button className={styles.shareBtn}>WhatsApp</button>
+
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            flexWrap: 'wrap' as const
+          }}>
+            <span style={{ color: '#636e72' }}>Compartir:</span>
+            {['Facebook', 'Twitter', 'LinkedIn', 'WhatsApp'].map((platform) => (
+              <button key={platform} style={{
+                backgroundColor: '#f8f9fa',
+                border: '1px solid #e5e7eb',
+                padding: '0.5rem 1rem',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                color: '#1a4158',
+                fontSize: '0.9rem'
+              }}>{platform}</button>
+            ))}
           </div>
         </div>
 
-        <div className={styles.relatedPosts}>
-          <h3>Artículos Relacionados</h3>
-          <div className={styles.relatedGrid}>
-            <div className={styles.relatedPost}>
-              <Image
-                src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=300&h=200&fit=crop"
-                alt="Financiamiento hipotecario"
-                width={300}
-                height={200}
-                className={styles.relatedImage}
-              />
-              <h4>Guía de Financiamiento Hipotecario</h4>
-              <p>Todo lo que necesitas saber sobre préstamos hipotecarios</p>
-            </div>
-            <div className={styles.relatedPost}>
-              <Image
-                src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=300&h=200&fit=crop"
-                alt="Documentación necesaria"
-                width={300}
-                height={200}
-                className={styles.relatedImage}
-              />
-              <h4>Documentación Necesaria para Comprar</h4>
-              <p>Lista completa de documentos requeridos</p>
-            </div>
+        <div style={{
+          maxWidth: '800px',
+          margin: '2rem auto 0'
+        }}>
+          <h3 style={{ color: '#1a4158', marginBottom: '1.5rem' }}>Artículos Relacionados</h3>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+            gap: '1.5rem'
+          }}>
+            {[
+              { title: 'Guía de Financiamiento Hipotecario', desc: 'Todo lo que necesitas saber sobre préstamos hipotecarios' },
+              { title: 'Documentación Necesaria para Comprar', desc: 'Lista completa de documentos requeridos' }
+            ].map((post, index) => (
+              <div key={index} style={{
+                backgroundColor: '#fff',
+                borderRadius: '16px',
+                overflow: 'hidden',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
+              }}>
+                <Image
+                  src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=300&h=200&fit=crop"
+                  alt={post.title}
+                  width={300}
+                  height={200}
+                  style={{ width: '100%', height: '200px', objectFit: 'cover' }}
+                />
+                <div style={{ padding: '1rem' }}>
+                  <h4 style={{ color: '#1a4158', marginTop: 0, marginBottom: '0.5rem', fontSize: '1rem' }}>{post.title}</h4>
+                  <p style={{ color: '#636e72', margin: 0, fontSize: '0.9rem' }}>{post.desc}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
