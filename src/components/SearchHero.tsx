@@ -177,37 +177,37 @@ export default function SearchHero() {
   }
 
   return (
-    <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-[60vh] sm:min-h-[70vh] flex items-center justify-center overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-brand-dark via-brand-accent to-brand-primary" />
 
       {/* Decorative overlay */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-brand-secondary/10 blur-3xl" />
-        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] rounded-full bg-brand-primary/20 blur-3xl" />
+        <div className="absolute top-1/4 left-1/4 w-48 sm:w-96 h-48 sm:h-96 rounded-full bg-brand-secondary/10 blur-3xl" />
+        <div className="absolute bottom-0 right-0 w-64 sm:w-[500px] h-64 sm:h-[500px] rounded-full bg-brand-primary/20 blur-3xl" />
       </div>
 
       {/* Content */}
-      <div className="relative z-10 w-full max-w-4xl mx-auto px-6 py-16">
+      <div className="relative z-10 w-full max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
         <div className="text-center">
           {/* Title */}
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3 sm:mb-4 leading-tight">
             Mucho más que mudarte
           </h1>
 
           {/* Subtitle */}
-          <p className="text-lg sm:text-xl text-white/80 mb-10 max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl text-white/80 mb-6 sm:mb-10 max-w-2xl mx-auto px-2">
             Encuentra tu hogar ideal con el acompañamiento profesional que necesitás
           </p>
 
           {/* Action Buttons */}
-          <div className="flex flex-wrap gap-3 justify-center mb-8">
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 sm:gap-3 justify-center mb-6 sm:mb-8 px-2">
             {ACTION_BUTTONS.map((btn) => (
               <button
                 key={btn.id}
                 onClick={() => handleActionClick(btn.id)}
                 className={`
-                  inline-flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm
+                  inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 sm:py-3 rounded-xl font-semibold text-xs sm:text-sm
                   transition-all duration-200 hover:-translate-y-0.5
                   ${operation === btn.id
                     ? 'bg-white text-brand-accent shadow-lg'
@@ -218,14 +218,14 @@ export default function SearchHero() {
                 `}
               >
                 {btn.icon}
-                {btn.label}
+                <span className="whitespace-nowrap">{btn.label}</span>
               </button>
             ))}
           </div>
 
           {/* Search Box */}
-          <div className="bg-white rounded-2xl p-3 shadow-2xl shadow-black/20">
-            <div className="flex flex-col sm:flex-row gap-3">
+          <div className="bg-white rounded-xl sm:rounded-2xl p-2 sm:p-3 shadow-2xl shadow-black/20 mx-2 sm:mx-0">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               {/* Location Input */}
               <div className="flex-1 relative">
                 <input
@@ -236,11 +236,11 @@ export default function SearchHero() {
                   onChange={(e) => setSearchLocation(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                   disabled={isLoadingMaps}
-                  className="w-full h-14 px-5 text-base bg-surface border-2 border-border rounded-xl outline-none transition-all duration-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 disabled:opacity-60"
+                  className="w-full h-12 sm:h-14 px-4 sm:px-5 text-sm sm:text-base bg-surface border-2 border-border rounded-xl outline-none transition-all duration-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 disabled:opacity-60"
                 />
                 {mapsError && (
                   <span
-                    className="absolute right-4 top-1/2 -translate-y-1/2 cursor-help text-warning"
+                    className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 cursor-help text-warning"
                     title={mapsError}
                   >
                     ⚠️
@@ -252,7 +252,7 @@ export default function SearchHero() {
               <select
                 value={propertyType}
                 onChange={(e) => setPropertyType(e.target.value)}
-                className="h-14 px-4 text-base bg-surface border-2 border-border rounded-xl outline-none cursor-pointer transition-all duration-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 sm:w-48"
+                className="h-12 sm:h-14 px-3 sm:px-4 text-sm sm:text-base bg-surface border-2 border-border rounded-xl outline-none cursor-pointer transition-all duration-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 sm:w-48"
               >
                 {PROPERTY_TYPES.map(type => (
                   <option key={type.value} value={type.value}>
@@ -265,27 +265,27 @@ export default function SearchHero() {
               <button
                 onClick={handleSearch}
                 aria-label="Buscar propiedades"
-                className="h-14 px-6 bg-gradient-to-r from-brand-secondary to-yellow-500 rounded-xl flex items-center justify-center gap-2 font-semibold text-brand-dark hover:shadow-lg hover:shadow-brand-secondary/30 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
+                className="h-12 sm:h-14 px-4 sm:px-6 bg-gradient-to-r from-brand-secondary to-yellow-500 rounded-xl flex items-center justify-center gap-2 font-semibold text-sm sm:text-base text-brand-dark hover:shadow-lg hover:shadow-brand-secondary/30 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
               >
                 <Search className="w-5 h-5" />
-                <span className="hidden sm:inline">Buscar</span>
+                <span>Buscar</span>
               </button>
             </div>
           </div>
 
           {/* Quick stats */}
-          <div className="mt-10 flex flex-wrap justify-center gap-8 text-white/70">
+          <div className="mt-6 sm:mt-10 grid grid-cols-3 gap-4 sm:flex sm:flex-wrap sm:justify-center sm:gap-8 text-white/70 px-2">
             <div className="text-center">
-              <div className="text-2xl font-bold text-white">+500</div>
-              <div className="text-sm">Propiedades</div>
+              <div className="text-xl sm:text-2xl font-bold text-white">+500</div>
+              <div className="text-xs sm:text-sm">Propiedades</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-white">+15</div>
-              <div className="text-sm">Años de experiencia</div>
+              <div className="text-xl sm:text-2xl font-bold text-white">+15</div>
+              <div className="text-xs sm:text-sm">Años experiencia</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-white">+300</div>
-              <div className="text-sm">Clientes satisfechos</div>
+              <div className="text-xl sm:text-2xl font-bold text-white">+300</div>
+              <div className="text-xs sm:text-sm">Clientes</div>
             </div>
           </div>
         </div>

@@ -235,7 +235,7 @@ export default function UsuariosPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-200 p-6 md:p-8">
+    <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <AdminPageHeader
           title="Gestión de Usuarios"

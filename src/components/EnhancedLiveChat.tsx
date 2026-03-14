@@ -1,264 +1,10 @@
 'use client'
 
-import { useState, useRef, CSSProperties } from 'react'
+import { useState, useRef } from 'react'
 import Image from 'next/image'
 import { useChat } from '@/hooks/useChat'
-
-const styles: Record<string, CSSProperties> = {
-  chatToggle: {
-    position: 'fixed',
-    bottom: '2rem',
-    right: '2rem',
-    width: '60px',
-    height: '60px',
-    backgroundColor: '#2c5f7d',
-    color: '#ffffff',
-    border: 'none',
-    borderRadius: '50%',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-    cursor: 'pointer',
-    fontSize: '1.5rem',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 1000,
-    transition: 'all 0.3s',
-  },
-  notificationBadge: {
-    position: 'absolute',
-    top: '-4px',
-    right: '-4px',
-    width: '20px',
-    height: '20px',
-    backgroundColor: '#e8b86d',
-    color: '#1a4158',
-    borderRadius: '50%',
-    fontSize: '0.75rem',
-    fontWeight: 600,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  chatContainer: {
-    position: 'fixed',
-    bottom: '2rem',
-    right: '2rem',
-    width: '380px',
-    maxWidth: 'calc(100vw - 2rem)',
-    height: '500px',
-    maxHeight: 'calc(100vh - 4rem)',
-    backgroundColor: '#ffffff',
-    borderRadius: '16px',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-    display: 'flex',
-    flexDirection: 'column',
-    zIndex: 1000,
-    overflow: 'hidden',
-    border: '1px solid #e5e7eb',
-  },
-  chatHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: '1rem',
-    backgroundColor: '#2c5f7d',
-    color: '#ffffff',
-  },
-  agentInfo: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.75rem',
-  },
-  agentAvatar: {
-    width: '40px',
-    height: '40px',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: '50%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '1.25rem',
-  },
-  agentName: {
-    margin: 0,
-    fontSize: '1rem',
-    fontWeight: 600,
-  },
-  status: {
-    fontSize: '0.75rem',
-    opacity: 0.9,
-  },
-  statusOnline: {
-    color: '#4CAF50',
-  },
-  statusOffline: {
-    color: '#FF9800',
-  },
-  headerActions: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-  },
-  headerBtn: {
-    width: '32px',
-    height: '32px',
-    backgroundColor: 'transparent',
-    border: 'none',
-    borderRadius: '50%',
-    cursor: 'pointer',
-    color: '#ffffff',
-    fontSize: '1rem',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    transition: 'background-color 0.2s',
-  },
-  chatMessages: {
-    flex: 1,
-    overflow: 'auto',
-    padding: '1rem',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.75rem',
-    backgroundColor: '#f8f9fa',
-  },
-  message: {
-    maxWidth: '80%',
-    padding: '0.75rem 1rem',
-    borderRadius: '16px',
-    fontSize: '0.875rem',
-    lineHeight: 1.5,
-  },
-  messageUser: {
-    alignSelf: 'flex-end',
-    backgroundColor: '#2c5f7d',
-    color: '#ffffff',
-    borderBottomRightRadius: '4px',
-  },
-  messageAgent: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#ffffff',
-    color: '#1a4158',
-    borderBottomLeftRadius: '4px',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-  },
-  messageContent: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.25rem',
-  },
-  fileMessage: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.5rem',
-  },
-  messageImage: {
-    borderRadius: '8px',
-    maxWidth: '100%',
-  },
-  fileIcon: {
-    fontSize: '2rem',
-  },
-  fileInfo: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.125rem',
-  },
-  fileName: {
-    margin: 0,
-    fontSize: '0.8125rem',
-    fontWeight: 500,
-  },
-  fileSize: {
-    margin: 0,
-    fontSize: '0.75rem',
-    opacity: 0.7,
-  },
-  timestamp: {
-    fontSize: '0.6875rem',
-    opacity: 0.7,
-    alignSelf: 'flex-end',
-  },
-  typingIndicator: {
-    display: 'flex',
-    gap: '4px',
-    padding: '0.5rem 0',
-  },
-  typingDot: {
-    width: '8px',
-    height: '8px',
-    backgroundColor: '#636e72',
-    borderRadius: '50%',
-    animation: 'typing 1.4s infinite ease-in-out',
-  },
-  quickReplies: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '0.5rem',
-    padding: '0.75rem 1rem',
-    borderTop: '1px solid #e5e7eb',
-    backgroundColor: '#ffffff',
-  },
-  quickReply: {
-    padding: '0.5rem 1rem',
-    backgroundColor: '#f8f9fa',
-    border: '1px solid #e5e7eb',
-    borderRadius: '20px',
-    cursor: 'pointer',
-    fontSize: '0.8125rem',
-    color: '#1a4158',
-    transition: 'all 0.2s',
-  },
-  chatInput: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    padding: '0.75rem 1rem',
-    borderTop: '1px solid #e5e7eb',
-    backgroundColor: '#ffffff',
-  },
-  attachBtn: {
-    width: '36px',
-    height: '36px',
-    backgroundColor: 'transparent',
-    border: 'none',
-    borderRadius: '50%',
-    cursor: 'pointer',
-    fontSize: '1.125rem',
-    color: '#636e72',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    transition: 'background-color 0.2s',
-  },
-  input: {
-    flex: 1,
-    padding: '0.625rem 1rem',
-    border: '1px solid #e5e7eb',
-    borderRadius: '20px',
-    fontSize: '0.875rem',
-    outline: 'none',
-    transition: 'border-color 0.2s',
-  },
-  sendBtn: {
-    width: '36px',
-    height: '36px',
-    backgroundColor: '#2c5f7d',
-    color: '#ffffff',
-    border: 'none',
-    borderRadius: '50%',
-    cursor: 'pointer',
-    fontSize: '1rem',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    transition: 'background-color 0.2s',
-  },
-  sendBtnDisabled: {
-    backgroundColor: '#e5e7eb',
-    cursor: 'not-allowed',
-  },
-}
+import { cn } from '@/lib/utils'
+import { MessageSquare, Trash2, X, Paperclip, Send } from 'lucide-react'
 
 export default function EnhancedLiveChat() {
   const [isOpen, setIsOpen] = useState(false)
@@ -274,7 +20,7 @@ export default function EnhancedLiveChat() {
     handleQuickReply,
     uploadFile,
     clearChat,
-    messagesEndRef
+    messagesEndRef,
   } = useChat()
 
   const handleSendMessage = async () => {
@@ -300,7 +46,7 @@ export default function EnhancedLiveChat() {
   const formatTime = (timestamp: string) => {
     return new Date(timestamp).toLocaleTimeString('es-AR', {
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     })
   }
 
@@ -316,86 +62,100 @@ export default function EnhancedLiveChat() {
 
   return (
     <>
+      {/* Chat Toggle Button */}
       {!isOpen && (
         <button
-          style={styles.chatToggle}
+          className="fixed bottom-8 right-8 z-[1000] flex h-[60px] w-[60px] items-center justify-center rounded-full bg-[#2c5f7d] text-white shadow-lg transition-all hover:scale-105 hover:bg-[#1a4158]"
           onClick={() => setIsOpen(true)}
           aria-label="Abrir chat"
         >
-          💬
+          <MessageSquare className="h-6 w-6" />
           {session.messages.length > 1 && (
-            <span style={styles.notificationBadge}>
-              {session.messages.filter(m => m.sender === 'user').length}
+            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-amber-400 text-xs font-semibold text-[#1a4158]">
+              {session.messages.filter((m) => m.sender === 'user').length}
             </span>
           )}
         </button>
       )}
 
+      {/* Chat Window */}
       {isOpen && (
-        <div style={styles.chatContainer}>
-          <div style={styles.chatHeader}>
-            <div style={styles.agentInfo}>
-              <div style={styles.agentAvatar}>
+        <div className="fixed bottom-8 right-8 z-[1000] flex h-[500px] max-h-[calc(100vh-4rem)] w-[380px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg">
+          {/* Header */}
+          <div className="flex items-center justify-between bg-[#2c5f7d] p-4 text-white">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-xl">
                 {session.agentAvatar || '🤖'}
               </div>
               <div>
-                <h4 style={styles.agentName}>{session.agentName || 'Asistente Virtual'}</h4>
-                <span style={{
-                  ...styles.status,
-                  ...(isOnline ? styles.statusOnline : styles.statusOffline)
-                }}>
-                  {isOnline ? 'En linea' : 'Desconectado'}
+                <h4 className="m-0 text-base font-semibold">
+                  {session.agentName || 'Asistente Virtual'}
+                </h4>
+                <span
+                  className={cn(
+                    'text-xs',
+                    isOnline ? 'text-green-400' : 'text-amber-400'
+                  )}
+                >
+                  {isOnline ? 'En línea' : 'Desconectado'}
                 </span>
               </div>
             </div>
-            <div style={styles.headerActions}>
+            <div className="flex items-center gap-2">
               <button
-                style={styles.headerBtn}
+                className="flex h-8 w-8 items-center justify-center rounded-full text-white transition-colors hover:bg-white/20"
                 onClick={clearChat}
                 title="Limpiar chat"
               >
-                🗑️
+                <Trash2 className="h-4 w-4" />
               </button>
               <button
-                style={styles.headerBtn}
+                className="flex h-8 w-8 items-center justify-center rounded-full text-white transition-colors hover:bg-white/20"
                 onClick={() => setIsOpen(false)}
                 aria-label="Cerrar chat"
               >
-                X
+                <X className="h-5 w-5" />
               </button>
             </div>
           </div>
 
-          <div style={styles.chatMessages}>
+          {/* Messages */}
+          <div className="flex flex-1 flex-col gap-3 overflow-auto bg-slate-50 p-4">
             {session.messages.map((message) => (
               <div
                 key={message.id}
-                style={{
-                  ...styles.message,
-                  ...(message.sender === 'user' ? styles.messageUser : styles.messageAgent)
-                }}
+                className={cn(
+                  'max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed',
+                  message.sender === 'user'
+                    ? 'self-end rounded-br-sm bg-[#2c5f7d] text-white'
+                    : 'self-start rounded-bl-sm bg-white text-[#1a4158] shadow-sm'
+                )}
               >
-                <div style={styles.messageContent}>
+                <div className="flex flex-col gap-1">
                   {message.type === 'image' && message.metadata?.fileName && (
-                    <div style={styles.fileMessage}>
+                    <div className="flex flex-col gap-2">
                       <Image
                         src={message.text}
                         alt={message.metadata.fileName}
                         width={320}
                         height={200}
-                        style={{ ...styles.messageImage, width: '100%', height: 'auto' }}
+                        className="w-full rounded-lg"
                         unoptimized
                       />
-                      <p style={styles.fileName}>{message.metadata.fileName}</p>
+                      <p className="m-0 text-[13px] font-medium">
+                        {message.metadata.fileName}
+                      </p>
                     </div>
                   )}
 
                   {message.type === 'file' && message.metadata?.fileName && (
-                    <div style={{ ...styles.fileMessage, flexDirection: 'row', alignItems: 'center', gap: '0.75rem' }}>
-                      <div style={styles.fileIcon}>📎</div>
-                      <div style={styles.fileInfo}>
-                        <p style={styles.fileName}>{message.metadata.fileName}</p>
-                        <p style={styles.fileSize}>
+                    <div className="flex flex-row items-center gap-3">
+                      <Paperclip className="h-8 w-8 shrink-0" />
+                      <div className="flex flex-col gap-0.5">
+                        <p className="m-0 text-[13px] font-medium">
+                          {message.metadata.fileName}
+                        </p>
+                        <p className="m-0 text-xs opacity-70">
                           {formatFileSize(message.metadata.fileSize || 0)}
                         </p>
                       </div>
@@ -403,22 +163,22 @@ export default function EnhancedLiveChat() {
                   )}
 
                   {message.type === 'text' && (
-                    <p style={{ margin: 0 }}>{message.text}</p>
+                    <p className="m-0">{message.text}</p>
                   )}
 
-                  <span style={styles.timestamp}>{formatTime(message.timestamp)}</span>
+                  <span className="self-end text-[11px] opacity-70">
+                    {formatTime(message.timestamp)}
+                  </span>
                 </div>
               </div>
             ))}
 
             {isTyping && (
-              <div style={{ ...styles.message, ...styles.messageAgent }}>
-                <div style={styles.messageContent}>
-                  <div style={styles.typingIndicator}>
-                    <span style={{ ...styles.typingDot, animationDelay: '0s' }}></span>
-                    <span style={{ ...styles.typingDot, animationDelay: '0.2s' }}></span>
-                    <span style={{ ...styles.typingDot, animationDelay: '0.4s' }}></span>
-                  </div>
+              <div className="max-w-[80%] self-start rounded-2xl rounded-bl-sm bg-white px-4 py-3 text-sm shadow-sm">
+                <div className="flex gap-1 py-2">
+                  <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:0s]"></span>
+                  <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:0.2s]"></span>
+                  <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:0.4s]"></span>
                 </div>
               </div>
             )}
@@ -426,11 +186,12 @@ export default function EnhancedLiveChat() {
             <div ref={messagesEndRef} />
           </div>
 
-          <div style={styles.quickReplies}>
+          {/* Quick Replies */}
+          <div className="flex flex-wrap gap-2 border-t border-slate-200 bg-white px-4 py-3">
             {quickReplies.map((reply) => (
               <button
                 key={reply.id}
-                style={styles.quickReply}
+                className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-[13px] text-[#1a4158] transition-all hover:border-[#2c5f7d] hover:bg-[#2c5f7d]/5"
                 onClick={() => handleQuickReply(reply)}
               >
                 {reply.text}
@@ -438,21 +199,22 @@ export default function EnhancedLiveChat() {
             ))}
           </div>
 
-          <div style={styles.chatInput}>
+          {/* Input */}
+          <div className="flex items-center gap-2 border-t border-slate-200 bg-white px-4 py-3">
             <input
               ref={fileInputRef}
               type="file"
               onChange={handleFileUpload}
               accept="image/*,.pdf,.doc,.docx"
-              style={{ display: 'none' }}
+              className="hidden"
             />
 
             <button
-              style={styles.attachBtn}
+              className="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100"
               onClick={() => fileInputRef.current?.click()}
               title="Adjuntar archivo"
             >
-              📎
+              <Paperclip className="h-5 w-5" />
             </button>
 
             <input
@@ -461,28 +223,24 @@ export default function EnhancedLiveChat() {
               onChange={(e) => setInputText(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Escribe tu mensaje..."
-              style={styles.input}
+              className="flex-1 rounded-full border border-slate-200 px-4 py-2.5 text-sm outline-none transition-colors focus:border-[#2c5f7d]"
             />
 
             <button
               onClick={handleSendMessage}
-              style={{
-                ...styles.sendBtn,
-                ...(!inputText.trim() ? styles.sendBtnDisabled : {})
-              }}
+              className={cn(
+                'flex h-9 w-9 items-center justify-center rounded-full transition-colors',
+                inputText.trim()
+                  ? 'bg-[#2c5f7d] text-white hover:bg-[#1a4158]'
+                  : 'cursor-not-allowed bg-slate-200 text-slate-400'
+              )}
               disabled={!inputText.trim()}
             >
-              ➤
+              <Send className="h-4 w-4" />
             </button>
           </div>
         </div>
       )}
-      <style>{`
-        @keyframes typing {
-          0%, 60%, 100% { transform: translateY(0); }
-          30% { transform: translateY(-4px); }
-        }
-      `}</style>
     </>
   )
 }

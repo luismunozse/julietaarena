@@ -243,7 +243,7 @@ export default function ConsultasPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-200 p-6 md:p-8">
+    <div className="space-y-6">
       <AdminPageHeader
         title="Consultas de Propiedades"
         subtitle="Gestiona las consultas recibidas de clientes interesados"

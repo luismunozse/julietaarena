@@ -6,8 +6,12 @@ import { useToast } from '@/components/ToastContainer'
 import { useRouter } from 'next/navigation'
 import Modal from '@/components/Modal'
 import Pagination from '@/components/admin/Pagination'
-import { useAuth } from '@/hooks/useAuth'
-
+import AdminPageHeader from '@/components/admin/AdminPageHeader'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Plus, FileText, Power, Trash2, ExternalLink } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface PropertyTemplate {
   id: string
@@ -20,20 +24,20 @@ interface PropertyTemplate {
   created_at: string
 }
 
+const categoryLabels: Record<string, string> = {
+  casa: 'Casa',
+  departamento: 'Departamento',
+  terreno: 'Terreno',
+  local: 'Local',
+  oficina: 'Oficina'
+}
+
 export default function PlantillasPage() {
   const [templates, setTemplates] = useState<PropertyTemplate[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [selectedTemplate, setSelectedTemplate] = useState<PropertyTemplate | null>(null)
   const [showCreateModal, setShowCreateModal] = useState(false)
-  const [showEditModal, setShowEditModal] = useState(false)
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    category: 'casa' as string
-  })
   const { success, error: showError } = useToast()
   const router = useRouter()
-  const { user } = useAuth()
 
   const loadTemplates = useCallback(async () => {
     try {
@@ -63,20 +67,16 @@ export default function PlantillasPage() {
   }, [loadTemplates])
 
   const handleCreateFromProperty = async () => {
-    // Esta función debería ser llamada desde la página de propiedades
-    // con los datos de una propiedad existente
     router.push('/admin/propiedades')
   }
 
   const handleUseTemplate = async (template: PropertyTemplate) => {
     try {
-      // Incrementar contador de uso
       await supabase
         .from('property_templates')
         .update({ usage_count: template.usage_count + 1 })
         .eq('id', template.id)
 
-      // Redirigir a crear propiedad con los datos de la plantilla
       const templateData = JSON.stringify(template.template_data)
       router.push(`/admin/propiedades/nueva?template=${encodeURIComponent(templateData)}`)
     } catch (err) {
@@ -130,49 +130,38 @@ export default function PlantillasPage() {
   }
 
   const getCategoryLabel = (category: string | null): string => {
-    const labels: Record<string, string> = {
-      casa: 'Casa',
-      departamento: 'Departamento',
-      terreno: 'Terreno',
-      local: 'Local',
-      oficina: 'Oficina'
-    }
-    return labels[category || ''] || category || 'Sin categoría'
+    return categoryLabels[category || ''] || category || 'Sin categoría'
   }
 
   if (isLoading) {
     return (
-      <div className="container">
-        <div className="loading">
-          <div className="spinner"></div>
-          <p>Cargando plantillas...</p>
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-600 mx-auto mb-4" />
+          <p className="text-slate-500">Cargando plantillas...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="container">
-      <div className="header">
-        <div>
-          <h1 className="title">Plantillas de Propiedades</h1>
-          <p className="subtitle">Crea y gestiona plantillas para acelerar la creación de propiedades</p>
-        </div>
-        <div className="headerActions">
-          <button
-            onClick={handleCreateFromProperty}
-            className="createFromPropertyButton"
-          >
-            Crear desde Propiedad
-          </button>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="createButton"
-          >
-            + Nueva Plantilla
-          </button>
-        </div>
-      </div>
+    <div className="space-y-6">
+      <AdminPageHeader
+        title="Plantillas de Propiedades"
+        subtitle="Crea y gestiona plantillas para acelerar la creación de propiedades"
+        action={
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handleCreateFromProperty}>
+              <ExternalLink className="h-4 w-4 mr-2" />
+              Crear desde Propiedad
+            </Button>
+            <Button onClick={() => setShowCreateModal(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Nueva Plantilla
+            </Button>
+          </div>
+        }
+      />
 
       <Pagination
         items={templates}
@@ -180,59 +169,74 @@ export default function PlantillasPage() {
         render={(paginatedItems) => (
           <>
             {paginatedItems.length === 0 ? (
-              <div className="empty">
-                <p className="emptyIcon">📄</p>
-                <p className="emptyText">No hay plantillas creadas</p>
-                <p className="emptySubtext">
-                  Crea plantillas desde propiedades existentes para reutilizar información común
-                </p>
-              </div>
+              <Card className="text-center py-12 bg-white">
+                <CardContent>
+                  <FileText className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+                  <p className="text-lg font-medium text-slate-700 mb-1">No hay plantillas creadas</p>
+                  <p className="text-sm text-slate-500">
+                    Crea plantillas desde propiedades existentes para reutilizar información común
+                  </p>
+                </CardContent>
+              </Card>
             ) : (
-              <div className="templatesGrid">
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {paginatedItems.map((template) => (
-                  <div key={template.id} className="templateCard">
-                    <div className="templateHeader">
-                      <h3 className="templateName">{template.name}</h3>
-                      <span className={`statusBadge ${template.is_active ? 'statusActive' : 'statusInactive'}`}>
-                        {template.is_active ? 'Activa' : 'Inactiva'}
-                      </span>
-                    </div>
-                    
-                    {template.description && (
-                      <p className="templateDescription">{template.description}</p>
-                    )}
+                  <Card key={template.id} className="bg-white">
+                    <CardContent className="p-5">
+                      <div className="flex items-start justify-between mb-3">
+                        <h3 className="font-semibold text-slate-800">{template.name}</h3>
+                        <Badge className={cn(
+                          'text-xs',
+                          template.is_active
+                            ? 'bg-green-100 text-green-700'
+                            : 'bg-slate-100 text-slate-600'
+                        )}>
+                          {template.is_active ? 'Activa' : 'Inactiva'}
+                        </Badge>
+                      </div>
 
-                    <div className="templateMeta">
-                      <span className="categoryBadge">
-                        {getCategoryLabel(template.category)}
-                      </span>
-                      <span className="usageCount">
-                        Usada {template.usage_count} veces
-                      </span>
-                    </div>
+                      {template.description && (
+                        <p className="text-sm text-slate-600 mb-3 line-clamp-2">
+                          {template.description}
+                        </p>
+                      )}
 
-                    <div className="templateActions">
-                      <button
-                        onClick={() => handleUseTemplate(template)}
-                        className="useButton"
-                        disabled={!template.is_active}
-                      >
-                        Usar Plantilla
-                      </button>
-                      <button
-                        onClick={() => handleToggleActive(template)}
-                        className="toggleButton"
-                      >
-                        {template.is_active ? 'Desactivar' : 'Activar'}
-                      </button>
-                      <button
-                        onClick={() => handleDeleteTemplate(template)}
-                        className="deleteButton"
-                      >
-                        Eliminar
-                      </button>
-                    </div>
-                  </div>
+                      <div className="flex items-center gap-2 mb-4">
+                        <Badge variant="outline" className="text-xs">
+                          {getCategoryLabel(template.category)}
+                        </Badge>
+                        <span className="text-xs text-slate-500">
+                          Usada {template.usage_count} veces
+                        </span>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => handleUseTemplate(template)}
+                          disabled={!template.is_active}
+                          className="flex-1"
+                        >
+                          Usar Plantilla
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleToggleActive(template)}
+                        >
+                          <Power className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDeleteTemplate(template)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
             )}
@@ -240,7 +244,6 @@ export default function PlantillasPage() {
         )}
       />
 
-      {/* Modal crear plantilla */}
       {showCreateModal && (
         <Modal
           isOpen={showCreateModal}
@@ -249,27 +252,28 @@ export default function PlantillasPage() {
           type="alert"
           message=""
         >
-          <div className="modalContent">
-            <p className="modalInfo">
+          <div className="space-y-4">
+            <p className="text-sm text-slate-600">
               Para crear una plantilla completa, primero crea o edita una propiedad y luego
               guárdala como plantilla desde allí.
             </p>
-            <div className="modalActions">
-              <button
+            <div className="flex gap-2">
+              <Button
                 onClick={() => {
                   setShowCreateModal(false)
                   router.push('/admin/propiedades/nueva')
                 }}
-                className="createPropertyButton"
+                className="flex-1"
               >
                 Ir a Crear Propiedad
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="outline"
                 onClick={() => setShowCreateModal(false)}
-                className="cancelButton"
+                className="flex-1"
               >
                 Cancelar
-              </button>
+              </Button>
             </div>
           </div>
         </Modal>
@@ -277,4 +281,3 @@ export default function PlantillasPage() {
     </div>
   )
 }
-

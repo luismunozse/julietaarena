@@ -44,23 +44,23 @@ export default function FeaturedProperties() {
 
   if (isLoading) {
     return (
-      <section className="py-12 lg:py-16 bg-gradient-to-b from-surface to-white">
-        <div className="max-w-7xl mx-auto px-6">
+      <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-b from-surface to-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           {/* Header */}
-          <div className="text-center mb-10">
-            <span className="inline-block px-4 py-1.5 bg-brand-secondary/10 text-brand-primary rounded-full text-sm font-medium mb-4">
+          <div className="text-center mb-8 sm:mb-10">
+            <span className="inline-block px-4 py-1.5 bg-brand-secondary/10 text-brand-primary rounded-full text-sm font-medium mb-3 sm:mb-4">
               Destacadas
             </span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-brand-accent mb-3">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-brand-accent mb-2 sm:mb-3">
               Propiedades Destacadas
             </h2>
-            <p className="text-muted max-w-xl mx-auto">
+            <p className="text-sm sm:text-base text-muted max-w-xl mx-auto px-2">
               Las mejores oportunidades del mercado seleccionadas especialmente para vos
             </p>
           </div>
 
           {/* Skeleton Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {[1, 2, 3].map(i => (
               <PropertyCardSkeleton key={i} />
             ))}
@@ -75,37 +75,38 @@ export default function FeaturedProperties() {
   }
 
   return (
-    <section className="py-12 lg:py-16 bg-gradient-to-b from-surface to-white">
-      <div className="max-w-7xl mx-auto px-6">
+    <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-b from-surface to-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
         {/* Header */}
-        <div className="text-center mb-10">
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-brand-secondary/10 text-brand-primary rounded-full text-sm font-medium mb-4">
+        <div className="text-center mb-8 sm:mb-10">
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-brand-secondary/10 text-brand-primary rounded-full text-sm font-medium mb-3 sm:mb-4">
             <Sparkles className="w-4 h-4" />
             Destacadas
           </span>
-          <h2 className="text-3xl sm:text-4xl font-bold text-brand-accent mb-3">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-brand-accent mb-2 sm:mb-3">
             Propiedades Destacadas
           </h2>
-          <p className="text-muted max-w-xl mx-auto">
+          <p className="text-sm sm:text-base text-muted max-w-xl mx-auto px-2">
             Las mejores oportunidades del mercado seleccionadas especialmente para vos
           </p>
         </div>
 
         {/* Properties Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-10">
           {featuredProperties.map(property => (
             <PropertyCard key={property.id} property={property} />
           ))}
         </div>
 
         {/* CTA Button */}
-        <div className="flex justify-center">
+        <div className="flex justify-center px-4">
           <button
             onClick={() => router.push('/propiedades/resultado?featured=true&operation=venta')}
-            className="group inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-brand-primary to-brand-accent text-white rounded-xl font-semibold shadow-lg shadow-brand-primary/25 hover:shadow-xl hover:shadow-brand-primary/35 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
+            className="group inline-flex items-center gap-2 px-5 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-brand-primary to-brand-accent text-white rounded-xl font-semibold text-sm sm:text-base shadow-lg shadow-brand-primary/25 hover:shadow-xl hover:shadow-brand-primary/35 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
           >
-            Ver todas las propiedades destacadas
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" />
+            <span className="hidden sm:inline">Ver todas las propiedades destacadas</span>
+            <span className="sm:hidden">Ver todas las destacadas</span>
+            <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform duration-200" />
           </button>
         </div>
       </div>

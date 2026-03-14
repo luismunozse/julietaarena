@@ -58,10 +58,11 @@ const quickActions = [
 
 export default function AdminDashboard() {
   return (
-    <main className="min-h-screen p-6 md:p-10 bg-[#f8f9fa]">
+    <div className="space-y-8">
       <AdminPageHeader
         title="Panel de Administración"
         subtitle="Bienvenido al panel de control de Julieta Arena"
+        className="mb-0"
       />
 
       {/* Estadísticas en tiempo real */}
@@ -74,49 +75,51 @@ export default function AdminDashboard() {
       <RecentActivity />
 
       {/* Cards de navegación */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {dashboardCards.map((card) => (
           <Link key={card.href} href={card.href}>
-            <Card className="flex items-center gap-5 p-6 border-l-4 border-l-[#2c5f7d] hover:-translate-y-1 hover:shadow-lg transition-all duration-300 cursor-pointer h-full">
-              <span className="text-5xl opacity-90">{card.icon}</span>
-              <div className="flex-1">
-                <h2 className="text-lg font-semibold text-[#1a4158] mb-1">
+            <Card className="group flex items-center gap-5 p-5 bg-white border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all duration-200 cursor-pointer h-full">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-slate-100 to-slate-50 group-hover:from-blue-50 group-hover:to-slate-50 transition-colors">
+                <span className="text-2xl">{card.icon}</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <h2 className="text-base font-semibold text-slate-800 mb-0.5">
                   {card.title}
                 </h2>
-                <p className="text-sm text-muted-foreground">{card.description}</p>
+                <p className="text-sm text-slate-500 truncate">{card.description}</p>
               </div>
-              <ChevronRight className="h-6 w-6 text-[#2c5f7d]" />
+              <ChevronRight className="h-5 w-5 text-slate-400 group-hover:text-slate-600 group-hover:translate-x-0.5 transition-all shrink-0" />
             </Card>
           </Link>
         ))}
       </div>
 
       {/* Sección de accesos rápidos */}
-      <div className="mt-12">
-        <h2 className="text-xl font-semibold text-[#1a4158] mb-5">
+      <div>
+        <h2 className="text-lg font-semibold text-slate-800 mb-4">
           Accesos Rápidos
         </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
           {quickActions.map((action) => (
             <Link
               key={action.href}
               href={action.href}
-              className="flex items-center justify-center gap-3 p-5 bg-white border-2 border-gray-200 rounded-xl text-[#1a4158] font-semibold hover:border-[#2c5f7d] hover:bg-[#2c5f7d]/5 transition-all duration-300"
+              className="flex flex-col items-center justify-center gap-2 p-4 bg-white border border-slate-200 rounded-xl text-slate-700 hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm transition-all duration-200"
             >
-              <span className="text-2xl">{action.icon}</span>
-              <span className="text-sm">{action.label}</span>
+              <span className="text-xl">{action.icon}</span>
+              <span className="text-xs font-medium text-center">{action.label}</span>
             </Link>
           ))}
         </div>
       </div>
 
       {/* Configuración de Notificaciones */}
-      <div className="mt-12">
-        <h2 className="text-xl font-semibold text-[#1a4158] mb-5 text-center">
+      <div>
+        <h2 className="text-xl font-semibold text-slate-800 mb-5 text-center">
           Notificaciones en Tiempo Real
         </h2>
         <NotificationSettings />
       </div>
-    </main>
+    </div>
   )
 }

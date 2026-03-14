@@ -6,7 +6,9 @@ import { useProperties } from '@/hooks/useProperties'
 import type { Property } from '@/data/properties'
 import PropertyForm from '@/components/PropertyForm'
 import Modal from '@/components/Modal'
-
+import AdminPageHeader from '@/components/admin/AdminPageHeader'
+import { Button } from '@/components/ui/button'
+import { ArrowLeft } from 'lucide-react'
 
 export default function EditPropertyPage() {
   const router = useRouter()
@@ -18,7 +20,6 @@ export default function EditPropertyPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Estados del modal
   const [modal, setModal] = useState<{
     isOpen: boolean
     type: 'alert' | 'success' | 'error'
@@ -47,7 +48,6 @@ export default function EditPropertyPage() {
   const handleSubmit = async (formData: Partial<Property>) => {
     setIsSubmitting(true)
 
-    // Validar datos requeridos
     if (!formData.title || !formData.description || !formData.price || !formData.location) {
       setModal({
         isOpen: true,
@@ -59,7 +59,6 @@ export default function EditPropertyPage() {
       return
     }
 
-    // Actualizar propiedad
     const success = await updateProperty(propertyId, formData)
 
     setIsSubmitting(false)
@@ -85,7 +84,14 @@ export default function EditPropertyPage() {
   }
 
   if (isLoading) {
-    return <div className="loading">Cargando propiedad...</div>
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-600 mx-auto mb-4" />
+          <p className="text-slate-500">Cargando propiedad...</p>
+        </div>
+      </div>
+    )
   }
 
   if (!property) {
@@ -93,16 +99,17 @@ export default function EditPropertyPage() {
   }
 
   return (
-    <div className="container">
-      <div className="header">
-        <h1>Editar Propiedad</h1>
-        <button
-          onClick={() => router.push('/admin/propiedades')}
-          className="cancelButton"
-        >
-          ← Volver
-        </button>
-      </div>
+    <div className="space-y-6">
+      <AdminPageHeader
+        title="Editar Propiedad"
+        subtitle={property.title}
+        action={
+          <Button variant="outline" onClick={() => router.push('/admin/propiedades')}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Volver
+          </Button>
+        }
+      />
 
       <PropertyForm
         onSubmit={handleSubmit}
@@ -110,7 +117,6 @@ export default function EditPropertyPage() {
         initialData={property}
       />
 
-      {/* Modal */}
       <Modal
         isOpen={modal.isOpen}
         onClose={() => setModal({ ...modal, isOpen: false })}

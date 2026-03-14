@@ -196,25 +196,25 @@ function PropertyCard({ property }: PropertyCardProps) {
         </div>
 
         {/* Content */}
-        <CardContent className="p-4 space-y-3">
+        <CardContent className="p-3 sm:p-4 space-y-2 sm:space-y-3">
           {/* Type & Location */}
-          <div className="space-y-1.5">
+          <div className="space-y-1 sm:space-y-1.5">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+              <span className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide">
                 {typeLabel}
               </span>
             </div>
-            <h3 className="font-semibold text-slate-900 line-clamp-1 group-hover:text-slate-700 transition-colors">
+            <h3 className="font-semibold text-sm sm:text-base text-slate-900 line-clamp-1 group-hover:text-slate-700 transition-colors">
               {property.title}
             </h3>
-            <div className="flex items-center gap-1.5 text-sm text-slate-500">
-              <MapPin className="h-3.5 w-3.5 shrink-0" />
+            <div className="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-slate-500">
+              <MapPin className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0" />
               <span className="truncate">{property.location}</span>
             </div>
           </div>
 
           {/* Features */}
-          <div className="flex items-center gap-4 text-sm text-slate-600">
+          <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm text-slate-600">
             {property.bedrooms && (
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -270,21 +270,21 @@ function PropertyCard({ property }: PropertyCardProps) {
           <Separator />
 
           {/* Actions */}
-          <div className="flex gap-2">
+          <div className="flex gap-1.5 sm:gap-2">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="flex-1 border-slate-300 text-slate-700 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-400"
+                  className="flex-1 border-slate-300 text-slate-700 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-400 h-8 sm:h-9 text-xs sm:text-sm px-2 sm:px-3"
                   onClick={(e) => {
                     e.stopPropagation()
                     analytics.trackContact('phone', `property_${property.id}`)
                     window.open('tel:+543513078376', '_self')
                   }}
                 >
-                  <Phone className="h-4 w-4" />
-                  <span className="hidden sm:inline ml-2">Llamar</span>
+                  <Phone className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline ml-1.5 sm:ml-2">Llamar</span>
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Llamar ahora</TooltipContent>
@@ -294,15 +294,15 @@ function PropertyCard({ property }: PropertyCardProps) {
               <TooltipTrigger asChild>
                 <Button
                   size="sm"
-                  className="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white"
+                  className="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white h-8 sm:h-9 text-xs sm:text-sm px-2 sm:px-3"
                   onClick={(e) => {
                     e.stopPropagation()
                     analytics.trackContact('whatsapp', `property_${property.id}`)
                     window.open(`https://wa.me/543513078376?text=Hola, me interesa la propiedad: ${property.title}`, '_blank')
                   }}
                 >
-                  <WhatsAppIcon className="h-4 w-4" />
-                  <span className="hidden sm:inline ml-2">WhatsApp</span>
+                  <WhatsAppIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline ml-1.5 sm:ml-2">WhatsApp</span>
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Enviar WhatsApp</TooltipContent>
@@ -313,13 +313,13 @@ function PropertyCard({ property }: PropertyCardProps) {
                 <Button
                   variant="outline"
                   size="icon"
-                  className="shrink-0 border-slate-300 text-slate-600 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-400"
+                  className="shrink-0 border-slate-300 text-slate-600 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-400 h-8 w-8 sm:h-9 sm:w-9"
                   onClick={(e) => {
                     e.stopPropagation()
                     setShowAppointmentBooking(true)
                   }}
                 >
-                  <Calendar className="h-4 w-4" />
+                  <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Agendar visita</TooltipContent>

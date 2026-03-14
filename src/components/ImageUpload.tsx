@@ -3,6 +3,8 @@
 import { useState, useRef, useCallback, type DragEvent } from 'react'
 import Image from 'next/image'
 import { uploadPropertyImage, deletePropertyImage, getPublicImageUrl } from '@/lib/storage'
+import { Upload, X, ArrowUp, ArrowDown, Loader2 } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface ImageUploadProps {
   images: string[]
@@ -36,29 +38,25 @@ export default function ImageUpload({
       const { publicUrl, path } = await uploadPropertyImage(file, { propertyId })
       return publicUrl || path
     } catch (err) {
-      console.error('❌ Error inesperado al subir imagen:', err)
+      console.error('Error inesperado al subir imagen:', err)
       setError('Error al procesar la imagen')
       return null
     }
   }, [propertyId])
 
-  // Validar archivo
   const validateFile = useCallback((file: File): string | null => {
-    // Validar tipo
     if (!file.type.startsWith('image/')) {
       return 'Solo se permiten archivos de imagen'
     }
 
-    // Validar tamaño
     const sizeMB = file.size / (1024 * 1024)
     if (sizeMB > maxSizeMB) {
-      return `El archivo es demasiado grande. Máximo ${maxSizeMB}MB`
+      return `El archivo es demasiado grande. Maximo ${maxSizeMB}MB`
     }
 
     return null
   }, [maxSizeMB])
 
-  // Procesar archivos
   const processFiles = useCallback(async (files: FileList) => {
     setError(null)
     setUploading(true)
@@ -67,15 +65,12 @@ export default function ImageUpload({
       const validFiles: File[] = []
       const errors: string[] = []
 
-      // Validar cantidad
       if (images.length + files.length > maxImages) {
-        console.warn('⚠️ Máximo de imágenes excedido:', images.length + files.length, '>', maxImages)
-        setError(`Máximo ${maxImages} imágenes permitidas`)
+        setError(`Maximo ${maxImages} imagenes permitidas`)
         setUploading(false)
         return
       }
 
-      // Validar cada archivo
       Array.from(files).forEach(file => {
         const validationError = validateFile(file)
         if (validationError) {
@@ -86,11 +81,9 @@ export default function ImageUpload({
       })
 
       if (errors.length > 0) {
-        console.warn('⚠️ Errores de validación:', errors)
         setError(errors.join(', '))
       }
 
-      // Procesar archivos válidos
       if (validFiles.length > 0) {
         const newImages: string[] = []
 
@@ -103,7 +96,7 @@ export default function ImageUpload({
               errors.push(`Error al procesar ${file.name}`)
             }
           } catch (err) {
-            console.error('❌ Error procesando imagen:', err)
+            console.error('Error procesando imagen:', err)
             errors.push(`Error al procesar ${file.name}`)
           }
         }
@@ -118,26 +111,23 @@ export default function ImageUpload({
       }
 
     } catch (err) {
-      console.error('❌ Error procesando imágenes:', err)
-      setError('Error al procesar las imágenes')
+      console.error('Error procesando imagenes:', err)
+      setError('Error al procesar las imagenes')
     } finally {
       setUploading(false)
     }
   }, [images, maxImages, onImagesChange, uploadImageFile, validateFile])
 
-  // Manejar selección de archivos
   const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (files && files.length > 0) {
       processFiles(files)
     }
-    // Reset input para permitir seleccionar el mismo archivo nuevamente
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
   }, [processFiles])
 
-  // Manejar drag & drop
   const handleDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -168,7 +158,6 @@ export default function ImageUpload({
     }
   }, [processFiles])
 
-  // Eliminar imagen
   const handleRemoveImage = async (index: number) => {
     const imageUrl = images[index]
     const updated = images.filter((_, i) => i !== index)
@@ -180,7 +169,6 @@ export default function ImageUpload({
     }
   }
 
-  // Reordenar imágenes (arrastrar para cambiar orden)
   const handleMoveImage = useCallback((fromIndex: number, toIndex: number) => {
     if (fromIndex === toIndex) return
     const updated = [...images]
@@ -226,11 +214,17 @@ export default function ImageUpload({
   }, [resetDragState])
 
   return (
-    <div className="container">
+    <div className="space-y-4">
       {/* Zona de subida */}
       <div
         ref={dropZoneRef}
-        className={`dropZone ${isDragging ? 'dragging' : ''} ${uploading ? 'uploading' : ''}`}
+        className={cn(
+          'relative border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all',
+          isDragging
+            ? 'border-slate-500 bg-slate-50'
+            : 'border-slate-300 hover:border-slate-400 hover:bg-slate-50/50',
+          uploading && 'pointer-events-none opacity-70'
+        )}
         onDragEnter={handleDragEnter}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -243,159 +237,175 @@ export default function ImageUpload({
           accept="image/*"
           multiple
           onChange={handleFileSelect}
-          className="hiddenInput"
+          className="sr-only"
           disabled={uploading || images.length >= maxImages}
         />
 
-        <div className="dropZoneContent">
+        <div className="flex flex-col items-center gap-3">
           {uploading ? (
             <>
-              <div className="spinner"></div>
-              <p>Subiendo imágenes...</p>
+              <Loader2 className="h-10 w-10 text-slate-400 animate-spin" />
+              <p className="text-slate-600 font-medium">Subiendo imagenes...</p>
             </>
           ) : (
             <>
-              <div className="uploadIcon">📸</div>
-              <p className="uploadText">
-                <strong>Haz clic o arrastra imágenes aquí</strong>
-              </p>
-              <p className="uploadHint">
-                Máximo {maxImages} imágenes • {maxSizeMB}MB por imagen
-              </p>
-              <p className="uploadHint">
-                Formatos: JPG, PNG, WebP
-              </p>
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-slate-100">
+                <Upload className="h-6 w-6 text-slate-500" />
+              </div>
+              <div>
+                <p className="text-slate-700 font-medium">
+                  Haz clic o arrastra imagenes aqui
+                </p>
+                <p className="text-sm text-slate-500 mt-1">
+                  Maximo {maxImages} imagenes - {maxSizeMB}MB por imagen
+                </p>
+                <p className="text-xs text-slate-400 mt-1">
+                  Formatos: JPG, PNG, WebP
+                </p>
+              </div>
             </>
           )}
         </div>
       </div>
 
-      {/* Opción alternativa: URL */}
-      <div className="urlOption">
-        <details>
-          <summary>O agregar desde URL</summary>
-          <div className="urlInput">
-            <input
-              type="url"
-              placeholder="https://ejemplo.com/imagen.jpg"
-              onKeyPress={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault()
-                  const input = e.currentTarget as HTMLInputElement
-                  const url = input.value.trim()
-                  if (url && !images.includes(url)) {
-                    if (images.length >= maxImages) {
-                      setError(`Máximo ${maxImages} imágenes permitidas`)
-                    } else {
-                      onImagesChange([...images, url])
-                      input.value = ''
-                      setError(null)
-                    }
+      {/* Opcion alternativa: URL */}
+      <details className="text-sm">
+        <summary className="cursor-pointer text-slate-500 hover:text-slate-700">
+          O agregar desde URL
+        </summary>
+        <div className="mt-3 flex gap-2">
+          <input
+            type="url"
+            placeholder="https://ejemplo.com/imagen.jpg"
+            className="flex-1 px-3 py-2 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-slate-200"
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                const input = e.currentTarget as HTMLInputElement
+                const url = input.value.trim()
+                if (url && !images.includes(url)) {
+                  if (images.length >= maxImages) {
+                    setError(`Maximo ${maxImages} imagenes permitidas`)
+                  } else {
+                    onImagesChange([...images, url])
+                    input.value = ''
+                    setError(null)
                   }
                 }
-              }}
-            />
-            <small>Presiona Enter para agregar</small>
-          </div>
-        </details>
-      </div>
+              }
+            }}
+          />
+          <span className="text-xs text-slate-400 self-center">Presiona Enter</span>
+        </div>
+      </details>
 
       {/* Mensaje de error */}
       {error && (
-        <div className="error">
-          ⚠️ {error}
+        <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+          <span>⚠️</span>
+          <span>{error}</span>
         </div>
       )}
 
-      {/* Vista previa de imágenes */}
+      {/* Vista previa de imagenes */}
       {images.length > 0 && (
-        <div className="imagesGrid">
-          {images.map((image, index) => {
-            const previewClasses = ['imagePreview']
-            if (draggingIndex === index) previewClasses.push('imagePreviewDragging')
-            if (dragOverIndex === index && draggingIndex !== index) previewClasses.push('imagePreviewDropTarget')
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+          {images.map((image, index) => (
+            <div
+              key={index}
+              className={cn(
+                'relative aspect-square rounded-lg overflow-hidden border-2 cursor-grab group',
+                draggingIndex === index
+                  ? 'opacity-50 border-slate-400'
+                  : dragOverIndex === index && draggingIndex !== index
+                  ? 'border-slate-500 ring-2 ring-slate-300'
+                  : 'border-slate-200 hover:border-slate-300'
+              )}
+              draggable
+              onDragStart={(event) => handleDragStart(event, index)}
+              onDragEnter={() => handleDragEnterPreview(index)}
+              onDragOver={handleDragOverPreview}
+              onDrop={(event) => handleDropPreview(event, index)}
+              onDragEnd={handleDragEnd}
+            >
+              <Image
+                src={brokenPreviews[image] ? placeholderImage : getPublicImageUrl(image)}
+                alt={`Imagen ${index + 1}`}
+                fill
+                sizes="(max-width: 768px) 45vw, 150px"
+                className="object-cover"
+                unoptimized
+                onError={() => setBrokenPreviews((prev) => ({ ...prev, [image]: true }))}
+              />
 
-            return (
-              <div
-                key={index}
-                className={previewClasses.join(' ')}
-                draggable
-                onDragStart={(event) => handleDragStart(event, index)}
-                onDragEnter={() => handleDragEnterPreview(index)}
-                onDragOver={handleDragOverPreview}
-                onDrop={(event) => handleDropPreview(event, index)}
-                onDragEnd={handleDragEnd}
-              >
-                <Image
-                  src={brokenPreviews[image] ? placeholderImage : getPublicImageUrl(image)}
-                  alt={`Imagen ${index + 1}`}
-                  fill
-                  sizes="(max-width: 768px) 45vw, 150px"
-                  className="previewImage"
-                  unoptimized
-                  onError={() => setBrokenPreviews((prev) => ({ ...prev, [image]: true }))}
-                />
-                <div className="imageOverlay">
-                  <span className="imageNumber">{index + 1}</span>
-                  <div className="imageActions">
-                    {index > 0 && (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleMoveImage(index, index - 1)
-                        }}
-                        className="moveButton"
-                        title="Mover hacia arriba"
-                      >
-                        ↑
-                      </button>
-                    )}
-                    {index < images.length - 1 && (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleMoveImage(index, index + 1)
-                        }}
-                        className="moveButton"
-                        title="Mover hacia abajo"
-                      >
-                        ↓
-                      </button>
-                    )}
+              {/* Overlay con controles */}
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors">
+                {/* Numero de imagen */}
+                <span className="absolute top-2 left-2 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-xs font-medium text-white">
+                  {index + 1}
+                </span>
+
+                {/* Botones de accion */}
+                <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {index > 0 && (
                     <button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation()
-                        handleRemoveImage(index)
+                        handleMoveImage(index, index - 1)
                       }}
-                      className="removeButton"
-                      title="Eliminar"
+                      className="flex h-6 w-6 items-center justify-center rounded bg-white/90 hover:bg-white text-slate-700 transition-colors"
+                      title="Mover hacia arriba"
                     >
-                      ✕
+                      <ArrowUp className="h-3.5 w-3.5" />
                     </button>
-                  </div>
+                  )}
+                  {index < images.length - 1 && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleMoveImage(index, index + 1)
+                      }}
+                      className="flex h-6 w-6 items-center justify-center rounded bg-white/90 hover:bg-white text-slate-700 transition-colors"
+                      title="Mover hacia abajo"
+                    >
+                      <ArrowDown className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleRemoveImage(index)
+                    }}
+                    className="flex h-6 w-6 items-center justify-center rounded bg-red-500/90 hover:bg-red-500 text-white transition-colors"
+                    title="Eliminar"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
                 </div>
               </div>
-            )
-          })}
+
+              {/* Badge de portada */}
+              {index === 0 && (
+                <span className="absolute bottom-2 left-2 px-2 py-0.5 bg-amber-500 text-white text-xs font-medium rounded">
+                  Portada
+                </span>
+              )}
+            </div>
+          ))}
         </div>
       )}
 
-      {/* Información */}
+      {/* Informacion */}
       {images.length > 0 && (
-        <div className="info">
+        <div className="text-sm text-slate-500 space-y-1">
           <p>
-            {images.length} {images.length === 1 ? 'imagen' : 'imágenes'} agregada{images.length === 1 ? '' : 's'}
-            {images.length > 0 && images[0]?.startsWith('data:') && (
-              <span className="warning">
-                {' • '}Las imágenes se guardan temporalmente. Para producción, configura Cloudinary o un servicio de almacenamiento.
-              </span>
-            )}
+            {images.length} {images.length === 1 ? 'imagen agregada' : 'imagenes agregadas'}
           </p>
           {images.length > 1 && (
-            <p className="reorderHint">
+            <p className="text-xs">
               Arrastra las miniaturas para reordenar. La primera imagen se usa como portada.
             </p>
           )}

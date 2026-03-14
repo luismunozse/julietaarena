@@ -1,8 +1,18 @@
 'use client'
 
-import { useState, useEffect, CSSProperties } from 'react'
+import { useState, useEffect } from 'react'
 import { useAnalytics } from '@/hooks/useAnalytics'
 import AnalyticsCharts from '@/components/admin/AnalyticsCharts'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Loader2, BarChart3, Eye, Home, Phone, AlertCircle } from 'lucide-react'
 
 interface AnalyticsData {
   totalEvents: number
@@ -11,214 +21,6 @@ interface AnalyticsData {
   popularEvents: Array<{ event: string; count: number }>
   events: any[]
   pageViews: any[]
-}
-
-const styles: Record<string, CSSProperties> = {
-  dashboard: {
-    padding: '1.5rem',
-  },
-  loading: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '4rem',
-    color: '#636e72',
-  },
-  spinner: {
-    width: '40px',
-    height: '40px',
-    border: '4px solid #e5e7eb',
-    borderTopColor: '#2c5f7d',
-    borderRadius: '50%',
-    animation: 'spin 1s linear infinite',
-    marginBottom: '1rem',
-  },
-  error: {
-    padding: '2rem',
-    textAlign: 'center',
-    color: '#636e72',
-    backgroundColor: '#f8f9fa',
-    borderRadius: '16px',
-  },
-  header: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: '2rem',
-    flexWrap: 'wrap',
-    gap: '1rem',
-  },
-  headerH1: {
-    margin: 0,
-    fontSize: '1.5rem',
-    fontWeight: 600,
-    color: '#1a4158',
-  },
-  controls: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1rem',
-  },
-  timeRange: {
-    padding: '0.5rem 1rem',
-    border: '1px solid #e5e7eb',
-    borderRadius: '8px',
-    fontSize: '0.875rem',
-    color: '#1a4158',
-    backgroundColor: '#ffffff',
-    cursor: 'pointer',
-  },
-  clearBtn: {
-    padding: '0.5rem 1rem',
-    backgroundColor: '#f8f9fa',
-    color: '#636e72',
-    border: '1px solid #e5e7eb',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontSize: '0.875rem',
-    transition: 'all 0.2s',
-  },
-  statsGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-    gap: '1rem',
-    marginBottom: '2rem',
-  },
-  statCard: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1rem',
-    padding: '1.25rem',
-    backgroundColor: '#ffffff',
-    borderRadius: '16px',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-    border: '1px solid #e5e7eb',
-  },
-  statIcon: {
-    width: '48px',
-    height: '48px',
-    backgroundColor: 'rgba(44, 95, 125, 0.1)',
-    borderRadius: '12px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '1.5rem',
-  },
-  statContent: {
-    flex: 1,
-  },
-  statContentH3: {
-    margin: '0 0 0.25rem 0',
-    fontSize: '0.8125rem',
-    fontWeight: 500,
-    color: '#636e72',
-  },
-  statNumber: {
-    margin: 0,
-    fontSize: '1.5rem',
-    fontWeight: 700,
-    color: '#1a4158',
-  },
-  contentGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-    gap: '1.5rem',
-    marginBottom: '2rem',
-  },
-  section: {
-    backgroundColor: '#ffffff',
-    borderRadius: '16px',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-    padding: '1.5rem',
-    marginBottom: '1.5rem',
-    border: '1px solid #e5e7eb',
-  },
-  sectionH2: {
-    margin: '0 0 1rem 0',
-    fontSize: '1.125rem',
-    fontWeight: 600,
-    color: '#1a4158',
-  },
-  list: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.5rem',
-  },
-  listItem: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: '0.75rem',
-    backgroundColor: '#f8f9fa',
-    borderRadius: '8px',
-  },
-  listLabel: {
-    fontSize: '0.875rem',
-    color: '#1a4158',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    maxWidth: '70%',
-  },
-  listValue: {
-    fontSize: '0.875rem',
-    fontWeight: 600,
-    color: '#2c5f7d',
-    whiteSpace: 'nowrap',
-  },
-  emptyState: {
-    padding: '2rem',
-    textAlign: 'center',
-    color: '#636e72',
-    fontSize: '0.875rem',
-  },
-  eventsTable: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.25rem',
-    overflow: 'auto',
-  },
-  tableHeader: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr 1fr 1fr',
-    gap: '1rem',
-    padding: '0.75rem',
-    backgroundColor: '#2c5f7d',
-    color: '#ffffff',
-    borderRadius: '8px 8px 0 0',
-    fontSize: '0.8125rem',
-    fontWeight: 600,
-  },
-  tableRow: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr 1fr 1fr',
-    gap: '1rem',
-    padding: '0.75rem',
-    backgroundColor: '#f8f9fa',
-    fontSize: '0.8125rem',
-    borderBottom: '1px solid #e5e7eb',
-  },
-  eventName: {
-    color: '#1a4158',
-    fontWeight: 500,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  },
-  eventCategory: {
-    color: '#636e72',
-  },
-  eventAction: {
-    color: '#636e72',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  },
-  eventDate: {
-    color: '#636e72',
-    fontSize: '0.75rem',
-  },
 }
 
 export default function AnalyticsDashboard() {
@@ -253,194 +55,259 @@ export default function AnalyticsDashboard() {
 
   if (isLoading) {
     return (
-      <div style={styles.dashboard}>
-        <div style={styles.loading}>
-          <div style={styles.spinner}></div>
+      <div className="p-6">
+        <div className="flex flex-col items-center justify-center py-16 text-slate-500">
+          <Loader2 className="mb-4 h-10 w-10 animate-spin text-[#2c5f7d]" />
           <p>Cargando datos de analytics...</p>
         </div>
-        <style>{`
-          @keyframes spin {
-            to { transform: rotate(360deg); }
-          }
-        `}</style>
       </div>
     )
   }
 
   if (!data) {
     return (
-      <div style={styles.dashboard}>
-        <div style={styles.error}>
-          <p>No se pudieron cargar los datos de analytics.</p>
-        </div>
+      <div className="p-6">
+        <Card className="bg-slate-50 text-center">
+          <CardContent className="py-8">
+            <AlertCircle className="mx-auto mb-4 h-12 w-12 text-slate-400" />
+            <p className="text-slate-600">
+              No se pudieron cargar los datos de analytics.
+            </p>
+          </CardContent>
+        </Card>
       </div>
     )
   }
 
+  const statCards = [
+    {
+      icon: <BarChart3 className="h-6 w-6 text-[#2c5f7d]" />,
+      label: 'Eventos Totales',
+      value: formatNumber(data.totalEvents || 0),
+    },
+    {
+      icon: <Eye className="h-6 w-6 text-[#2c5f7d]" />,
+      label: 'Vistas de Página',
+      value: formatNumber(data.totalPageViews || 0),
+    },
+    {
+      icon: <Home className="h-6 w-6 text-[#2c5f7d]" />,
+      label: 'Propiedades Vistas',
+      value: formatNumber(
+        (data.events || []).filter((e) => e.category === 'property').length
+      ),
+    },
+    {
+      icon: <Phone className="h-6 w-6 text-[#2c5f7d]" />,
+      label: 'Contactos',
+      value: formatNumber(
+        (data.events || []).filter((e) => e.category === 'contact').length
+      ),
+    },
+  ]
+
   return (
-    <div style={styles.dashboard}>
-      <div style={styles.header}>
-        <h1 style={styles.headerH1}>Dashboard de Analytics</h1>
-        <div style={styles.controls}>
-          <select
+    <div className="space-y-6 p-6">
+      {/* Header */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <h1 className="text-2xl font-semibold text-[#1a4158]">
+          Dashboard de Analytics
+        </h1>
+        <div className="flex items-center gap-4">
+          <Select
             value={timeRange}
-            onChange={(e) => setTimeRange(e.target.value as any)}
-            style={styles.timeRange}
+            onValueChange={(value) => setTimeRange(value as any)}
           >
-            <option value="24h">Ultimas 24 horas</option>
-            <option value="7d">Ultimos 7 dias</option>
-            <option value="30d">Ultimos 30 dias</option>
-            <option value="all">Todo el tiempo</option>
-          </select>
-          <button
-            onClick={() => analytics.clearData()}
-            style={styles.clearBtn}
-          >
+            <SelectTrigger className="w-48">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="24h">Últimas 24 horas</SelectItem>
+              <SelectItem value="7d">Últimos 7 días</SelectItem>
+              <SelectItem value="30d">Últimos 30 días</SelectItem>
+              <SelectItem value="all">Todo el tiempo</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button variant="outline" onClick={() => analytics.clearData()}>
             Limpiar Datos
-          </button>
+          </Button>
         </div>
       </div>
 
-      <div style={styles.statsGrid}>
-        <div style={styles.statCard}>
-          <div style={styles.statIcon}>📊</div>
-          <div style={styles.statContent}>
-            <h3 style={styles.statContentH3}>Eventos Totales</h3>
-            <p style={styles.statNumber}>{formatNumber(data.totalEvents || 0)}</p>
-          </div>
-        </div>
-
-        <div style={styles.statCard}>
-          <div style={styles.statIcon}>👁️</div>
-          <div style={styles.statContent}>
-            <h3 style={styles.statContentH3}>Vistas de Pagina</h3>
-            <p style={styles.statNumber}>{formatNumber(data.totalPageViews || 0)}</p>
-          </div>
-        </div>
-
-        <div style={styles.statCard}>
-          <div style={styles.statIcon}>🏠</div>
-          <div style={styles.statContent}>
-            <h3 style={styles.statContentH3}>Propiedades Vistas</h3>
-            <p style={styles.statNumber}>
-              {formatNumber((data.events || []).filter(e => e.category === 'property').length)}
-            </p>
-          </div>
-        </div>
-
-        <div style={styles.statCard}>
-          <div style={styles.statIcon}>📞</div>
-          <div style={styles.statContent}>
-            <h3 style={styles.statContentH3}>Contactos</h3>
-            <p style={styles.statNumber}>
-              {formatNumber((data.events || []).filter(e => e.category === 'contact').length)}
-            </p>
-          </div>
-        </div>
+      {/* Stats Grid */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {statCards.map((stat, index) => (
+          <Card key={index} className="bg-white">
+            <CardContent className="flex items-center gap-4 p-5">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#2c5f7d]/10">
+                {stat.icon}
+              </div>
+              <div className="flex-1">
+                <h3 className="mb-1 text-[13px] font-medium text-slate-500">
+                  {stat.label}
+                </h3>
+                <p className="text-2xl font-bold text-[#1a4158]">{stat.value}</p>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
-      <div style={styles.contentGrid}>
-        <div style={styles.section}>
-          <h2 style={styles.sectionH2}>Paginas Mas Visitadas</h2>
-          <div style={styles.list}>
+      {/* Content Grid */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Popular Pages */}
+        <Card className="bg-white">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg text-[#1a4158]">
+              Páginas Más Visitadas
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
             {(data.popularPages || []).slice(0, 10).length > 0 ? (
               (data.popularPages || []).slice(0, 10).map((page, index) => (
-                <div key={index} style={styles.listItem}>
-                  <span style={styles.listLabel}>{page.page}</span>
-                  <span style={styles.listValue}>{formatNumber(page.views)} vistas</span>
+                <div
+                  key={index}
+                  className="flex items-center justify-between rounded-lg bg-slate-50 p-3"
+                >
+                  <span className="max-w-[70%] truncate text-sm text-[#1a4158]">
+                    {page.page}
+                  </span>
+                  <span className="whitespace-nowrap text-sm font-semibold text-[#2c5f7d]">
+                    {formatNumber(page.views)} vistas
+                  </span>
                 </div>
               ))
             ) : (
-              <div style={styles.emptyState}>
-                <p>No hay datos de paginas visitadas aun</p>
+              <div className="py-8 text-center text-sm text-slate-500">
+                No hay datos de páginas visitadas aún
               </div>
             )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
-        <div style={styles.section}>
-          <h2 style={styles.sectionH2}>Eventos Mas Frecuentes</h2>
-          <div style={styles.list}>
+        {/* Popular Events */}
+        <Card className="bg-white">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg text-[#1a4158]">
+              Eventos Más Frecuentes
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
             {(data.popularEvents || []).slice(0, 10).length > 0 ? (
               (data.popularEvents || []).slice(0, 10).map((event, index) => (
-                <div key={index} style={styles.listItem}>
-                  <span style={styles.listLabel}>{event.event}</span>
-                  <span style={styles.listValue}>{formatNumber(event.count)} veces</span>
+                <div
+                  key={index}
+                  className="flex items-center justify-between rounded-lg bg-slate-50 p-3"
+                >
+                  <span className="max-w-[70%] truncate text-sm text-[#1a4158]">
+                    {event.event}
+                  </span>
+                  <span className="whitespace-nowrap text-sm font-semibold text-[#2c5f7d]">
+                    {formatNumber(event.count)} veces
+                  </span>
                 </div>
               ))
             ) : (
-              <div style={styles.emptyState}>
-                <p>No hay datos de eventos aun</p>
+              <div className="py-8 text-center text-sm text-slate-500">
+                No hay datos de eventos aún
               </div>
             )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
 
-      <div style={styles.section}>
-        <h2 style={styles.sectionH2}>Eventos Recientes</h2>
-        <div style={styles.eventsTable}>
+      {/* Recent Events Table */}
+      <Card className="bg-white">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg text-[#1a4158]">
+            Eventos Recientes
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
           {(data.events || []).length > 0 ? (
-            <>
-              <div style={styles.tableHeader}>
+            <div className="overflow-auto">
+              <div className="grid grid-cols-4 gap-4 rounded-t-lg bg-[#2c5f7d] p-3 text-[13px] font-semibold text-white">
                 <span>Evento</span>
-                <span>Categoria</span>
-                <span>Accion</span>
+                <span>Categoría</span>
+                <span>Acción</span>
                 <span>Fecha</span>
               </div>
-              {(data.events || []).slice(-20).reverse().map((event, index) => (
-                <div key={index} style={styles.tableRow}>
-                  <span style={styles.eventName}>{event.event}</span>
-                  <span style={styles.eventCategory}>{event.category}</span>
-                  <span style={styles.eventAction}>{event.action}</span>
-                  <span style={styles.eventDate}>{formatDate(event.timestamp)}</span>
-                </div>
-              ))}
-            </>
+              {(data.events || [])
+                .slice(-20)
+                .reverse()
+                .map((event, index) => (
+                  <div
+                    key={index}
+                    className="grid grid-cols-4 gap-4 border-b border-slate-200 bg-slate-50 p-3 text-[13px]"
+                  >
+                    <span className="truncate font-medium text-[#1a4158]">
+                      {event.event}
+                    </span>
+                    <span className="text-slate-500">{event.category}</span>
+                    <span className="truncate text-slate-500">
+                      {event.action}
+                    </span>
+                    <span className="text-xs text-slate-500">
+                      {formatDate(event.timestamp)}
+                    </span>
+                  </div>
+                ))}
+            </div>
           ) : (
-            <div style={styles.emptyState}>
-              <p>No hay eventos registrados aun</p>
+            <div className="py-8 text-center text-sm text-slate-500">
+              No hay eventos registrados aún
             </div>
           )}
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      <div style={styles.section}>
-        <h2 style={styles.sectionH2}>Vistas de Pagina Recientes</h2>
-        <div style={styles.eventsTable}>
+      {/* Recent Page Views Table */}
+      <Card className="bg-white">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg text-[#1a4158]">
+            Vistas de Página Recientes
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
           {(data.pageViews || []).length > 0 ? (
-            <>
-              <div style={styles.tableHeader}>
-                <span>Pagina</span>
-                <span>Titulo</span>
+            <div className="overflow-auto">
+              <div className="grid grid-cols-4 gap-4 rounded-t-lg bg-[#2c5f7d] p-3 text-[13px] font-semibold text-white">
+                <span>Página</span>
+                <span>Título</span>
                 <span>URL</span>
                 <span>Fecha</span>
               </div>
-              {(data.pageViews || []).slice(-20).reverse().map((pageView, index) => (
-                <div key={index} style={styles.tableRow}>
-                  <span style={styles.eventName}>{pageView.page}</span>
-                  <span style={styles.eventCategory}>{pageView.title}</span>
-                  <span style={styles.eventAction}>{pageView.url}</span>
-                  <span style={styles.eventDate}>{formatDate(pageView.timestamp)}</span>
-                </div>
-              ))}
-            </>
+              {(data.pageViews || [])
+                .slice(-20)
+                .reverse()
+                .map((pageView, index) => (
+                  <div
+                    key={index}
+                    className="grid grid-cols-4 gap-4 border-b border-slate-200 bg-slate-50 p-3 text-[13px]"
+                  >
+                    <span className="truncate font-medium text-[#1a4158]">
+                      {pageView.page}
+                    </span>
+                    <span className="text-slate-500">{pageView.title}</span>
+                    <span className="truncate text-slate-500">
+                      {pageView.url}
+                    </span>
+                    <span className="text-xs text-slate-500">
+                      {formatDate(pageView.timestamp)}
+                    </span>
+                  </div>
+                ))}
+            </div>
           ) : (
-            <div style={styles.emptyState}>
-              <p>No hay vistas de pagina registradas aun</p>
+            <div className="py-8 text-center text-sm text-slate-500">
+              No hay vistas de página registradas aún
             </div>
           )}
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      {/* Graficos Avanzados */}
+      {/* Advanced Charts */}
       <AnalyticsCharts timeRange={timeRange} />
-
-      <style>{`
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   )
 }

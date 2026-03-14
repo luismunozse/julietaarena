@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import AnalyticsDashboard from '@/components/AnalyticsDashboard'
-
+import AdminPageHeader from '@/components/admin/AdminPageHeader'
 
 export const metadata: Metadata = {
   title: 'Analytics - Panel de Administración | Julieta Arena',
@@ -13,13 +13,12 @@ export const metadata: Metadata = {
 
 export default function AdminAnalyticsPage() {
   return (
-    <main className="pageContainer">
-      <div className="header">
-        <h1>Panel de Administración</h1>
-        <p>Analytics y métricas del sitio web</p>
-      </div>
-      
+    <div className="space-y-6">
+      <AdminPageHeader
+        title="Analytics"
+        subtitle="Métricas y estadísticas del sitio web"
+      />
       <AnalyticsDashboard />
-    </main>
+    </div>
   )
 }

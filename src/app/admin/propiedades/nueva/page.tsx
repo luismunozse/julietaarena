@@ -1,21 +1,26 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { useProperties } from '@/hooks/useProperties'
 import type { Property } from '@/data/properties'
 import PropertyForm from '@/components/PropertyForm'
 import Modal from '@/components/Modal'
+import AdminPageHeader from '@/components/admin/AdminPageHeader'
+import { Button } from '@/components/ui/button'
+import { ArrowLeft, RotateCcw } from 'lucide-react'
 
+const DRAFT_STORAGE_KEY = 'property-form-draft'
 
 export default function NewPropertyPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { isAuthenticated, isLoading: authLoading } = useAuth()
   const { createProperty } = useProperties()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [formKey, setFormKey] = useState(0)
 
-  // Estados del modal
   const [modal, setModal] = useState<{
     isOpen: boolean
     type: 'alert' | 'success' | 'error'
@@ -28,9 +33,31 @@ export default function NewPropertyPage() {
     message: ''
   })
 
-  // Protección de ruta
+  // Limpiar borrador si viene con parametro clear=true
+  useEffect(() => {
+    if (searchParams.get('clear') === 'true') {
+      localStorage.removeItem(DRAFT_STORAGE_KEY)
+      // Remover el parametro de la URL sin recargar
+      router.replace('/admin/propiedades/nueva', { scroll: false })
+    }
+  }, [searchParams, router])
+
+  const handleClearDraft = () => {
+    if (confirm('¿Deseas limpiar el formulario y empezar de cero?')) {
+      localStorage.removeItem(DRAFT_STORAGE_KEY)
+      setFormKey(prev => prev + 1) // Forzar re-render del formulario
+    }
+  }
+
   if (authLoading) {
-    return <div className="loading">Cargando...</div>
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-600 mx-auto mb-4" />
+          <p className="text-slate-500">Cargando...</p>
+        </div>
+      </div>
+    )
   }
 
   if (!isAuthenticated) {
@@ -42,7 +69,6 @@ export default function NewPropertyPage() {
     try {
       setIsSubmitting(true)
 
-      // Validar datos requeridos
       if (!formData.title || !formData.description || !formData.price || !formData.location) {
         setModal({
           isOpen: true,
@@ -54,11 +80,9 @@ export default function NewPropertyPage() {
         return
       }
 
-      // Crear propiedad
       const success = await createProperty(formData as any)
 
       if (success) {
-        // Limpiar borrador guardado
         if (typeof (window as any).__clearPropertyDraft === 'function') {
           (window as any).__clearPropertyDraft()
         }
@@ -81,7 +105,7 @@ export default function NewPropertyPage() {
         })
       }
     } catch (error) {
-      console.error('❌ Error capturado en handleSubmit:', error)
+      console.error('Error capturado en handleSubmit:', error)
       setModal({
         isOpen: true,
         type: 'error',
@@ -94,23 +118,30 @@ export default function NewPropertyPage() {
   }
 
   return (
-    <div className="container">
-      <div className="header">
-        <h1>Agregar Nueva Propiedad</h1>
-        <button
-          onClick={() => router.push('/admin/propiedades')}
-          className="cancelButton"
-        >
-          ← Volver
-        </button>
-      </div>
+    <div className="space-y-6">
+      <AdminPageHeader
+        title="Agregar Nueva Propiedad"
+        subtitle="Completa el formulario para crear una nueva propiedad"
+        action={
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handleClearDraft}>
+              <RotateCcw className="h-4 w-4 mr-2" />
+              Limpiar
+            </Button>
+            <Button variant="outline" onClick={() => router.push('/admin/propiedades')}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Volver
+            </Button>
+          </div>
+        }
+      />
 
       <PropertyForm
+        key={formKey}
         onSubmit={handleSubmit}
         isSubmitting={isSubmitting}
       />
 
-      {/* Modal */}
       <Modal
         isOpen={modal.isOpen}
         onClose={() => setModal({ ...modal, isOpen: false })}

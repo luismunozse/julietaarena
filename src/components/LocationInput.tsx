@@ -1,6 +1,9 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { Input } from '@/components/ui/input'
+import { cn } from '@/lib/utils'
+import { MapPin, AlertCircle, Lightbulb, Loader2 } from 'lucide-react'
 
 interface LocationInputProps {
   value: string
@@ -9,7 +12,12 @@ interface LocationInputProps {
   error?: string
 }
 
-export default function LocationInput({ value, onChange, placeholder = 'Buscar ubicación...', error }: LocationInputProps) {
+export default function LocationInput({
+  value,
+  onChange,
+  placeholder = 'Buscar ubicación...',
+  error,
+}: LocationInputProps) {
   const [isLoadingMaps, setIsLoadingMaps] = useState(true)
   const [mapsError, setMapsError] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -35,11 +43,15 @@ export default function LocationInput({ value, onChange, placeholder = 'Buscar u
         }
 
         // Verificar si ya existe un script en proceso de carga
-        const existingScript = document.querySelector('script[src*="maps.googleapis.com"]')
+        const existingScript = document.querySelector(
+          'script[src*="maps.googleapis.com"]'
+        )
         if (existingScript) {
           // Si existe, esperar a que cargue
           existingScript.addEventListener('load', () => resolve())
-          existingScript.addEventListener('error', () => reject(new Error('Failed to load Google Maps')))
+          existingScript.addEventListener('error', () =>
+            reject(new Error('Failed to load Google Maps'))
+          )
           return
         }
 
@@ -61,11 +73,14 @@ export default function LocationInput({ value, onChange, placeholder = 'Buscar u
         if (!inputRef.current) return
 
         // Configurar autocomplete
-        const autocomplete = new google.maps.places.Autocomplete(inputRef.current, {
-          componentRestrictions: { country: 'ar' }, // Restringir a Argentina
-          fields: ['formatted_address', 'geometry', 'name'],
-          types: ['geocode'] // Solo direcciones
-        })
+        const autocomplete = new google.maps.places.Autocomplete(
+          inputRef.current,
+          {
+            componentRestrictions: { country: 'ar' }, // Restringir a Argentina
+            fields: ['formatted_address', 'geometry', 'name'],
+            types: ['geocode'], // Solo direcciones
+          }
+        )
 
         // Listener para cuando se selecciona un lugar
         autocomplete.addListener('place_changed', () => {
@@ -79,7 +94,7 @@ export default function LocationInput({ value, onChange, placeholder = 'Buscar u
           const location = place.formatted_address || place.name || ''
           const coordinates = {
             lat: place.geometry.location.lat(),
-            lng: place.geometry.location.lng()
+            lng: place.geometry.location.lng(),
           }
 
           onChange(location, coordinates)
@@ -109,25 +124,45 @@ export default function LocationInput({ value, onChange, placeholder = 'Buscar u
   }
 
   return (
-    <div className="container">
-      <input
-        ref={inputRef}
-        type="text"
-        value={value}
-        onChange={handleInputChange}
-        placeholder={isLoadingMaps ? 'Cargando Google Maps...' : placeholder}
-        disabled={isLoadingMaps}
-        className={`input ${error ? 'error' : ''}`}
-      />
+    <div className="space-y-2">
+      <div className="relative">
+        <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          ref={inputRef}
+          type="text"
+          value={value}
+          onChange={handleInputChange}
+          placeholder={isLoadingMaps ? 'Cargando Google Maps...' : placeholder}
+          disabled={isLoadingMaps}
+          className={cn(
+            'pl-9',
+            error && 'border-destructive focus-visible:ring-destructive',
+            isLoadingMaps && 'opacity-70'
+          )}
+        />
+        {isLoadingMaps && (
+          <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+        )}
+      </div>
+
       {mapsError && (
-        <p className="errorMessage">
-          ⚠️ {mapsError}. La dirección se puede ingresar manualmente.
+        <p className="flex items-center gap-1.5 text-sm text-amber-600">
+          <AlertCircle className="h-4 w-4 shrink-0" />
+          <span>{mapsError}. La dirección se puede ingresar manualmente.</span>
         </p>
       )}
-      {error && <p className="errorMessage">{error}</p>}
+
+      {error && (
+        <p className="flex items-center gap-1.5 text-sm text-destructive">
+          <AlertCircle className="h-4 w-4 shrink-0" />
+          <span>{error}</span>
+        </p>
+      )}
+
       {!isLoadingMaps && !mapsError && (
-        <p className="hint">
-          💡 Comienza a escribir para buscar con autocompletado
+        <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <Lightbulb className="h-3.5 w-3.5 shrink-0" />
+          <span>Comienza a escribir para buscar con autocompletado</span>
         </p>
       )}
     </div>
