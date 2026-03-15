@@ -91,8 +91,7 @@ export function useDashboardStats() {
             .lt('created_at', currentStart.toISOString()),
         ])
 
-        if (inquiriesError) console.error('Error cargando consultas:', inquiriesError)
-        if (contactsError) console.error('Error cargando contactos:', contactsError)
+        // errors from inquiries/contacts queries are non-fatal
 
         const activeProperties = properties.filter(p => p.status === 'disponible').length
         const featuredProperties = properties.filter(p => p.featured).length
@@ -203,7 +202,6 @@ export function useDashboardStats() {
           },
         })
       } catch (err) {
-        console.error('Error cargando estadísticas:', err)
         setError(err instanceof Error ? err.message : 'Error desconocido')
       } finally {
         setIsLoading(false)

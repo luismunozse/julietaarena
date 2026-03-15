@@ -210,7 +210,7 @@ export default function AsesoramientoLegalPage() {
                   Consultar por WhatsApp
                 </a>
                 <a
-                  href="mailto:inmobiliaria72juliarena@gmail.com"
+                  href="mailto:martillerajulietaarena@gmail.com"
                   className="flex items-center justify-center gap-2 px-6 py-4 border-2 border-brand-primary text-brand-primary font-semibold rounded-xl hover:bg-brand-primary hover:text-white transition-all duration-200"
                 >
                   <Mail className="w-5 h-5" />

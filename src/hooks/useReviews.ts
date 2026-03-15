@@ -16,8 +16,8 @@ export function useReviews() {
     if (stored) {
       try {
         setReviews(JSON.parse(stored))
-      } catch (error) {
-        console.error('Error loading reviews:', error)
+      } catch {
+        // silently ignore
       }
     }
   }, [])

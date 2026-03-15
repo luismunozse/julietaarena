@@ -1,48 +1,49 @@
-import { Home, Key, Gavel, Users, ClipboardCheck, Scale, ArrowRight } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 
 const services = [
   {
-    icon: Home,
     title: 'Venta de Propiedades',
     description: 'Asesoramiento integral en la compra y venta de inmuebles con gestión completa del proceso.',
     href: '/propiedades',
     color: '#3b82f6',
+    image: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&h=400&fit=crop&crop=center',
   },
   {
-    icon: Key,
     title: 'Alquileres',
     description: 'Administración de alquileres residenciales y comerciales con seguimiento profesional.',
     href: '/propiedades?tipo=alquiler',
     color: '#10b981',
+    image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&h=400&fit=crop&crop=center',
   },
   {
-    icon: Gavel,
     title: 'Remates Judiciales',
     description: 'Especialización en remates judiciales y subastas públicas con experiencia legal.',
     href: '/remates-judiciales',
     color: '#f59e0b',
+    image: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=600&h=400&fit=crop&crop=center',
   },
   {
-    icon: Users,
     title: 'Jubilaciones',
     description: 'Asesoramiento en trámites de jubilaciones y gestiones previsionales.',
     href: '#contacto',
     color: '#8b5cf6',
+    image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=600&h=400&fit=crop&crop=center',
   },
   {
-    icon: ClipboardCheck,
     title: 'Tasaciones',
     description: 'Tasaciones profesionales para compra-venta, sucesiones y fines judiciales.',
     href: '/tasaciones',
     color: '#ec4899',
+    image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=600&h=400&fit=crop&crop=center',
   },
   {
-    icon: Scale,
     title: 'Asesoramiento Legal',
     description: 'Consultoría especializada en aspectos legales de transacciones inmobiliarias.',
     href: '/asesoramiento-legal',
     color: '#06b6d4',
+    image: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=600&h=400&fit=crop&crop=center',
   },
 ]
 
@@ -70,34 +71,41 @@ export default function Services() {
         {/* Services Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {services.map((service, index) => {
-            const IconComponent = service.icon
             const isAnchor = service.href.startsWith('#')
 
             const cardContent = (
-              <div className="bg-white rounded-xl sm:rounded-2xl p-5 sm:p-6 md:p-8 border border-border hover:shadow-lg hover:-translate-y-1 transition-all duration-300 h-full cursor-pointer group">
-                {/* Icon */}
-                <div
-                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center mb-4 sm:mb-5 group-hover:scale-105 transition-transform duration-300"
-                  style={{
-                    background: service.color,
-                    boxShadow: `0 8px 20px ${service.color}40`
-                  }}
-                >
-                  <IconComponent className="w-6 h-6 sm:w-7 sm:h-7 text-white" strokeWidth={1.5} />
+              <div className="bg-white rounded-xl sm:rounded-2xl border border-border hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full cursor-pointer group overflow-hidden">
+                {/* Image */}
+                <div className="relative h-40 sm:h-44 overflow-hidden">
+                  <Image
+                    src={service.image}
+                    alt={service.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                  {/* Color accent bar */}
+                  <div
+                    className="absolute bottom-0 left-0 right-0 h-1"
+                    style={{ backgroundColor: service.color }}
+                  />
                 </div>
 
                 {/* Content */}
-                <h3 className="text-lg sm:text-xl font-semibold text-brand-accent mb-2 sm:mb-3">
-                  {service.title}
-                </h3>
-                <p className="text-sm sm:text-base text-muted leading-relaxed mb-4 sm:mb-5">
-                  {service.description}
-                </p>
+                <div className="p-5 sm:p-6">
+                  <h3 className="text-lg sm:text-xl font-semibold text-brand-accent mb-2 sm:mb-3">
+                    {service.title}
+                  </h3>
+                  <p className="text-sm sm:text-base text-muted leading-relaxed mb-4 sm:mb-5">
+                    {service.description}
+                  </p>
 
-                {/* Link indicator */}
-                <div className="flex items-center text-sm font-medium text-brand-primary group-hover:text-brand-secondary transition-colors">
-                  <span>Más información</span>
-                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                  {/* Link indicator */}
+                  <div className="flex items-center text-sm font-medium text-brand-primary group-hover:text-brand-secondary transition-colors">
+                    <span>Más información</span>
+                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                  </div>
                 </div>
               </div>
             )

@@ -8,7 +8,7 @@ import { sanitizeText } from '@/lib/sanitize'
 import { logger } from '@/lib/logger'
 import { normalizeError, getUserFriendlyMessage } from '@/lib/errors'
 import { checkRateLimit, RATE_LIMIT_CONFIGS } from '@/lib/rateLimit'
-import { MapPin, Phone, Mail, Clock, Loader2, Send, MessageSquare, type LucideIcon } from 'lucide-react'
+import { MapPin, Phone, Mail, Clock, Loader2, Send, MessageSquare, User, AtSign, Briefcase, MessageCircle, type LucideIcon } from 'lucide-react'
 
 /* =============================================================================
    TYPES
@@ -56,8 +56,8 @@ const CONTACT_INFO: ContactInfo[] = [
   {
     icon: Mail,
     title: 'Email',
-    content: 'inmobiliaria72juliarena@gmail.com',
-    href: 'mailto:inmobiliaria72juliarena@gmail.com',
+    content: 'martillerajulietaarena@gmail.com',
+    href: 'mailto:martillerajulietaarena@gmail.com',
   },
   {
     icon: Clock,
@@ -359,9 +359,13 @@ export default function Contact() {
     }
   }
 
-  const inputBaseClasses = "w-full h-11 sm:h-12 px-3 sm:px-4 text-sm sm:text-base bg-surface border rounded-xl outline-none transition-all duration-200 focus:bg-white focus:ring-2"
+  const inputBaseClasses = "w-full h-11 sm:h-12 pl-10 sm:pl-11 pr-3 sm:pr-4 text-sm sm:text-base bg-surface border rounded-xl outline-none transition-all duration-200 focus:bg-white focus:ring-2"
   const inputNormalClasses = `${inputBaseClasses} border-border focus:border-brand-primary focus:ring-brand-primary/20`
   const inputErrorClasses = `${inputBaseClasses} border-red-500 border-2 focus:border-red-500 focus:ring-red-500/20`
+  const selectBaseClasses = "w-full h-11 sm:h-12 pl-10 sm:pl-11 pr-8 text-sm sm:text-base bg-surface border rounded-xl outline-none cursor-pointer transition-all duration-200 focus:bg-white focus:ring-2 appearance-none"
+  const selectNormalClasses = `${selectBaseClasses} border-border focus:border-brand-primary focus:ring-brand-primary/20`
+  const selectErrorClasses = `${selectBaseClasses} border-red-500 border-2 focus:border-red-500 focus:ring-red-500/20`
+  const iconClasses = "absolute left-3 sm:left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none"
 
   return (
     <section id="contacto" className="py-8 sm:py-12 lg:py-16 bg-gradient-to-b from-surface to-white">
@@ -409,15 +413,19 @@ export default function Contact() {
                     <label className="block text-sm font-medium text-foreground mb-2">
                       Nombre Completo <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      type="text"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      placeholder="Tu nombre"
-                      className={errors.name ? inputErrorClasses : inputNormalClasses}
-                    />
+                    <div className="relative">
+                      <User className={iconClasses} />
+                      <input
+                        type="text"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        placeholder="Ej: María García"
+                        autoComplete="name"
+                        className={errors.name ? inputErrorClasses : inputNormalClasses}
+                      />
+                    </div>
                     {errors.name && (
                       <p className="text-xs text-red-500 mt-1">{errors.name}</p>
                     )}
@@ -426,15 +434,19 @@ export default function Contact() {
                     <label className="block text-sm font-medium text-foreground mb-2">
                       Email <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      placeholder="tu@email.com"
-                      className={errors.email ? inputErrorClasses : inputNormalClasses}
-                    />
+                    <div className="relative">
+                      <AtSign className={iconClasses} />
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        placeholder="Ej: maria@email.com"
+                        autoComplete="email"
+                        className={errors.email ? inputErrorClasses : inputNormalClasses}
+                      />
+                    </div>
                     {errors.email && (
                       <p className="text-xs text-red-500 mt-1">{errors.email}</p>
                     )}
@@ -447,41 +459,48 @@ export default function Contact() {
                     <label className="block text-sm font-medium text-foreground mb-2">
                       Teléfono <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handlePhoneChange}
-                      onBlur={handleBlur}
-                      maxLength={10}
-                      inputMode="numeric"
-                      pattern="[0-9]*"
-                      placeholder="3511234567"
-                      className={errors.phone ? inputErrorClasses : inputNormalClasses}
-                    />
+                    <div className="relative">
+                      <Phone className={iconClasses} />
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handlePhoneChange}
+                        onBlur={handleBlur}
+                        maxLength={10}
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        placeholder="Ej: 3511234567"
+                        autoComplete="tel-national"
+                        className={errors.phone ? inputErrorClasses : inputNormalClasses}
+                      />
+                    </div>
                     {errors.phone ? (
                       <p className="text-xs text-red-500 mt-1">{errors.phone}</p>
                     ) : (
-                      <p className="text-xs text-gray-500 mt-1">10 dígitos sin espacios</p>
+                      <p className="text-xs text-gray-500 mt-1">10 dígitos con código de área</p>
                     )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-2">
                       Servicio de Interés <span className="text-red-500">*</span>
                     </label>
-                    <select
-                      name="service"
-                      value={formData.service}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      className={errors.service ? inputErrorClasses : inputNormalClasses}
-                    >
-                      {SERVICE_OPTIONS.map(option => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="relative">
+                      <Briefcase className={iconClasses} />
+                      <select
+                        name="service"
+                        value={formData.service}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        className={errors.service ? selectErrorClasses : selectNormalClasses}
+                      >
+                        {SERVICE_OPTIONS.map(option => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                     {errors.service && (
                       <p className="text-xs text-red-500 mt-1">{errors.service}</p>
                     )}
@@ -493,15 +512,22 @@ export default function Contact() {
                   <label className="block text-sm font-medium text-foreground mb-2">
                     Mensaje <span className="text-red-500">*</span>
                   </label>
-                  <textarea
-                    name="message"
-                    rows={5}
-                    value={formData.message}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    placeholder="¿En qué puedo ayudarte?"
-                    className={`${errors.message ? inputErrorClasses : inputNormalClasses} h-auto py-3 resize-none`}
-                  />
+                  <div className="relative">
+                    <MessageCircle className="absolute left-3 sm:left-3.5 top-3.5 w-4 h-4 text-muted pointer-events-none" />
+                    <textarea
+                      name="message"
+                      rows={4}
+                      value={formData.message}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      placeholder="Contanos en qué podemos ayudarte..."
+                      className={`w-full pl-10 sm:pl-11 pr-3 sm:pr-4 py-3 text-sm sm:text-base bg-surface border rounded-xl outline-none transition-all duration-200 focus:bg-white focus:ring-2 resize-none ${
+                        errors.message
+                          ? 'border-red-500 border-2 focus:border-red-500 focus:ring-red-500/20'
+                          : 'border-border focus:border-brand-primary focus:ring-brand-primary/20'
+                      }`}
+                    />
+                  </div>
                   {errors.message && (
                     <p className="text-xs text-red-500 mt-1">{errors.message}</p>
                   )}

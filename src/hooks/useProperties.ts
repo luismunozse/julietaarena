@@ -166,7 +166,6 @@ export function useProperties() {
 
   const migrateInitialProperties = useCallback(async (userId?: string | null) => {
     if (!userId) {
-      console.warn('Se requiere un usuario autenticado para migrar propiedades de ejemplo.')
       return
     }
 
@@ -182,10 +181,10 @@ export function useProperties() {
       const { error } = await supabase.from('properties').insert(supabaseProperties)
 
       if (error) {
-        console.error('Error migrando propiedades:', error)
+        // migration error - non-fatal
       }
-    } catch (err) {
-      console.error('Error en migración:', err)
+    } catch {
+      // silently ignore
     }
   }, [])
 
@@ -286,7 +285,6 @@ export function useProperties() {
       setProperties(updatedProperties)
       return true
     } catch (err) {
-      console.error('Error saving to localStorage:', err)
       setError('Error al guardar propiedades')
       return false
     }

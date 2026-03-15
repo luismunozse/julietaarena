@@ -101,7 +101,7 @@ export function useRecentActivity(limit = 10) {
 
         setActivities(formattedActivities as ActivityItem[])
       } catch (err) {
-        console.error('Error cargando actividad reciente:', err)
+        // silently ignore
       } finally {
         setIsLoading(false)
       }

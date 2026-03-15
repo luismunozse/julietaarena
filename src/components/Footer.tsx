@@ -70,7 +70,7 @@ export default function Footer() {
               </li>
               <li className="flex items-center justify-center md:justify-start gap-2 text-sm text-white/90">
                 <Mail className="h-4 w-4 shrink-0" />
-                <span className="truncate">inmobiliaria72juliarena@gmail.com</span>
+                <span className="truncate">martillerajulietaarena@gmail.com</span>
               </li>
               <li className="flex items-center justify-center md:justify-start gap-2 text-sm text-white/90">
                 <Clock className="h-4 w-4 shrink-0" />

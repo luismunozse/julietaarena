@@ -46,7 +46,6 @@ export default function AssigneeSelector({
         .eq('is_active', true)
 
       if (rolesError) {
-        console.error('Error al cargar usuarios:', rolesError)
         // Intentar obtener usuarios directamente de auth si hay error
         const { data: authData } = await supabase.auth.admin?.listUsers()
         if (authData?.users) {
@@ -85,7 +84,6 @@ export default function AssigneeSelector({
 
       setUsers(usersList)
     } catch (err) {
-      console.error('Error al cargar usuarios:', err)
       showError('Error al cargar la lista de usuarios')
     } finally {
       setIsLoadingUsers(false)
@@ -111,7 +109,6 @@ export default function AssigneeSelector({
         .eq('id', entityId)
 
       if (error) {
-        console.error('Error al actualizar asignacion:', error)
         showError('Error al actualizar la asignacion')
         return
       }
@@ -130,7 +127,6 @@ export default function AssigneeSelector({
 
       success(newAssigneeId ? 'Asignacion actualizada correctamente' : 'Asignacion removida')
     } catch (err) {
-      console.error('Error:', err)
       showError('Error al actualizar la asignacion')
     } finally {
       setIsLoading(false)

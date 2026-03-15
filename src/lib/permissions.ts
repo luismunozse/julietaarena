@@ -42,8 +42,7 @@ export async function getUserPermissions(userId: string): Promise<UserPermission
     }
 
     return data.permissions as UserPermissions
-  } catch (err) {
-    console.error('Error al obtener permisos:', err)
+  } catch {
     return getDefaultPermissions('viewer')
   }
 }

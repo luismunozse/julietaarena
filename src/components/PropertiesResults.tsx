@@ -23,6 +23,14 @@ type ViewMode = 'grid' | 'list' | 'map'
 type OperationTab = 'venta' | 'alquiler'
 
 /* =============================================================================
+   HELPERS
+============================================================================= */
+
+/** Normaliza texto: minúsculas y sin tildes/diacríticos para búsqueda flexible */
+const normalize = (text: string): string =>
+  text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
+
+/* =============================================================================
    CONSTANTS
 ============================================================================= */
 
@@ -134,20 +142,25 @@ export default function PropertiesResults() {
         if (selectedType !== 'all' && property.type !== selectedType) return false
 
         if (searchTerm && searchTerm.trim()) {
-          const searchLower = searchTerm.toLowerCase().trim()
-          const titleLower = property.title.toLowerCase()
-          const locationLower = property.location.toLowerCase()
-          const descriptionLower = property.description.toLowerCase()
-          // Buscar en ambas direcciones: la propiedad contiene el término O el término contiene la ubicación
-          const titleMatch = titleLower.includes(searchLower) || searchLower.includes(titleLower)
-          const locationMatch = locationLower.includes(searchLower) || searchLower.includes(locationLower)
-          const descriptionMatch = descriptionLower.includes(searchLower)
-          if (!titleMatch && !locationMatch && !descriptionMatch) return false
+          const searchLower = normalize(searchTerm)
+          const titleNorm = normalize(property.title)
+          const locationNorm = normalize(property.location)
+          const descriptionNorm = normalize(property.description)
+          const combined = `${titleNorm} ${locationNorm} ${descriptionNorm}`
+
+          // Separar en palabras y verificar que TODAS aparezcan en algún campo
+          const words = searchLower.split(/\s+/).filter(w => w.length > 1)
+          const allWordsMatch = words.length > 0 && words.every(word => combined.includes(word))
+          // También probar con el término completo por si es una frase exacta
+          const exactMatch = combined.includes(searchLower)
+          if (!allWordsMatch && !exactMatch) return false
         } else if (selectedLocation !== 'all' && selectedLocation) {
-          // Solo aplicar filtro de selectedLocation si no hay searchTerm (evitar duplicar)
-          const locationLower = property.location.toLowerCase()
-          const selectedLower = selectedLocation.toLowerCase()
-          if (!locationLower.includes(selectedLower) && !selectedLower.includes(locationLower)) return false
+          const selectedNorm = normalize(selectedLocation)
+          const locationNorm = normalize(property.location)
+          const words = selectedNorm.split(/\s+/).filter(w => w.length > 1)
+          const allWordsMatch = words.length > 0 && words.every(word => locationNorm.includes(word))
+          const exactMatch = locationNorm.includes(selectedNorm) || selectedNorm.includes(locationNorm)
+          if (!allWordsMatch && !exactMatch) return false
         }
 
         if (minPrice && property.price < parseFloat(minPrice)) return false
@@ -177,7 +190,6 @@ export default function PropertiesResults() {
         return true
       })
     } catch (error) {
-      console.error('Error filtering properties:', error)
       return currentProperties.filter(p => p.status === 'disponible')
     }
   }, [currentProperties, selectedType, selectedLocation, searchTerm, searchParams, propertiesLoading, minPrice, maxPrice, bedrooms, bathrooms, minArea, maxArea])

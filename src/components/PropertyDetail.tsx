@@ -65,7 +65,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
         </nav>
 
         <div className="flex justify-between items-start flex-wrap gap-4">
-          <div className="flex-1 min-w-[280px]">
+          <div className="flex-1 min-w-0">
             {/* Title */}
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-brand-dark mb-3">
               {property.title}

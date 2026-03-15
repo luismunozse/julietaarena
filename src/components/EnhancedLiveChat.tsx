@@ -80,7 +80,7 @@ export default function EnhancedLiveChat() {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-8 right-8 z-[1000] flex h-[500px] max-h-[calc(100vh-4rem)] w-[380px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg">
+        <div className="fixed bottom-8 right-8 z-[1000] flex h-[500px] max-h-[calc(100vh-4rem)] w-full sm:w-[380px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg">
           {/* Header */}
           <div className="flex items-center justify-between bg-[#2c5f7d] p-4 text-white">
             <div className="flex items-center gap-3">

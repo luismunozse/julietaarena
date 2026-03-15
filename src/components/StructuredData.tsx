@@ -6,7 +6,7 @@ export default function StructuredData() {
     description: 'Martillera Pública en Córdoba, Argentina. Servicios profesionales de venta, alquiler de propiedades, remates judiciales, jubilaciones y tasaciones.',
     url: 'https://julietaarena.com.ar',
     telephone: '+54-351-307-8376',
-    email: 'inmobiliaria72juliarena@gmail.com',
+    email: 'martillerajulietaarena@gmail.com',
     address: {
       '@type': 'PostalAddress',
       addressLocality: 'Córdoba',

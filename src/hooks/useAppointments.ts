@@ -14,8 +14,8 @@ export function useAppointments() {
     if (stored) {
       try {
         setAppointments(JSON.parse(stored))
-      } catch (error) {
-        console.error('Error loading appointments:', error)
+      } catch {
+        // silently ignore
       }
     }
   }, [])

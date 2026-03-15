@@ -40,7 +40,6 @@ function LoginForm() {
         setError('Email o contraseña incorrectos. Verifica tus credenciales.')
       }
     } catch (err) {
-      console.error('Auth error:', err)
       setError('Ocurrió un error. Por favor intenta nuevamente.')
     } finally {
       setIsSubmitting(false)

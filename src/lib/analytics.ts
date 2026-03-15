@@ -53,8 +53,8 @@ class Analytics {
       if (storedPageViews) {
         this.pageViews = JSON.parse(storedPageViews)
       }
-    } catch (error) {
-      console.warn('Error loading analytics data from storage:', error)
+    } catch {
+      // silently ignore
     }
   }
 
@@ -62,8 +62,8 @@ class Analytics {
     try {
       localStorage.setItem('analytics_events', JSON.stringify(this.events))
       localStorage.setItem('analytics_pageviews', JSON.stringify(this.pageViews))
-    } catch (error) {
-      console.warn('Error saving analytics data to storage:', error)
+    } catch {
+      // silently ignore
     }
   }
 

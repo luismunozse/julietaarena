@@ -58,7 +58,6 @@ export default function TagsManager({
         .eq('id', entityId)
 
       if (error) {
-        console.error('Error al actualizar etiquetas:', error)
         showError('Error al actualizar las etiquetas')
         return
       }
@@ -67,7 +66,6 @@ export default function TagsManager({
       onTagsChange?.(newTags)
       success('Etiquetas actualizadas correctamente')
     } catch (err) {
-      console.error('Error:', err)
       showError('Error al actualizar las etiquetas')
     } finally {
       setIsLoading(false)

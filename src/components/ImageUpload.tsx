@@ -38,7 +38,6 @@ export default function ImageUpload({
       const { publicUrl, path } = await uploadPropertyImage(file, { propertyId })
       return publicUrl || path
     } catch (err) {
-      console.error('Error inesperado al subir imagen:', err)
       setError('Error al procesar la imagen')
       return null
     }
@@ -96,7 +95,6 @@ export default function ImageUpload({
               errors.push(`Error al procesar ${file.name}`)
             }
           } catch (err) {
-            console.error('Error procesando imagen:', err)
             errors.push(`Error al procesar ${file.name}`)
           }
         }
@@ -111,7 +109,6 @@ export default function ImageUpload({
       }
 
     } catch (err) {
-      console.error('Error procesando imagenes:', err)
       setError('Error al procesar las imagenes')
     } finally {
       setUploading(false)
@@ -164,8 +161,8 @@ export default function ImageUpload({
     onImagesChange(updated)
     try {
       await deletePropertyImage(imageUrl)
-    } catch (err) {
-      console.error('Error eliminando imagen:', err)
+    } catch {
+      // silently ignore
     }
   }
 

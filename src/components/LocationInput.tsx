@@ -104,7 +104,6 @@ export default function LocationInput({
         setIsLoadingMaps(false)
         setMapsError(null)
       } catch (err) {
-        console.error('Error loading Google Maps:', err)
         setMapsError('Error al cargar Google Maps')
         setIsLoadingMaps(false)
       }

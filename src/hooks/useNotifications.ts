@@ -21,8 +21,7 @@ export function useNotifications() {
       const result = await Notification.requestPermission()
       setPermission(result)
       return result === 'granted'
-    } catch (error) {
-      console.error('Error requesting notification permission:', error)
+    } catch {
       return false
     }
   }
@@ -43,8 +42,8 @@ export function useNotifications() {
       }, 5000)
 
       return notification
-    } catch (error) {
-      console.error('Error showing notification:', error)
+    } catch {
+      // silently ignore
     }
   }
 

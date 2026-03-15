@@ -134,7 +134,6 @@ export default function SearchHero() {
         autocompleteRef.current = autocomplete
         setIsLoadingMaps(false)
       } catch (error) {
-        console.error('Error loading Google Maps:', error)
         setMapsError('Error al cargar el servicio de ubicaciones')
         setIsLoadingMaps(false)
       }

@@ -34,7 +34,6 @@ export function usePushNotifications() {
         return { success: false, error: 'Permiso denegado' }
       }
     } catch (error) {
-      console.error('Error al solicitar permiso:', error)
       return { success: false, error: 'Error al solicitar permiso' }
     }
   }, [isSupported])
@@ -60,8 +59,8 @@ export function usePushNotifications() {
       setTimeout(() => notification.close(), 10000)
 
       return notification
-    } catch (error) {
-      console.error('Error al mostrar notificación:', error)
+    } catch {
+      // silently ignore
     }
   }, [permission, isEnabled])
 
@@ -121,7 +120,7 @@ export function useInquiryNotifications() {
             try {
               const audio = new Audio('/sounds/notification.mp3')
               audio.volume = 0.5
-              audio.play().catch((e) => console.log('No se pudo reproducir sonido:', e))
+              audio.play().catch(() => { /* silently ignore */ })
             } catch (e) {
               // Ignorar si no hay sonido
             }
@@ -177,7 +176,7 @@ export function useInquiryNotifications() {
             try {
               const audio = new Audio('/sounds/notification.mp3')
               audio.volume = 0.5
-              audio.play().catch((e) => console.log('No se pudo reproducir sonido:', e))
+              audio.play().catch(() => { /* silently ignore */ })
             } catch (e) {
               // Ignorar si no hay sonido
             }

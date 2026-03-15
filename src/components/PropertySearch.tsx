@@ -106,7 +106,6 @@ export default function PropertySearch() {
         autocompleteRef.current = autocomplete
         setIsLoadingMaps(false)
       } catch (error) {
-        console.error('Error loading Google Maps:', error)
         setMapsError('Error al cargar el servicio de ubicaciones')
         setIsLoadingMaps(false)
       }
@@ -210,7 +209,7 @@ export default function PropertySearch() {
                 "border-2 border-white/30 bg-white/95 text-[#1a4158] rounded-xl",
                 "text-[clamp(0.85rem,1.3vw,1.05rem)] font-semibold",
                 "backdrop-blur-lg shadow-[0_4px_12px_rgba(0,0,0,0.15)]",
-                "flex-1 min-w-[min(140px,calc(50%-6px))] whitespace-nowrap",
+                "flex-1 min-w-0 whitespace-nowrap",
                 "hover:bg-white hover:border-white hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.2)]",
                 "transition-all duration-300",
                 operation === 'venta' && "bg-white border-amber-400 shadow-[0_4px_16px_rgba(232,184,109,0.4)]"
@@ -228,7 +227,7 @@ export default function PropertySearch() {
                 "border-2 border-white/30 bg-white/95 text-[#1a4158] rounded-xl",
                 "text-[clamp(0.85rem,1.3vw,1.05rem)] font-semibold",
                 "backdrop-blur-lg shadow-[0_4px_12px_rgba(0,0,0,0.15)]",
-                "flex-1 min-w-[min(140px,calc(50%-6px))] whitespace-nowrap",
+                "flex-1 min-w-0 whitespace-nowrap",
                 "hover:bg-white hover:border-white hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.2)]",
                 "transition-all duration-300",
                 operation === 'alquiler' && "bg-white border-amber-400 shadow-[0_4px_16px_rgba(232,184,109,0.4)]"
@@ -246,7 +245,7 @@ export default function PropertySearch() {
                 "border-2 border-white/30 bg-white/95 text-[#1a4158] rounded-xl",
                 "text-[clamp(0.85rem,1.3vw,1.05rem)] font-semibold",
                 "backdrop-blur-lg shadow-[0_4px_12px_rgba(0,0,0,0.15)]",
-                "flex-1 min-w-[min(140px,calc(50%-6px))] whitespace-nowrap",
+                "flex-1 min-w-0 whitespace-nowrap",
                 "hover:bg-white hover:border-white hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.2)]",
                 "transition-all duration-300"
               )}
@@ -262,7 +261,7 @@ export default function PropertySearch() {
                 "border-2 border-amber-500 bg-amber-500 text-white rounded-xl",
                 "text-[clamp(0.85rem,1.3vw,1.05rem)] font-semibold",
                 "backdrop-blur-lg shadow-[0_4px_12px_rgba(0,0,0,0.15)]",
-                "flex-1 min-w-[min(140px,calc(50%-6px))] whitespace-nowrap",
+                "flex-1 min-w-0 whitespace-nowrap",
                 "hover:bg-amber-600 hover:border-amber-600 hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.2)]",
                 "transition-all duration-300"
               )}

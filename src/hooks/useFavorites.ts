@@ -13,8 +13,8 @@ export function useFavorites() {
     if (stored) {
       try {
         setFavorites(JSON.parse(stored))
-      } catch (error) {
-        console.error('Error loading favorites:', error)
+      } catch {
+        // silently ignore
       }
     }
   }, [])

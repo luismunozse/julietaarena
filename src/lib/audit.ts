@@ -64,11 +64,9 @@ export async function logAuditEvent(
     })
 
     if (error) {
-      console.error('Error al registrar evento de auditoría:', error)
       // No lanzar error para no interrumpir el flujo principal
     }
-  } catch (err) {
-    console.error('Error inesperado al registrar evento de auditoría:', err)
+  } catch {
     // No lanzar error para no interrumpir el flujo principal
   }
 }
@@ -91,13 +89,11 @@ export async function getAuditLogs(
       .limit(limit)
 
     if (error) {
-      console.error('Error al obtener logs de auditoría:', error)
       return []
     }
 
     return data || []
-  } catch (err) {
-    console.error('Error inesperado al obtener logs de auditoría:', err)
+  } catch {
     return []
   }
 }
@@ -148,13 +144,11 @@ export async function getAllAuditLogs(filters?: {
     const { data, error } = await query
 
     if (error) {
-      console.error('Error al obtener logs de auditoría:', error)
       return []
     }
 
     return data || []
-  } catch (err) {
-    console.error('Error inesperado al obtener logs de auditoría:', err)
+  } catch {
     return []
   }
 }

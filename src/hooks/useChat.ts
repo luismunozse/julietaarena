@@ -36,8 +36,8 @@ export function useChat() {
     if (stored) {
       try {
         setSession(JSON.parse(stored))
-      } catch (error) {
-        console.error('Error loading chat session:', error)
+      } catch {
+        // silently ignore
       }
     } else {
       // Crear nueva sesión

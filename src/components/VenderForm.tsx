@@ -298,11 +298,11 @@ export default function VenderForm() {
                 <span>+54 (351) 307-8376</span>
               </a>
               <a
-                href="mailto:inmobiliaria72juliarena@gmail.com"
+                href="mailto:martillerajulietaarena@gmail.com"
                 className="flex items-center gap-3 text-white/85 hover:text-brand-secondary transition-colors"
               >
                 <Mail className="w-5 h-5" />
-                <span className="text-sm">inmobiliaria72juliarena@gmail.com</span>
+                <span className="text-sm">martillerajulietaarena@gmail.com</span>
               </a>
             </div>
           </div>

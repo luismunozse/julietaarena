@@ -205,7 +205,6 @@ export default function AppraisalForm() {
       setErrors({})
       setTouched({})
     } catch (err) {
-      console.error('Error enviando tasacion', err)
       error('No pudimos enviar la solicitud. Por favor, intenta nuevamente o contactanos por WhatsApp.')
     } finally {
       setIsSubmitting(false)

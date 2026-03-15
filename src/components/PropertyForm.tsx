@@ -77,8 +77,7 @@ export default function PropertyForm({
           setFormData(draft)
           setHasDraft(true)
         }
-      } catch (error) {
-        console.error('Error cargando borrador:', error)
+      } catch {
         localStorage.removeItem(DRAFT_STORAGE_KEY)
       }
     }
@@ -314,7 +313,6 @@ export default function PropertyForm({
     setErrors(newErrors)
 
     if (Object.keys(newErrors).length > 0) {
-      console.warn('Errores de validacion encontrados:', newErrors)
       // Scroll al primer error despues de un pequeno delay para que se rendericen los errores
       setTimeout(() => {
         const firstErrorField = Object.keys(newErrors)[0]

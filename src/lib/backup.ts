@@ -59,7 +59,6 @@ export async function createBackup(): Promise<BackupData> {
 
     return backup
   } catch (error) {
-    console.error('Error al crear backup:', error)
     throw error
   }
 }
@@ -129,7 +128,6 @@ export async function restoreBackup(backup: BackupData): Promise<void> {
       }
     }
   } catch (error) {
-    console.error('Error al restaurar backup:', error)
     throw error
   }
 }

@@ -32,7 +32,7 @@ export default function ExportButton({ properties, disabled }: ExportButtonProps
       // Pequeno delay para mejor UX
       await new Promise(resolve => setTimeout(resolve, 300))
     } catch (err) {
-      console.error('Error al exportar:', err)
+      // silently ignore
     } finally {
       setIsExporting(false)
     }

@@ -64,7 +64,6 @@ export default function PropertySidebar({ property }: PropertySidebarProps) {
         .select()
 
       if (error) {
-        console.error('Error al guardar consulta:', error)
         showError('Error al enviar el mensaje. Por favor, contactanos por WhatsApp.', 7000)
         return
       }
@@ -72,7 +71,6 @@ export default function PropertySidebar({ property }: PropertySidebarProps) {
       success('Mensaje enviado correctamente! Te contactaremos pronto.', 5000)
       setContactFormData({ name: '', phone: '', email: '', message: '' })
     } catch (err) {
-      console.error('Error al enviar mensaje:', err)
       showError('Error al enviar el mensaje. Por favor, contactanos por WhatsApp.', 7000)
     } finally {
       setIsSubmitting(false)
@@ -138,7 +136,7 @@ export default function PropertySidebar({ property }: PropertySidebarProps) {
         </div>
 
         {/* Quick Action Buttons */}
-        <div className="grid grid-cols-2 gap-3 py-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 py-5">
           <Button
             className="h-12 bg-[#25D366] hover:bg-[#20bd5a] text-white font-medium shadow-sm"
             onClick={handleWhatsApp}
@@ -182,7 +180,7 @@ export default function PropertySidebar({ property }: PropertySidebarProps) {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <Label htmlFor="phone" className="text-xs font-medium text-muted mb-1.5 block">
                 Telefono *

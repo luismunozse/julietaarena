@@ -33,7 +33,7 @@ export default function ChangeHistory({ entityType, entityId }: ChangeHistoryPro
       const auditLogs = await getAuditLogs(entityType, entityId)
       setLogs(auditLogs)
     } catch (err) {
-      console.error('Error al cargar historial:', err)
+      // silently ignore
     } finally {
       setIsLoading(false)
     }

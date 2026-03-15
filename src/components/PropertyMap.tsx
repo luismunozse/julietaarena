@@ -129,7 +129,7 @@ export default function PropertyMap({
         <Card className="overflow-hidden bg-white">
           {/* Filters */}
           <div className="flex flex-wrap gap-4 border-b border-slate-200 bg-slate-50 p-4">
-            <div className="flex min-w-[180px] flex-col gap-1">
+            <div className="flex min-w-0 flex-1 flex-col gap-1">
               <Label htmlFor="typeFilter" className="text-sm font-medium">
                 Tipo de Propiedad
               </Label>
@@ -149,7 +149,7 @@ export default function PropertyMap({
               </Select>
             </div>
 
-            <div className="flex min-w-[180px] flex-col gap-1">
+            <div className="flex min-w-0 flex-1 flex-col gap-1">
               <Label htmlFor="operationFilter" className="text-sm font-medium">
                 Operación
               </Label>

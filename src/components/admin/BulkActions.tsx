@@ -76,7 +76,7 @@ export default function BulkActions({
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 md:flex md:flex-wrap gap-2 w-full md:w-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:flex md:flex-wrap gap-2 w-full md:w-auto">
         <Select
           disabled={isProcessing}
           onValueChange={(value) => {

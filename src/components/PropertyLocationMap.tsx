@@ -92,7 +92,6 @@ export default function PropertyLocationMap({ latitude, longitude, propertyTitle
 
     if (!apiKey) {
       setError('API key de Google Maps no configurada')
-      console.error('NEXT_PUBLIC_GOOGLE_MAPS_API_KEY no esta en .env.local')
       return
     }
 
@@ -117,7 +116,6 @@ export default function PropertyLocationMap({ latitude, longitude, propertyTitle
     script.addEventListener('load', initMap)
     script.addEventListener('error', () => {
       setError('Error al cargar Google Maps')
-      console.error('Error al cargar el script de Google Maps')
     })
     document.head.appendChild(script)
 

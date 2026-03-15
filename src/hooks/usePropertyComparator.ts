@@ -18,8 +18,8 @@ export function usePropertyComparator() {
         // Aquí necesitarías cargar las propiedades por ID desde tu store
         // Por ahora lo dejamos vacío
         setComparisonProperties([])
-      } catch (error) {
-        console.error('Error loading comparison properties:', error)
+      } catch {
+        // silently ignore
       }
     }
   }, [])

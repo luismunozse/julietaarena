@@ -64,7 +64,7 @@ const styles: Record<string, CSSProperties> = {
   },
   chartsGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))',
     gap: '1.5rem',
   },
   chartCard: {
@@ -108,7 +108,7 @@ export default function AnalyticsCharts({ timeRange }: AnalyticsChartsProps) {
         setInquiriesData(inquiries || [])
         setContactsData(contacts || [])
       } catch (err) {
-        console.error('Error cargando datos:', err)
+        // silently ignore
       } finally {
         setIsLoading(false)
       }
