@@ -12,7 +12,7 @@ import PropertyLocationMap from './PropertyLocationMap'
 import { useAnalytics } from '@/hooks/useAnalytics'
 import { sanitizeText } from '@/lib/sanitize'
 import { cn } from '@/lib/utils'
-import { MapPin, Share2, ChevronRight, Camera, Map } from 'lucide-react'
+import { MapPin, Share2, ChevronRight, Camera, Map, ExternalLink, Navigation } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 
@@ -26,7 +26,8 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
   const analytics = useAnalytics()
 
   const getOperationLabel = (): string => {
-    return property.operation === 'venta' ? 'Venta' : 'Alquiler'
+    const labels: Record<string, string> = { venta: 'Venta', alquiler: 'Alquiler', alquiler_temporal: 'Alquiler Temporal' }
+    return labels[property.operation] || property.operation
   }
 
   const getTypeLabel = (): string => {
@@ -84,6 +85,11 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
               <Badge variant="outline" className="text-sm font-medium px-3 py-1">
                 {getTypeLabel()}
               </Badge>
+              {property.aptCredit && (
+                <Badge className="text-sm font-semibold px-3 py-1 bg-amber-100 text-amber-700 hover:bg-amber-100">
+                  Apto Crédito
+                </Badge>
+              )}
               <div className="flex items-center gap-1.5 text-muted">
                 <MapPin className="w-4 h-4" />
                 <span className="text-sm">{property.location}</span>
@@ -174,19 +180,74 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
             <p className="text-muted leading-relaxed m-0 whitespace-pre-line">{sanitizeText(property.description)}</p>
           </div>
 
+          {/* Video Tour */}
+          {property.videoUrl && (
+            <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-border">
+              <div className="p-6 pb-3">
+                <h2 className="text-lg font-semibold text-brand-dark">Tour Virtual</h2>
+              </div>
+              {property.videoUrl.includes('youtube.com') || property.videoUrl.includes('youtu.be') ? (
+                <div className="relative w-full pb-[56.25%]">
+                  <iframe
+                    className="absolute inset-0 w-full h-full"
+                    src={property.videoUrl
+                      .replace('watch?v=', 'embed/')
+                      .replace('youtu.be/', 'youtube.com/embed/')
+                      .split('&')[0]}
+                    title="Tour virtual"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+              ) : (
+                <div className="px-6 pb-6">
+                  <a
+                    href={property.videoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-brand-primary hover:text-brand-accent font-medium transition-colors"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    Ver tour virtual
+                  </a>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Caracteristicas */}
           <PropertyFeatures features={property.features} />
 
           {/* Informacion adicional si existe */}
-          {(property.yearBuilt || property.orientation || (property.floor && property.totalFloors) || property.expenses) && (
+          {(property.yearBuilt || property.orientation || (property.floor && property.totalFloors) || property.expenses || property.disposition || property.condition || property.rooms) && (
             <div className="bg-white rounded-xl p-6 shadow-sm border border-border">
               <h2 className="text-lg font-semibold text-brand-dark mb-4">Informacion Adicional</h2>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {property.condition && (
+                  <div className="p-3 bg-surface rounded-lg">
+                    <span className="text-xs text-muted block mb-1">Condición</span>
+                    <span className="text-sm font-semibold text-brand-dark">
+                      {{ a_estrenar: 'A estrenar', muy_bueno: 'Muy bueno', bueno: 'Bueno', regular: 'Regular', a_reciclar: 'A reciclar' }[property.condition] || property.condition}
+                    </span>
+                  </div>
+                )}
+                {property.rooms && (
+                  <div className="p-3 bg-surface rounded-lg">
+                    <span className="text-xs text-muted block mb-1">Ambientes</span>
+                    <span className="text-sm font-semibold text-brand-dark">{property.rooms}</span>
+                  </div>
+                )}
+                {property.disposition && (
+                  <div className="p-3 bg-surface rounded-lg">
+                    <span className="text-xs text-muted block mb-1">Disposición</span>
+                    <span className="text-sm font-semibold text-brand-dark capitalize">{property.disposition}</span>
+                  </div>
+                )}
                 {property.yearBuilt && (
                   <div className="p-3 bg-surface rounded-lg">
                     <span className="text-xs text-muted block mb-1">Antiguedad</span>
                     <span className="text-sm font-semibold text-brand-dark">
-                      {new Date().getFullYear() - property.yearBuilt} anos
+                      {property.condition === 'a_estrenar' ? 'A estrenar' : `${new Date().getFullYear() - property.yearBuilt} años`}
                     </span>
                   </div>
                 )}
@@ -196,7 +257,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                     <span className="text-sm font-semibold text-brand-dark">{property.orientation}</span>
                   </div>
                 )}
-                {property.floor && property.totalFloors && (
+                {property.floor !== undefined && property.totalFloors && (
                   <div className="p-3 bg-surface rounded-lg">
                     <span className="text-xs text-muted block mb-1">Piso</span>
                     <span className="text-sm font-semibold text-brand-dark">
@@ -213,6 +274,86 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                   </div>
                 )}
               </div>
+            </div>
+          )}
+
+          {/* Servicios disponibles */}
+          {property.services && property.services.length > 0 && (
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-border">
+              <h2 className="text-lg font-semibold text-brand-dark mb-4">Servicios e Infraestructura</h2>
+              <div className="flex flex-wrap gap-2">
+                {property.services.map((service) => (
+                  <Badge key={service} variant="outline" className="px-3 py-1.5 text-sm bg-emerald-50 text-emerald-700 border-emerald-200">
+                    {service}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Documentación */}
+          {property.documentation && property.documentation.length > 0 && (
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-border">
+              <h2 className="text-lg font-semibold text-brand-dark mb-4">Documentación</h2>
+              <div className="flex flex-wrap gap-2">
+                {property.documentation.map((doc) => (
+                  <Badge key={doc} variant="outline" className="px-3 py-1.5 text-sm bg-blue-50 text-blue-700 border-blue-200">
+                    {doc}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Mapa de ubicación - siempre visible */}
+          {property.coordinates && (
+            <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-border">
+              <div className="p-6 pb-4">
+                <div className="flex items-center justify-between flex-wrap gap-3">
+                  <div>
+                    <h2 className="text-lg font-semibold text-brand-dark">Ubicación</h2>
+                    <p className="text-sm text-muted flex items-center gap-1.5 mt-1">
+                      <MapPin className="w-4 h-4" />
+                      {property.location}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-sm"
+                      onClick={() => {
+                        window.open(
+                          `https://www.google.com/maps/dir/?api=1&destination=${property.coordinates!.lat},${property.coordinates!.lng}`,
+                          '_blank'
+                        )
+                      }}
+                    >
+                      <Navigation className="w-4 h-4" />
+                      <span className="hidden sm:inline">Cómo llegar</span>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-sm"
+                      onClick={() => {
+                        window.open(
+                          `https://www.google.com/maps/@${property.coordinates!.lat},${property.coordinates!.lng},17z`,
+                          '_blank'
+                        )
+                      }}
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                      <span className="hidden sm:inline">Abrir en Google Maps</span>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              <PropertyLocationMap
+                latitude={property.coordinates.lat}
+                longitude={property.coordinates.lng}
+                propertyTitle={property.title}
+              />
             </div>
           )}
         </div>

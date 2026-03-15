@@ -105,7 +105,6 @@ export default function NewPropertyPage() {
         })
       }
     } catch (error) {
-      console.error('Error capturado en handleSubmit:', error)
       setModal({
         isOpen: true,
         type: 'error',

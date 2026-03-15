@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect, useRef } from 'react'
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useProperties } from '@/hooks/useProperties'
 import PropertyCard from './PropertyCard'
@@ -112,6 +112,7 @@ export default function PropertiesResults() {
   const [selectedLocation, setSelectedLocation] = useState<string>('all')
   const [sortBy, setSortBy] = useState<string>('recent')
   const [searchTerm, setSearchTerm] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
 
   // Advanced filters
@@ -125,6 +126,13 @@ export default function PropertiesResults() {
 
   const analytics = useAnalytics()
   const hasTrackedResults = useRef(false)
+  const emptySearchTracked = useRef<string | null>(null)
+
+  // Debounce del término de búsqueda (300ms)
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchTerm), 300)
+    return () => clearTimeout(timer)
+  }, [searchTerm])
 
   const { trackCustomMetric, trackEmptyState } = useUXMetrics({
     componentName: 'PropertiesResults',
@@ -187,7 +195,7 @@ export default function PropertiesResults() {
         if (featured === 'true' && !property.featured) return false
         if (selectedType !== 'all' && property.type !== selectedType) return false
 
-        if (searchTerm && searchTerm.trim()) {
+        if (debouncedSearch && debouncedSearch.trim()) {
           // Buscar en: título, ubicación, descripción, features y tipo
           const searchable = [
             property.title,
@@ -197,7 +205,7 @@ export default function PropertiesResults() {
             ...(property.features || []),
           ].join(' ')
 
-          if (!matchesSearch(searchTerm, searchable)) return false
+          if (!matchesSearch(debouncedSearch, searchable)) return false
         } else if (selectedLocation !== 'all' && selectedLocation) {
           // Búsqueda solo por ubicación
           if (!matchesSearch(selectedLocation, property.location)) return false
@@ -232,10 +240,31 @@ export default function PropertiesResults() {
     } catch (error) {
       return currentProperties.filter(p => p.status === 'disponible')
     }
-  }, [currentProperties, selectedType, selectedLocation, searchTerm, searchParams, propertiesLoading, minPrice, maxPrice, bedrooms, bathrooms, minArea, maxArea])
+  }, [currentProperties, selectedType, selectedLocation, debouncedSearch, searchParams, propertiesLoading, minPrice, maxPrice, bedrooms, bathrooms, minArea, maxArea])
+
+  // Tracking de búsquedas sin resultados (para el dueño del negocio)
+  useEffect(() => {
+    if (!propertiesLoading && debouncedSearch && filteredProperties.length === 0) {
+      const key = `${debouncedSearch}|${activeTab}|${selectedType}`
+      if (emptySearchTracked.current !== key) {
+        emptySearchTracked.current = key
+        analytics.trackEvent({
+          event: 'search_no_results',
+          category: 'search',
+          action: 'empty_results',
+          label: `${debouncedSearch} (${activeTab}, ${selectedType})`,
+        })
+      }
+    }
+  }, [filteredProperties.length, debouncedSearch, propertiesLoading, activeTab, selectedType, analytics])
 
   const sortedProperties = useMemo(() => {
     return [...filteredProperties].sort((a, b) => {
+      // Destacadas primero (solo cuando no hay un orden explícito de precio/área)
+      if (sortBy === 'recent') {
+        if (a.featured && !b.featured) return -1
+        if (!a.featured && b.featured) return 1
+      }
       switch (sortBy) {
         case 'price-asc': return a.price - b.price
         case 'price-desc': return b.price - a.price
@@ -246,10 +275,20 @@ export default function PropertiesResults() {
     })
   }, [filteredProperties, sortBy])
 
+  // Sugerencias cuando no hay resultados: propiedades de la misma operación sin filtros
+  const suggestions = useMemo(() => {
+    if (filteredProperties.length > 0 || propertiesLoading) return []
+    return currentProperties
+      .filter(p => p.status === 'disponible')
+      .sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0))
+      .slice(0, 3)
+  }, [filteredProperties.length, currentProperties, propertiesLoading])
+
   const handleTabChange = (tab: OperationTab) => {
     if (tab === activeTab) return
     setActiveTab(tab)
-    pushParams({ operation: tab })
+    // Preservar búsqueda y filtros al cambiar de tab
+    pushParams({ operation: tab, location: searchTerm || null, type: selectedType !== 'all' ? selectedType : null })
     analytics.trackEvent({ event: 'properties_tab_change', category: 'properties', action: 'switch_operation', label: tab })
   }
 
@@ -267,7 +306,7 @@ export default function PropertiesResults() {
     pushParams({ type: null, location: null, featured: null })
   }
 
-  const hasActiveFilters = selectedType !== 'all' || searchTerm || minPrice || maxPrice || bedrooms !== 'all' || bathrooms !== 'all' || minArea || maxArea
+  const hasActiveFilters = selectedType !== 'all' || debouncedSearch || minPrice || maxPrice || bedrooms !== 'all' || bathrooms !== 'all' || minArea || maxArea
 
   const inputClasses = "w-full h-11 px-4 text-sm bg-white border border-border rounded-lg outline-none transition-all duration-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20"
   const selectClasses = "h-11 px-3 text-sm bg-white border border-border rounded-lg outline-none cursor-pointer transition-all duration-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20"
@@ -514,16 +553,34 @@ export default function PropertiesResults() {
         ) : (
           <>
             {(() => {
-              trackEmptyState(`No results for: ${searchTerm || 'unknown'} - Type: ${selectedType} - Operation: ${activeTab}`)
+              trackEmptyState(`No results for: ${debouncedSearch || 'unknown'} - Type: ${selectedType} - Operation: ${activeTab}`)
               return null
             })()}
             <EmptyState
               icon="🔍"
               title="No se encontraron propiedades"
-              description="Intenta ajustar tus criterios de búsqueda o explora otras opciones disponibles."
-              actionLabel="Hacer una nueva búsqueda"
-              onAction={() => router.push('/propiedades')}
+              description={
+                debouncedSearch
+                  ? `No hay resultados para "${debouncedSearch}". Probá con otro barrio, ciudad o tipo de propiedad.`
+                  : 'Intenta ajustar tus criterios de búsqueda o explora otras opciones disponibles.'
+              }
+              actionLabel="Limpiar filtros"
+              onAction={handleClearFilters}
             />
+
+            {/* Sugerencias de propiedades */}
+            {suggestions.length > 0 && (
+              <div className="mt-8">
+                <h3 className="text-lg font-semibold text-brand-accent mb-4">
+                  Te puede interesar
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {suggestions.map(property => (
+                    <PropertyCard key={property.id} property={property} />
+                  ))}
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>

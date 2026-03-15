@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import type { Property } from '@/data/properties'
 import ImageUpload from './ImageUpload'
 import LocationInput from './LocationInput'
+import Modal from './Modal'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -19,7 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
-import { Plus, X, AlertCircle, FileWarning, Star } from 'lucide-react'
+import { Plus, X, AlertCircle, FileWarning, Star, Check, Save, Loader2 } from 'lucide-react'
 
 interface PropertyFormProps {
   onSubmit: (data: Partial<Property>) => void
@@ -28,6 +29,107 @@ interface PropertyFormProps {
 }
 
 const DRAFT_STORAGE_KEY = 'property-form-draft'
+
+/* =============================================================================
+   SUGGESTED FEATURES BY PROPERTY TYPE
+============================================================================= */
+
+const COMMON_FEATURES: Record<string, string[]> = {
+  casa: [
+    'Pileta', 'Parrilla', 'Jardín', 'Cochera cubierta', 'Quincho',
+    'Aire acondicionado', 'Calefacción central', 'Gas natural',
+    'Seguridad 24hs', 'Barrio cerrado', 'Agua corriente', 'Cloacas',
+    'Alarma', 'Lavadero', 'Vestidor', 'Escritorio', 'Playroom',
+  ],
+  departamento: [
+    'Balcón', 'Terraza', 'Aire acondicionado', 'Calefacción central',
+    'Ascensor', 'Seguridad 24hs', 'Pileta común', 'SUM', 'Gimnasio',
+    'Laundry', 'Baulera', 'Gas natural', 'Portería', 'Parrilla común',
+  ],
+  terreno: [
+    'Agua corriente', 'Gas natural', 'Cloacas', 'Luz eléctrica',
+    'Calle asfaltada', 'Escritura inmediata', 'Apto crédito',
+    'Barrio cerrado', 'Esquina', 'Medianeras',
+  ],
+  local: [
+    'Vidriera', 'Depósito', 'Baño privado', 'Aire acondicionado',
+    'Habilitación comercial', 'Sobre avenida', 'Estacionamiento',
+    'Alarma', 'Entrepiso',
+  ],
+  oficina: [
+    'Aire acondicionado', 'Calefacción', 'Ascensor', 'Seguridad 24hs',
+    'Sala de reuniones', 'Recepción', 'Baño privado', 'Cochera',
+    'Internet fibra óptica', 'Open space',
+  ],
+  cochera: [
+    'Cubierta', 'Fija', 'Móvil', 'Subterránea', 'Con portón automático',
+    'Seguridad 24hs', 'Acceso con control remoto',
+  ],
+}
+
+/* =============================================================================
+   PROGRESS SECTIONS
+============================================================================= */
+
+const SECTIONS = [
+  { id: 'basica', label: 'Básica', fields: ['title', 'description', 'type', 'operation', 'status', 'location', 'price'] },
+  { id: 'caracteristicas', label: 'Detalles', fields: ['area'] },
+  { id: 'imagenes', label: 'Imágenes', fields: ['images'] },
+  { id: 'adicionales', label: 'Extras', fields: ['features'] },
+  { id: 'servicios', label: 'Servicios', fields: ['services'] },
+  { id: 'opciones', label: 'Opciones', fields: ['featured'] },
+] as const
+
+/* =============================================================================
+   VALIDATION HELPERS
+============================================================================= */
+
+function validateField(field: string, value: unknown): string | null {
+  switch (field) {
+    case 'title':
+      if (!value || (value as string).trim().length < 5)
+        return 'El título debe tener al menos 5 caracteres'
+      return null
+    case 'description':
+      if (!value || (value as string).trim().length < 20)
+        return 'La descripción debe tener al menos 20 caracteres'
+      return null
+    case 'price':
+      if (!value || (value as number) <= 0)
+        return 'El precio debe ser mayor a 0'
+      return null
+    case 'location':
+      if (!value || (value as string).trim().length < 3)
+        return 'La ubicación es requerida'
+      return null
+    case 'area':
+      if (!value || (value as number) <= 0)
+        return 'El área debe ser mayor a 0'
+      return null
+    case 'images':
+      if (!value || (value as string[]).length === 0)
+        return 'Debes agregar al menos una imagen'
+      return null
+    default:
+      return null
+  }
+}
+
+const REQUIRED_FIELDS = ['title', 'description', 'price', 'location', 'area', 'images']
+
+/* =============================================================================
+   FORMAT PRICE DISPLAY
+============================================================================= */
+
+function formatPriceDisplay(value: number | string): string {
+  const num = typeof value === 'string' ? parseFloat(value) : value
+  if (!num || isNaN(num)) return ''
+  return num.toLocaleString('es-AR')
+}
+
+/* =============================================================================
+   COMPONENT
+============================================================================= */
 
 export default function PropertyForm({
   onSubmit,
@@ -50,19 +152,38 @@ export default function PropertyForm({
       area: 0,
       bedrooms: undefined,
       bathrooms: undefined,
+      rooms: undefined,
       parking: undefined,
       yearBuilt: undefined,
       coveredArea: undefined,
       floor: undefined,
       totalFloors: undefined,
       orientation: '',
+      disposition: '',
       expenses: undefined,
+      condition: '',
+      aptCredit: false,
+      internalCode: '',
+      videoUrl: '',
+      services: [],
+      documentation: [],
     }
   )
 
   const [newFeature, setNewFeature] = useState('')
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [touched, setTouched] = useState<Record<string, boolean>>({})
   const [hasDraft, setHasDraft] = useState(false)
+  const [priceDisplay, setPriceDisplay] = useState('')
+  const [clearDraftModal, setClearDraftModal] = useState(false)
+  const submitBarRef = useRef<HTMLDivElement>(null)
+
+  // Init price display
+  useEffect(() => {
+    if (formData.price && formData.price > 0) {
+      setPriceDisplay(formatPriceDisplay(formData.price))
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Cargar draft desde localStorage al montar el componente
   useEffect(() => {
@@ -76,6 +197,9 @@ export default function PropertyForm({
         if (!initialData || Object.keys(initialData).length === 0) {
           setFormData(draft)
           setHasDraft(true)
+          if (draft.price && draft.price > 0) {
+            setPriceDisplay(formatPriceDisplay(draft.price))
+          }
         }
       } catch {
         localStorage.removeItem(DRAFT_STORAGE_KEY)
@@ -88,51 +212,38 @@ export default function PropertyForm({
   useEffect(() => {
     if (initialData && Object.keys(initialData).length > 0) {
       setFormData(initialData)
+      if (initialData.price && initialData.price > 0) {
+        setPriceDisplay(formatPriceDisplay(initialData.price))
+      }
     }
   }, [initialData])
 
   // Funcion para guardar el borrador
   const saveDraft = useCallback(() => {
-    // No guardar si es modo edicion (tiene ID) o si esta enviando
-    if (formData.id || isSubmitting) {
-      return
-    }
+    if (formData.id || isSubmitting) return
 
-    // No guardar si el formulario esta vacio
     const isFormEmpty =
       !formData.title &&
       !formData.description &&
       !formData.price &&
       !formData.location
-    if (isFormEmpty) {
-      return
-    }
+    if (isFormEmpty) return
 
     localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(formData))
   }, [formData, isSubmitting])
 
   // Guardar automaticamente en localStorage con debounce
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      saveDraft()
-    }, 300) // Guardar 300ms despues del ultimo cambio (mas rapido)
-
+    const timeoutId = setTimeout(() => { saveDraft() }, 300)
     return () => clearTimeout(timeoutId)
   }, [saveDraft])
 
   // Guardar cuando el usuario cambia de pestana o cierra la ventana
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.hidden) {
-        // Usuario cambio de pestana, guardar inmediatamente
-        saveDraft()
-      }
+      if (document.hidden) saveDraft()
     }
-
-    const handleBeforeUnload = () => {
-      // Usuario esta cerrando o refrescando la pagina, guardar inmediatamente
-      saveDraft()
-    }
+    const handleBeforeUnload = () => { saveDraft() }
 
     document.addEventListener('visibilitychange', handleVisibilityChange)
     window.addEventListener('beforeunload', handleBeforeUnload)
@@ -156,11 +267,45 @@ export default function PropertyForm({
     }
   }, [clearDraft])
 
+  /* ---------------------------------------------------------------------------
+     PROGRESS CALCULATION
+  --------------------------------------------------------------------------- */
+
+  const progress = useMemo(() => {
+    let filled = 0
+    let total = 0
+
+    for (const section of SECTIONS) {
+      for (const field of section.fields) {
+        total++
+        const val = formData[field as keyof Property]
+        if (field === 'images') {
+          if (Array.isArray(val) && val.length > 0) filled++
+        } else if (field === 'features') {
+          if (Array.isArray(val) && val.length > 0) filled++
+        } else if (field === 'featured') {
+          filled++ // always counts as filled (has default)
+        } else if (field === 'type' || field === 'operation' || field === 'status') {
+          filled++ // selects always have a value
+        } else if (typeof val === 'number') {
+          if (val > 0) filled++
+        } else if (typeof val === 'string') {
+          if (val.trim().length > 0) filled++
+        }
+      }
+    }
+
+    return Math.round((filled / total) * 100)
+  }, [formData])
+
+  /* ---------------------------------------------------------------------------
+     HANDLERS
+  --------------------------------------------------------------------------- */
+
   const handleChange = (field: keyof Property, value: any) => {
     setFormData((prev) => {
       const updated = { ...prev, [field]: value }
 
-      // Si se cambia el tipo de propiedad, limpiar campos no relevantes
       if (field === 'type') {
         const isCochera = value === 'cochera'
         const isTerreno = value === 'terreno'
@@ -168,14 +313,12 @@ export default function PropertyForm({
         const isOficina = value === 'oficina'
 
         if (isCochera) {
-          // Limpiar campos no relevantes para cocheras
           updated.bedrooms = undefined
           updated.bathrooms = undefined
-          updated.parking = undefined // Una cochera no tiene "cocheras"
+          updated.parking = undefined
           updated.totalFloors = undefined
           updated.orientation = ''
         } else if (isTerreno) {
-          // Limpiar campos no relevantes para terrenos
           updated.bedrooms = undefined
           updated.bathrooms = undefined
           updated.parking = undefined
@@ -186,7 +329,6 @@ export default function PropertyForm({
           updated.expenses = undefined
           updated.coveredArea = undefined
         } else if (isLocal || isOficina) {
-          // Limpiar campos no relevantes para locales comerciales y oficinas
           updated.bedrooms = undefined
           updated.bathrooms = undefined
           updated.orientation = ''
@@ -206,77 +348,65 @@ export default function PropertyForm({
     }
   }
 
-  const handleImagesChange = (images: string[]) => {
-    handleChange('images', images)
+  const handleBlur = (field: string) => {
+    setTouched((prev) => ({ ...prev, [field]: true }))
+
+    if (REQUIRED_FIELDS.includes(field)) {
+      const error = validateField(field, formData[field as keyof Property])
+      if (error) {
+        setErrors((prev) => ({ ...prev, [field]: error }))
+      } else {
+        setErrors((prev) => {
+          const newErrors = { ...prev }
+          delete newErrors[field]
+          return newErrors
+        })
+      }
+    }
   }
 
-  // Determinar si un campo es relevante segun el tipo de propiedad
+  const handleImagesChange = (images: string[]) => {
+    handleChange('images', images)
+    // Clear images error when images are added
+    if (images.length > 0 && errors.images) {
+      setErrors((prev) => {
+        const newErrors = { ...prev }
+        delete newErrors.images
+        return newErrors
+      })
+    }
+  }
+
   const isFieldRelevant = (fieldName: string): boolean => {
     const isCochera = formData.type === 'cochera'
     const isTerreno = formData.type === 'terreno'
     const isLocal = formData.type === 'local'
     const isOficina = formData.type === 'oficina'
 
-    // Campos siempre relevantes
-    const alwaysRelevant = [
-      'title',
-      'description',
-      'price',
-      'location',
-      'type',
-      'operation',
-      'status',
-      'images',
-      'features',
-    ]
+    const alwaysRelevant = ['title', 'description', 'price', 'location', 'type', 'operation', 'status', 'images', 'features', 'condition', 'aptCredit', 'internalCode', 'videoUrl', 'services', 'documentation']
     if (alwaysRelevant.includes(fieldName)) return true
 
-    // Campos especificos por tipo
-    if (isCochera) {
-      // Para cocheras: area, ano, expensas, piso (nivel de cochera)
-      // NO incluir: bedrooms, bathrooms, parking (una cochera no tiene cocheras), totalFloors, orientation
-      const cocheraRelevant = [
-        'area',
-        'coveredArea',
-        'yearBuilt',
-        'expenses',
-        'floor',
-      ]
-      return cocheraRelevant.includes(fieldName)
-    }
+    if (isCochera) return ['area', 'coveredArea', 'yearBuilt', 'expenses', 'floor'].includes(fieldName)
+    if (isTerreno) return ['area'].includes(fieldName)
+    if (isLocal || isOficina) return ['area', 'coveredArea', 'yearBuilt', 'expenses', 'floor', 'totalFloors', 'parking', 'rooms'].includes(fieldName)
 
-    if (isTerreno) {
-      // Para terrenos: solo area
-      const terrenoRelevant = ['area']
-      return terrenoRelevant.includes(fieldName)
-    }
-
-    if (isLocal || isOficina) {
-      // Para locales comerciales y oficinas: area, ano, expensas, piso, cocheras
-      // NO incluir: bedrooms, bathrooms, orientation
-      const comercialRelevant = [
-        'area',
-        'coveredArea',
-        'yearBuilt',
-        'expenses',
-        'floor',
-        'totalFloors',
-        'parking',
-      ]
-      return comercialRelevant.includes(fieldName)
-    }
-
-    // Para otros tipos (casa, departamento): todos los campos
+    // casa, departamento: todos los campos
     return true
   }
 
   const handleAddFeature = () => {
     if (newFeature.trim()) {
-      handleChange('features', [
-        ...(formData.features || []),
-        newFeature.trim(),
-      ])
+      handleChange('features', [...(formData.features || []), newFeature.trim()])
       setNewFeature('')
+    }
+  }
+
+  const handleToggleSuggestedFeature = (feature: string) => {
+    const current = formData.features || []
+    if (current.includes(feature)) {
+      handleChange('features', current.filter((f) => f !== feature))
+    } else {
+      handleChange('features', [...current, feature])
     }
   }
 
@@ -285,41 +415,33 @@ export default function PropertyForm({
     handleChange('features', updated)
   }
 
+  const handlePriceChange = (displayValue: string) => {
+    // Remove everything except digits and decimal
+    const cleaned = displayValue.replace(/[^\d]/g, '')
+    const numericValue = parseInt(cleaned) || 0
+    setPriceDisplay(cleaned ? formatPriceDisplay(numericValue) : '')
+    handleChange('price', numericValue)
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
     const newErrors: Record<string, string> = {}
 
-    // Validar
-    if (!formData.title || formData.title.trim().length < 5) {
-      newErrors.title = 'El titulo debe tener al menos 5 caracteres'
-    }
-    if (!formData.description || formData.description.trim().length < 20) {
-      newErrors.description = 'La descripcion debe tener al menos 20 caracteres'
-    }
-    if (!formData.price || formData.price <= 0) {
-      newErrors.price = 'El precio debe ser mayor a 0'
-    }
-    if (!formData.location || formData.location.trim().length < 3) {
-      newErrors.location = 'La ubicacion es requerida'
-    }
-    if (!formData.area || formData.area <= 0) {
-      newErrors.area = 'El area debe ser mayor a 0'
-    }
-    if (!formData.images || formData.images.length === 0) {
-      newErrors.images = 'Debes agregar al menos una imagen'
+    for (const field of REQUIRED_FIELDS) {
+      const error = validateField(field, formData[field as keyof Property])
+      if (error) newErrors[field] = error
     }
 
     setErrors(newErrors)
+    // Mark all required fields as touched
+    setTouched(REQUIRED_FIELDS.reduce((acc, f) => ({ ...acc, [f]: true }), {}))
 
     if (Object.keys(newErrors).length > 0) {
-      // Scroll al primer error despues de un pequeno delay para que se rendericen los errores
       setTimeout(() => {
         const firstErrorField = Object.keys(newErrors)[0]
         if (firstErrorField) {
-          const element = document.querySelector(
-            `[data-field="${firstErrorField}"]`
-          )
+          const element = document.querySelector(`[data-field="${firstErrorField}"]`)
           element?.scrollIntoView({ behavior: 'smooth', block: 'center' })
         }
       }, 100)
@@ -329,9 +451,46 @@ export default function PropertyForm({
     onSubmit(formData)
   }
 
+  const suggestedFeatures = COMMON_FEATURES[formData.type || 'casa'] || COMMON_FEATURES.casa
+  const currentFeatures = formData.features || []
+
+  const errorCount = Object.keys(errors).length
+
+  /* ---------------------------------------------------------------------------
+     RENDER
+  --------------------------------------------------------------------------- */
+
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-      {/* Informacion basica */}
+    <form onSubmit={handleSubmit} className="flex flex-col gap-6 pb-24">
+      {/* ================================================================
+          PROGRESS BAR
+      ================================================================ */}
+      <div className="sticky top-0 z-10 -mx-1 px-1 pt-1 pb-3 bg-gradient-to-b from-slate-50 via-slate-50 to-transparent">
+        <div className="flex items-center gap-3 rounded-xl bg-white border border-slate-200 px-4 py-3 shadow-sm">
+          <div className="flex-1">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs font-medium text-slate-600">Progreso del formulario</span>
+              <span className="text-xs font-semibold text-slate-700">{progress}%</span>
+            </div>
+            <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div
+                className={cn(
+                  "h-full rounded-full transition-all duration-500 ease-out",
+                  progress < 50 ? "bg-amber-400" : progress < 100 ? "bg-blue-500" : "bg-emerald-500"
+                )}
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </div>
+          {progress === 100 && (
+            <Check className="h-5 w-5 text-emerald-500 shrink-0" />
+          )}
+        </div>
+      </div>
+
+      {/* ================================================================
+          SECCION 1: INFORMACION BASICA
+      ================================================================ */}
       <Card className="bg-white">
         <CardHeader className="pb-4">
           <CardTitle className="border-b-2 border-amber-400 pb-3 text-lg text-slate-900">
@@ -340,13 +499,13 @@ export default function PropertyForm({
         </CardHeader>
         <CardContent className="space-y-5">
           <div className="space-y-2" data-field="title">
-            <Label htmlFor="title">Título *</Label>
+            <Label htmlFor="title">Título <span className="text-destructive">*</span></Label>
             <Input
               id="title"
               type="text"
               value={formData.title || ''}
               onChange={(e) => handleChange('title', e.target.value)}
-              required
+              onBlur={() => handleBlur('title')}
               placeholder={
                 formData.type === 'cochera'
                   ? 'Ej: Cochera en Nueva Cordoba'
@@ -354,9 +513,9 @@ export default function PropertyForm({
                     ? 'Ej: Terreno en Villa Allende'
                     : 'Ej: Casa en Villa Allende'
               }
-              className={cn(errors.title && 'border-destructive')}
+              className={cn(touched.title && errors.title && 'border-destructive')}
             />
-            {errors.title && (
+            {touched.title && errors.title && (
               <p className="flex items-center gap-1 text-sm text-destructive">
                 <AlertCircle className="h-4 w-4" />
                 {errors.title}
@@ -365,12 +524,12 @@ export default function PropertyForm({
           </div>
 
           <div className="space-y-2" data-field="description">
-            <Label htmlFor="description">Descripción *</Label>
+            <Label htmlFor="description">Descripción <span className="text-destructive">*</span></Label>
             <Textarea
               id="description"
               value={formData.description || ''}
               onChange={(e) => handleChange('description', e.target.value)}
-              required
+              onBlur={() => handleBlur('description')}
               rows={5}
               placeholder={
                 formData.type === 'cochera'
@@ -379,12 +538,15 @@ export default function PropertyForm({
                     ? 'Describe el terreno: ubicacion, medidas, servicios disponibles, caracteristicas...'
                     : 'Describe la propiedad en detalle...'
               }
-              className={cn(errors.description && 'border-destructive')}
+              className={cn(touched.description && errors.description && 'border-destructive')}
             />
-            <p className="text-xs text-muted-foreground">
+            <p className={cn(
+              "text-xs",
+              (formData.description?.length || 0) >= 20 ? "text-emerald-600" : "text-muted-foreground"
+            )}>
               {formData.description?.length || 0} caracteres (mínimo 20)
             </p>
-            {errors.description && (
+            {touched.description && errors.description && (
               <p className="flex items-center gap-1 text-sm text-destructive">
                 <AlertCircle className="h-4 w-4" />
                 {errors.description}
@@ -394,7 +556,7 @@ export default function PropertyForm({
 
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="space-y-2">
-              <Label htmlFor="type">Tipo *</Label>
+              <Label htmlFor="type">Tipo <span className="text-destructive">*</span></Label>
               <Select
                 value={formData.type}
                 onValueChange={(value) => handleChange('type', value)}
@@ -414,7 +576,7 @@ export default function PropertyForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="operation">Operación *</Label>
+              <Label htmlFor="operation">Operación <span className="text-destructive">*</span></Label>
               <Select
                 value={formData.operation}
                 onValueChange={(value) => handleChange('operation', value)}
@@ -425,12 +587,13 @@ export default function PropertyForm({
                 <SelectContent>
                   <SelectItem value="venta">Venta</SelectItem>
                   <SelectItem value="alquiler">Alquiler</SelectItem>
+                  <SelectItem value="alquiler_temporal">Alquiler Temporal</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="status">Estado *</Label>
+              <Label htmlFor="status">Estado <span className="text-destructive">*</span></Label>
               <Select
                 value={formData.status}
                 onValueChange={(value) => handleChange('status', value)}
@@ -449,7 +612,7 @@ export default function PropertyForm({
 
           <div className="space-y-2" data-field="location">
             <Label>
-              Ubicación *{' '}
+              Ubicación <span className="text-destructive">*</span>{' '}
               <span className="font-normal text-muted-foreground">
                 (con autocompletado de Google Maps)
               </span>
@@ -467,12 +630,12 @@ export default function PropertyForm({
                   ? 'Ej: Nueva Cordoba, Cordoba Capital'
                   : 'Ej: Villa Allende, Cordoba'
               }
-              error={errors.location}
+              error={touched.location ? errors.location : undefined}
             />
           </div>
 
           <div className="space-y-2" data-field="price">
-            <Label>Precio *</Label>
+            <Label>Precio <span className="text-destructive">*</span></Label>
             <div className="flex gap-3">
               <div className="w-36">
                 <Select
@@ -495,20 +658,18 @@ export default function PropertyForm({
                   {formData.currency === 'USD' ? 'US$' : '$'}
                 </span>
                 <Input
-                  type="number"
-                  value={formData.price || ''}
-                  onChange={(e) =>
-                    handleChange('price', parseFloat(e.target.value) || 0)
-                  }
-                  required
-                  min="0"
-                  placeholder={formData.currency === 'USD' ? '450000' : '85000000'}
-                  className={cn('pl-11', errors.price && 'border-destructive')}
+                  type="text"
+                  inputMode="numeric"
+                  value={priceDisplay}
+                  onChange={(e) => handlePriceChange(e.target.value)}
+                  onBlur={() => handleBlur('price')}
+                  placeholder={formData.currency === 'USD' ? '450.000' : '85.000.000'}
+                  className={cn('pl-11', touched.price && errors.price && 'border-destructive')}
                 />
               </div>
             </div>
             {(formData.price ?? 0) > 0 && (
-              <p className="text-xs text-slate-700">
+              <p className="text-xs font-medium text-emerald-700">
                 {new Intl.NumberFormat('es-AR', {
                   style: 'currency',
                   currency: formData.currency || 'USD',
@@ -516,17 +677,47 @@ export default function PropertyForm({
                 }).format(formData.price ?? 0)}
               </p>
             )}
-            {errors.price && (
+            {touched.price && errors.price && (
               <p className="flex items-center gap-1 text-sm text-destructive">
                 <AlertCircle className="h-4 w-4" />
                 {errors.price}
               </p>
             )}
           </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="internalCode">
+                Código Interno <span className="text-xs text-muted-foreground font-normal">opcional</span>
+              </Label>
+              <Input
+                id="internalCode"
+                type="text"
+                value={formData.internalCode || ''}
+                onChange={(e) => handleChange('internalCode', e.target.value)}
+                placeholder="Ej: JA-0042"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="videoUrl">
+                Video / Tour Virtual <span className="text-xs text-muted-foreground font-normal">opcional</span>
+              </Label>
+              <Input
+                id="videoUrl"
+                type="url"
+                value={formData.videoUrl || ''}
+                onChange={(e) => handleChange('videoUrl', e.target.value)}
+                placeholder="https://youtube.com/watch?v=... o Matterport"
+              />
+            </div>
+          </div>
         </CardContent>
       </Card>
 
-      {/* Caracteristicas */}
+      {/* ================================================================
+          SECCION 2: CARACTERISTICAS
+      ================================================================ */}
       <Card className="bg-white">
         <CardHeader className="pb-4">
           <CardTitle className="border-b-2 border-amber-400 pb-3 text-lg text-slate-900">
@@ -535,9 +726,71 @@ export default function PropertyForm({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-5">
+          {/* Condición y Disposición */}
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div className="space-y-2">
+              <Label htmlFor="condition">
+                Condición <span className="text-xs text-muted-foreground font-normal">opcional</span>
+              </Label>
+              <Select
+                value={formData.condition || ''}
+                onValueChange={(value) => handleChange('condition', value)}
+              >
+                <SelectTrigger id="condition">
+                  <SelectValue placeholder="Seleccionar..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="a_estrenar">A estrenar</SelectItem>
+                  <SelectItem value="muy_bueno">Muy bueno</SelectItem>
+                  <SelectItem value="bueno">Bueno</SelectItem>
+                  <SelectItem value="regular">Regular</SelectItem>
+                  <SelectItem value="a_reciclar">A reciclar</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {isFieldRelevant('disposition') && !['terreno', 'cochera'].includes(formData.type || '') && (
+              <div className="space-y-2">
+                <Label htmlFor="disposition">
+                  Disposición <span className="text-xs text-muted-foreground font-normal">opcional</span>
+                </Label>
+                <Select
+                  value={formData.disposition || ''}
+                  onValueChange={(value) => handleChange('disposition', value)}
+                >
+                  <SelectTrigger id="disposition">
+                    <SelectValue placeholder="Seleccionar..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="frente">Frente</SelectItem>
+                    <SelectItem value="contrafrente">Contrafrente</SelectItem>
+                    <SelectItem value="interno">Interno</SelectItem>
+                    <SelectItem value="lateral">Lateral</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {isFieldRelevant('rooms') && !['terreno', 'cochera', 'local'].includes(formData.type || '') && (
+              <div className="space-y-2">
+                <Label htmlFor="rooms">
+                  Ambientes <span className="text-xs text-muted-foreground font-normal">opcional</span>
+                </Label>
+                <Input
+                  id="rooms"
+                  type="number"
+                  value={formData.rooms || ''}
+                  onChange={(e) => handleChange('rooms', parseInt(e.target.value) || undefined)}
+                  min="1"
+                  placeholder="Ej: 3"
+                />
+              </div>
+            )}
+          </div>
+
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2" data-field="area">
-              <Label htmlFor="area">Área Total (m²) *</Label>
+              <Label htmlFor="area">Área Total (m²) <span className="text-destructive">*</span></Label>
               <Input
                 id="area"
                 type="number"
@@ -545,12 +798,12 @@ export default function PropertyForm({
                 onChange={(e) =>
                   handleChange('area', parseFloat(e.target.value) || 0)
                 }
-                required
+                onBlur={() => handleBlur('area')}
                 min="0"
                 step="0.01"
-                className={cn(errors.area && 'border-destructive')}
+                className={cn(touched.area && errors.area && 'border-destructive')}
               />
-              {errors.area && (
+              {touched.area && errors.area && (
                 <p className="flex items-center gap-1 text-sm text-destructive">
                   <AlertCircle className="h-4 w-4" />
                   {errors.area}
@@ -560,16 +813,15 @@ export default function PropertyForm({
 
             {isFieldRelevant('coveredArea') && (
               <div className="space-y-2">
-                <Label htmlFor="coveredArea">Área Cubierta (m²)</Label>
+                <Label htmlFor="coveredArea">
+                  Área Cubierta (m²) <span className="text-xs text-muted-foreground font-normal">opcional</span>
+                </Label>
                 <Input
                   id="coveredArea"
                   type="number"
                   value={formData.coveredArea || ''}
                   onChange={(e) =>
-                    handleChange(
-                      'coveredArea',
-                      parseFloat(e.target.value) || undefined
-                    )
+                    handleChange('coveredArea', parseFloat(e.target.value) || undefined)
                   }
                   min="0"
                   step="0.01"
@@ -584,16 +836,15 @@ export default function PropertyForm({
             <div className="grid gap-4 sm:grid-cols-3">
               {isFieldRelevant('bedrooms') && (
                 <div className="space-y-2">
-                  <Label htmlFor="bedrooms">Dormitorios</Label>
+                  <Label htmlFor="bedrooms">
+                    Dormitorios <span className="text-xs text-muted-foreground font-normal">opcional</span>
+                  </Label>
                   <Input
                     id="bedrooms"
                     type="number"
                     value={formData.bedrooms || ''}
                     onChange={(e) =>
-                      handleChange(
-                        'bedrooms',
-                        parseInt(e.target.value) || undefined
-                      )
+                      handleChange('bedrooms', parseInt(e.target.value) || undefined)
                     }
                     min="0"
                   />
@@ -602,16 +853,15 @@ export default function PropertyForm({
 
               {isFieldRelevant('bathrooms') && (
                 <div className="space-y-2">
-                  <Label htmlFor="bathrooms">Baños</Label>
+                  <Label htmlFor="bathrooms">
+                    Baños <span className="text-xs text-muted-foreground font-normal">opcional</span>
+                  </Label>
                   <Input
                     id="bathrooms"
                     type="number"
                     value={formData.bathrooms || ''}
                     onChange={(e) =>
-                      handleChange(
-                        'bathrooms',
-                        parseInt(e.target.value) || undefined
-                      )
+                      handleChange('bathrooms', parseInt(e.target.value) || undefined)
                     }
                     min="0"
                   />
@@ -621,19 +871,15 @@ export default function PropertyForm({
               {isFieldRelevant('parking') && (
                 <div className="space-y-2">
                   <Label htmlFor="parking">
-                    {formData.type === 'cochera'
-                      ? 'Cantidad de Cocheras'
-                      : 'Cocheras'}
+                    {formData.type === 'cochera' ? 'Cantidad de Cocheras' : 'Cocheras'}{' '}
+                    <span className="text-xs text-muted-foreground font-normal">opcional</span>
                   </Label>
                   <Input
                     id="parking"
                     type="number"
                     value={formData.parking || ''}
                     onChange={(e) =>
-                      handleChange(
-                        'parking',
-                        parseInt(e.target.value) || undefined
-                      )
+                      handleChange('parking', parseInt(e.target.value) || undefined)
                     }
                     min="0"
                   />
@@ -648,16 +894,15 @@ export default function PropertyForm({
             <div className="grid gap-4 sm:grid-cols-3">
               {isFieldRelevant('yearBuilt') && (
                 <div className="space-y-2">
-                  <Label htmlFor="yearBuilt">Año de Construcción</Label>
+                  <Label htmlFor="yearBuilt">
+                    Año de Construcción <span className="text-xs text-muted-foreground font-normal">opcional</span>
+                  </Label>
                   <Input
                     id="yearBuilt"
                     type="number"
                     value={formData.yearBuilt || ''}
                     onChange={(e) =>
-                      handleChange(
-                        'yearBuilt',
-                        parseInt(e.target.value) || undefined
-                      )
+                      handleChange('yearBuilt', parseInt(e.target.value) || undefined)
                     }
                     min="1900"
                     max={new Date().getFullYear()}
@@ -668,17 +913,15 @@ export default function PropertyForm({
               {isFieldRelevant('floor') && (
                 <div className="space-y-2">
                   <Label htmlFor="floor">
-                    {formData.type === 'cochera' ? 'Nivel' : 'Piso'}
+                    {formData.type === 'cochera' ? 'Nivel' : 'Piso'}{' '}
+                    <span className="text-xs text-muted-foreground font-normal">opcional</span>
                   </Label>
                   <Input
                     id="floor"
                     type="number"
                     value={formData.floor !== undefined ? formData.floor : ''}
                     onChange={(e) => {
-                      const value =
-                        e.target.value === ''
-                          ? undefined
-                          : parseInt(e.target.value)
+                      const value = e.target.value === '' ? undefined : parseInt(e.target.value)
                       handleChange('floor', value)
                     }}
                     min={formData.type === 'cochera' ? '-1' : '0'}
@@ -699,16 +942,15 @@ export default function PropertyForm({
 
               {isFieldRelevant('totalFloors') && (
                 <div className="space-y-2">
-                  <Label htmlFor="totalFloors">Total Pisos</Label>
+                  <Label htmlFor="totalFloors">
+                    Total Pisos <span className="text-xs text-muted-foreground font-normal">opcional</span>
+                  </Label>
                   <Input
                     id="totalFloors"
                     type="number"
                     value={formData.totalFloors || ''}
                     onChange={(e) =>
-                      handleChange(
-                        'totalFloors',
-                        parseInt(e.target.value) || undefined
-                      )
+                      handleChange('totalFloors', parseInt(e.target.value) || undefined)
                     }
                     min="0"
                   />
@@ -722,12 +964,12 @@ export default function PropertyForm({
             <div className="grid gap-4 sm:grid-cols-2">
               {isFieldRelevant('orientation') && (
                 <div className="space-y-2">
-                  <Label htmlFor="orientation">Orientación</Label>
+                  <Label htmlFor="orientation">
+                    Orientación <span className="text-xs text-muted-foreground font-normal">opcional</span>
+                  </Label>
                   <Select
                     value={formData.orientation || ''}
-                    onValueChange={(value) =>
-                      handleChange('orientation', value)
-                    }
+                    onValueChange={(value) => handleChange('orientation', value)}
                   >
                     <SelectTrigger id="orientation">
                       <SelectValue placeholder="Seleccionar..." />
@@ -748,16 +990,15 @@ export default function PropertyForm({
 
               {isFieldRelevant('expenses') && (
                 <div className="space-y-2">
-                  <Label htmlFor="expenses">Expensas ($)</Label>
+                  <Label htmlFor="expenses">
+                    Expensas ($) <span className="text-xs text-muted-foreground font-normal">opcional</span>
+                  </Label>
                   <Input
                     id="expenses"
                     type="number"
                     value={formData.expenses || ''}
                     onChange={(e) =>
-                      handleChange(
-                        'expenses',
-                        parseFloat(e.target.value) || undefined
-                      )
+                      handleChange('expenses', parseFloat(e.target.value) || undefined)
                     }
                     min="0"
                   />
@@ -768,17 +1009,18 @@ export default function PropertyForm({
         </CardContent>
       </Card>
 
-      {/* Imagenes */}
+      {/* ================================================================
+          SECCION 3: IMAGENES
+      ================================================================ */}
       <Card className="bg-white" data-field="images">
         <CardHeader className="pb-4">
           <CardTitle className="border-b-2 border-amber-400 pb-3 text-lg text-slate-900">
-            Imágenes *
+            Imágenes <span className="text-destructive">*</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Agrega imágenes de la propiedad. Puedes arrastrar y soltar o hacer
-            clic para seleccionar.
+            Agrega imágenes de la propiedad. La primera imagen será la portada en redes sociales y listados.
           </p>
 
           <ImageUpload
@@ -798,22 +1040,52 @@ export default function PropertyForm({
         </CardContent>
       </Card>
 
-      {/* Caracteristicas adicionales */}
+      {/* ================================================================
+          SECCION 4: CARACTERISTICAS ADICIONALES
+      ================================================================ */}
       <Card className="bg-white">
         <CardHeader className="pb-4">
           <CardTitle className="border-b-2 border-amber-400 pb-3 text-lg text-slate-900">
             Características Adicionales
+            <span className="text-xs text-muted-foreground font-normal ml-2">opcional</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Suggested features chips */}
           <div className="space-y-2">
-            <Label>Agregar característica</Label>
+            <Label className="text-xs text-muted-foreground">Selecciona o escribe las características</Label>
+            <div className="flex flex-wrap gap-2">
+              {suggestedFeatures.map((feature) => {
+                const isSelected = currentFeatures.includes(feature)
+                return (
+                  <button
+                    key={feature}
+                    type="button"
+                    onClick={() => handleToggleSuggestedFeature(feature)}
+                    className={cn(
+                      "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm border transition-all duration-200",
+                      isSelected
+                        ? "bg-[#2c5f7d] text-white border-[#2c5f7d] shadow-sm"
+                        : "bg-white text-slate-600 border-slate-200 hover:border-slate-400 hover:bg-slate-50"
+                    )}
+                  >
+                    {isSelected && <Check className="h-3.5 w-3.5" />}
+                    {feature}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Custom feature input */}
+          <div className="space-y-2">
+            <Label className="text-xs text-muted-foreground">Agregar otra característica</Label>
             <div className="flex gap-3">
               <Input
                 type="text"
                 value={newFeature}
                 onChange={(e) => setNewFeature(e.target.value)}
-                placeholder="Ej: Jardin amplio, Parrilla, etc."
+                placeholder="Ej: Vista panorámica, Doble altura..."
                 onKeyPress={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault()
@@ -822,44 +1094,150 @@ export default function PropertyForm({
                 }}
                 className="flex-1"
               />
-              <Button type="button" onClick={handleAddFeature}>
+              <Button type="button" onClick={handleAddFeature} disabled={!newFeature.trim()}>
                 <Plus className="mr-2 h-4 w-4" />
                 Agregar
               </Button>
             </div>
           </div>
 
-          {formData.features && formData.features.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {formData.features.map((feature, index) => (
-                <Badge
-                  key={index}
-                  variant="secondary"
-                  className="gap-1.5 px-3 py-1.5 text-sm"
-                >
-                  {feature}
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveFeature(index)}
-                    className="ml-1 rounded-full p-0.5 hover:bg-slate-300"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              ))}
+          {/* Custom features (not in suggestions) */}
+          {currentFeatures.filter((f) => !suggestedFeatures.includes(f)).length > 0 && (
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">Personalizadas</Label>
+              <div className="flex flex-wrap gap-2">
+                {currentFeatures
+                  .filter((f) => !suggestedFeatures.includes(f))
+                  .map((feature) => {
+                    const originalIndex = currentFeatures.indexOf(feature)
+                    return (
+                      <Badge
+                        key={feature}
+                        variant="secondary"
+                        className="gap-1.5 px-3 py-1.5 text-sm"
+                      >
+                        {feature}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveFeature(originalIndex)}
+                          className="ml-1 rounded-full p-0.5 hover:bg-slate-300"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    )
+                  })}
+              </div>
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Opciones */}
+      {/* ================================================================
+          SECCION: SERVICIOS E INFRAESTRUCTURA
+      ================================================================ */}
+      <Card className="bg-white">
+        <CardHeader className="pb-4">
+          <CardTitle className="border-b-2 border-amber-400 pb-3 text-lg text-slate-900">
+            Servicios e Infraestructura
+            <span className="text-xs text-muted-foreground font-normal ml-2">opcional</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Label className="text-xs text-muted-foreground">Selecciona los servicios disponibles</Label>
+          <div className="flex flex-wrap gap-2">
+            {[
+              'Agua corriente', 'Gas natural', 'Cloacas', 'Electricidad',
+              'Internet fibra óptica', 'Cable', 'Teléfono fijo',
+              'Calle asfaltada', 'Alumbrado público', 'Transporte público',
+              'Recolección de residuos',
+            ].map((service) => {
+              const isSelected = (formData.services || []).includes(service)
+              return (
+                <button
+                  key={service}
+                  type="button"
+                  onClick={() => {
+                    const current = formData.services || []
+                    if (isSelected) {
+                      handleChange('services', current.filter((s) => s !== service))
+                    } else {
+                      handleChange('services', [...current, service])
+                    }
+                  }}
+                  className={cn(
+                    "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm border transition-all duration-200",
+                    isSelected
+                      ? "bg-emerald-600 text-white border-emerald-600 shadow-sm"
+                      : "bg-white text-slate-600 border-slate-200 hover:border-slate-400 hover:bg-slate-50"
+                  )}
+                >
+                  {isSelected && <Check className="h-3.5 w-3.5" />}
+                  {service}
+                </button>
+              )
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* ================================================================
+          SECCION: DOCUMENTACION
+      ================================================================ */}
+      <Card className="bg-white">
+        <CardHeader className="pb-4">
+          <CardTitle className="border-b-2 border-amber-400 pb-3 text-lg text-slate-900">
+            Documentación
+            <span className="text-xs text-muted-foreground font-normal ml-2">opcional</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Label className="text-xs text-muted-foreground">Documentación disponible de la propiedad</Label>
+          <div className="flex flex-wrap gap-2">
+            {[
+              'Escritura', 'Boleto de compraventa', 'Planos aprobados',
+              'Final de obra', 'Apto crédito bancario', 'Libre de gravámenes',
+              'Informe de dominio', 'Certificado catastral', 'Reglamento de copropiedad',
+            ].map((doc) => {
+              const isSelected = (formData.documentation || []).includes(doc)
+              return (
+                <button
+                  key={doc}
+                  type="button"
+                  onClick={() => {
+                    const current = formData.documentation || []
+                    if (isSelected) {
+                      handleChange('documentation', current.filter((d) => d !== doc))
+                    } else {
+                      handleChange('documentation', [...current, doc])
+                    }
+                  }}
+                  className={cn(
+                    "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm border transition-all duration-200",
+                    isSelected
+                      ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                      : "bg-white text-slate-600 border-slate-200 hover:border-slate-400 hover:bg-slate-50"
+                  )}
+                >
+                  {isSelected && <Check className="h-3.5 w-3.5" />}
+                  {doc}
+                </button>
+              )
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* ================================================================
+          SECCION: OPCIONES
+      ================================================================ */}
       <Card className="bg-white">
         <CardHeader className="pb-4">
           <CardTitle className="border-b-2 border-amber-400 pb-3 text-lg text-slate-900">
             Opciones
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <div className="flex items-center gap-3">
             <Checkbox
               id="featured"
@@ -876,10 +1254,28 @@ export default function PropertyForm({
               Propiedad destacada (aparecerá en la portada)
             </Label>
           </div>
+
+          <div className="flex items-center gap-3">
+            <Checkbox
+              id="aptCredit"
+              checked={formData.aptCredit || false}
+              onCheckedChange={(checked) =>
+                handleChange('aptCredit', checked === true)
+              }
+            />
+            <Label
+              htmlFor="aptCredit"
+              className="flex cursor-pointer items-center gap-2 text-emerald-700"
+            >
+              Apto crédito hipotecario
+            </Label>
+          </div>
         </CardContent>
       </Card>
 
-      {/* Indicador de borrador */}
+      {/* ================================================================
+          INDICADOR DE BORRADOR
+      ================================================================ */}
       {hasDraft && (
         <Card className="border-amber-400 bg-amber-50">
           <CardContent className="flex flex-wrap items-center justify-between gap-3 py-4">
@@ -890,16 +1286,7 @@ export default function PropertyForm({
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => {
-                if (
-                  confirm(
-                    '¿Deseas limpiar el borrador guardado y empezar de cero?'
-                  )
-                ) {
-                  clearDraft()
-                  window.location.reload()
-                }
-              }}
+              onClick={() => setClearDraftModal(true)}
               className="border-amber-400 text-amber-800 hover:bg-amber-100"
             >
               Limpiar borrador
@@ -908,17 +1295,69 @@ export default function PropertyForm({
         </Card>
       )}
 
-      {/* Botones */}
-      <div className="flex justify-end pt-4">
-        <Button
-          type="submit"
-          size="lg"
-          disabled={isSubmitting}
-          className="min-w-40 bg-gradient-to-r from-[#2c5f7d] to-[#1a4158] font-semibold hover:from-[#1a4158] hover:to-[#0f2a38]"
-        >
-          {isSubmitting ? 'Guardando...' : 'Guardar Propiedad'}
-        </Button>
+      {/* ================================================================
+          STICKY SUBMIT BAR
+      ================================================================ */}
+      <div
+        ref={submitBarRef}
+        className="fixed bottom-0 left-0 right-0 z-20 border-t border-slate-200 bg-white/95 backdrop-blur-md shadow-[0_-4px_12px_rgba(0,0,0,0.08)] px-4 py-3"
+      >
+        <div className="mx-auto max-w-4xl flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 text-sm text-slate-500">
+            <div className="hidden sm:flex items-center gap-2">
+              <div className="h-2 w-16 bg-slate-100 rounded-full overflow-hidden">
+                <div
+                  className={cn(
+                    "h-full rounded-full transition-all duration-500",
+                    progress < 50 ? "bg-amber-400" : progress < 100 ? "bg-blue-500" : "bg-emerald-500"
+                  )}
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <span className="text-xs">{progress}%</span>
+            </div>
+            {errorCount > 0 && (
+              <span className="text-destructive text-xs font-medium">
+                {errorCount} {errorCount === 1 ? 'error' : 'errores'}
+              </span>
+            )}
+          </div>
+          <Button
+            type="submit"
+            size="lg"
+            disabled={isSubmitting}
+            className="min-w-40 bg-gradient-to-r from-[#2c5f7d] to-[#1a4158] font-semibold hover:from-[#1a4158] hover:to-[#0f2a38]"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Guardando...
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4" />
+                Guardar Propiedad
+              </>
+            )}
+          </Button>
+        </div>
       </div>
+
+      {/* ================================================================
+          MODAL: LIMPIAR BORRADOR
+      ================================================================ */}
+      <Modal
+        isOpen={clearDraftModal}
+        onClose={() => setClearDraftModal(false)}
+        title="Limpiar borrador"
+        message="¿Deseas limpiar el borrador guardado y empezar de cero? Esta acción no se puede deshacer."
+        type="alert"
+        onConfirm={() => {
+          clearDraft()
+          setClearDraftModal(false)
+          window.location.reload()
+        }}
+      />
     </form>
   )
 }

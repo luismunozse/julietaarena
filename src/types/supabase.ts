@@ -13,6 +13,7 @@ export interface SupabaseProperty {
   type: 'casa' | 'departamento' | 'terreno' | 'local' | 'oficina' | 'cochera'
   bedrooms: number | null
   bathrooms: number | null
+  rooms: number | null
   area: number
   covered_area: number | null
   images: string[] | null
@@ -24,8 +25,15 @@ export interface SupabaseProperty {
   floor: number | null
   total_floors: number | null
   orientation: string | null
+  disposition: string | null
   expenses: number | null
-  operation: 'venta' | 'alquiler'
+  operation: 'venta' | 'alquiler' | 'alquiler_temporal'
+  condition: string | null
+  apt_credit: boolean | null
+  internal_code: string | null
+  video_url: string | null
+  services: string[] | null
+  documentation: string[] | null
   broker_name: string | null
   broker_phone: string | null
   broker_email: string | null

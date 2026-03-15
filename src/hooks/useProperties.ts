@@ -33,6 +33,7 @@ const propertyToSupabase = (property: Property): Omit<SupabaseProperty, 'created
   type: property.type,
   bedrooms: property.bedrooms ?? null,
   bathrooms: property.bathrooms ?? null,
+  rooms: property.rooms ?? null,
   area: property.area,
   covered_area: property.coveredArea ?? null,
   images: property.images ?? [],
@@ -44,8 +45,15 @@ const propertyToSupabase = (property: Property): Omit<SupabaseProperty, 'created
   floor: property.floor ?? null,
   total_floors: property.totalFloors ?? null,
   orientation: property.orientation ?? null,
+  disposition: property.disposition ?? null,
   expenses: property.expenses ?? null,
   operation: property.operation,
+  condition: property.condition ?? null,
+  apt_credit: property.aptCredit ?? null,
+  internal_code: property.internalCode ?? null,
+  video_url: property.videoUrl ?? null,
+  services: property.services ?? null,
+  documentation: property.documentation ?? null,
   broker_name: property.broker?.name ?? null,
   broker_phone: property.broker?.phone ?? null,
   broker_email: property.broker?.email ?? null,
@@ -60,7 +68,7 @@ const normalizeSupabaseData = (data: Record<string, unknown>): Record<string, un
   const normalized = { ...data }
 
   // Convertir strings a numbers donde corresponda
-  const numericFields = ['price', 'area', 'covered_area', 'bedrooms', 'bathrooms', 'year_built', 'parking', 'floor', 'total_floors', 'expenses', 'latitude', 'longitude']
+  const numericFields = ['price', 'area', 'covered_area', 'bedrooms', 'bathrooms', 'rooms', 'year_built', 'parking', 'floor', 'total_floors', 'expenses', 'latitude', 'longitude']
   for (const field of numericFields) {
     const value = normalized[field]
     // Empty strings or whitespace-only strings should become null
@@ -76,7 +84,7 @@ const normalizeSupabaseData = (data: Record<string, unknown>): Record<string, un
   }
 
   // Parsear JSON strings a arrays
-  const arrayFields = ['images', 'features']
+  const arrayFields = ['images', 'features', 'services', 'documentation']
   for (const field of arrayFields) {
     const value = normalized[field]
     if (typeof value === 'string') {
@@ -121,6 +129,7 @@ const supabaseToProperty = (data: unknown): Property | null => {
     type: validated.type,
     bedrooms: validated.bedrooms ?? undefined,
     bathrooms: validated.bathrooms ?? undefined,
+    rooms: validated.rooms ?? undefined,
     area: validated.area,
     coveredArea: validated.covered_area ?? undefined,
     images: normalizeImages(validated.images),
@@ -132,8 +141,15 @@ const supabaseToProperty = (data: unknown): Property | null => {
     floor: validated.floor ?? undefined,
     totalFloors: validated.total_floors ?? undefined,
     orientation: validated.orientation ?? undefined,
+    disposition: validated.disposition ?? undefined,
     expenses: validated.expenses ?? undefined,
     operation: validated.operation,
+    condition: validated.condition ?? undefined,
+    aptCredit: validated.apt_credit ?? undefined,
+    internalCode: validated.internal_code ?? undefined,
+    videoUrl: validated.video_url ?? undefined,
+    services: Array.isArray(validated.services) ? validated.services : undefined,
+    documentation: Array.isArray(validated.documentation) ? validated.documentation : undefined,
     broker: validated.broker_name
       ? {
           name: validated.broker_name,

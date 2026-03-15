@@ -8,8 +8,9 @@ export interface Property {
   type: 'casa' | 'departamento' | 'terreno' | 'local' | 'oficina' | 'cochera'
   bedrooms?: number
   bathrooms?: number
+  rooms?: number // Ambientes
   area: number
-  coveredArea?: number // Área cubierta
+  coveredArea?: number
   images: string[]
   features: string[]
   status: 'disponible' | 'reservado' | 'vendido'
@@ -19,8 +20,15 @@ export interface Property {
   floor?: number
   totalFloors?: number
   orientation?: string
+  disposition?: string // frente, contrafrente, interno, lateral
   expenses?: number
-  operation: 'venta' | 'alquiler'
+  operation: 'venta' | 'alquiler' | 'alquiler_temporal'
+  condition?: string // a_estrenar, muy_bueno, bueno, regular, a_reciclar
+  aptCredit?: boolean
+  internalCode?: string
+  videoUrl?: string
+  services?: string[] // agua, gas, cloacas, electricidad, internet, etc.
+  documentation?: string[] // escritura, planos, final_de_obra, etc.
   broker?: {
     name: string
     phone: string
@@ -53,7 +61,7 @@ export const getPropertyById = (id: string): Property | undefined => {
   return properties.find(prop => prop.id === id)
 }
 
-export const getPropertiesByOperation = (operation: 'venta' | 'alquiler'): Property[] => {
+export const getPropertiesByOperation = (operation: 'venta' | 'alquiler' | 'alquiler_temporal'): Property[] => {
   return properties.filter(prop => prop.operation === operation && prop.status === 'disponible')
 }
 
