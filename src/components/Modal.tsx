@@ -96,11 +96,14 @@ export default function Modal({
     >
       <div
         className={cn(
-          'relative mx-auto w-full max-w-[480px] rounded-2xl bg-white p-8 text-center',
+          'relative mx-auto w-full max-w-[480px] max-h-[90vh] overflow-y-auto rounded-2xl bg-white p-8 text-center',
           'shadow-[0_20px_60px_rgba(0,0,0,0.3)]',
           'animate-in slide-in-from-bottom-5 zoom-in-95 duration-300',
-          'max-sm:p-6'
+          'max-sm:p-5 max-sm:max-w-[95vw]'
         )}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}

@@ -8,7 +8,7 @@ import { loginCredentialsSchema, registerDataSchema, validateAndParse } from '@/
 import { logger } from '@/lib/logger'
 import { AuthError, normalizeError, getUserFriendlyMessage } from '@/lib/errors'
 import { useToast } from '@/components/ToastContainer'
-import { debugLog } from '@/lib/debugLogger'
+
 
 interface AuthContextType {
   user: User | null
@@ -78,15 +78,9 @@ export function useAuthProvider() {
   const { error: showErrorToast, success: showSuccessToast } = useToast()
 
   useEffect(() => {
-    // #region agent log
-    debugLog({location:'useAuth.ts:80',message:'useAuth useEffect mounting',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'});
-    // #endregion
     let isMounted = true
 
     const applySession = (supabaseSession: Session | null) => {
-      // #region agent log
-      debugLog({location:'useAuth.ts:86',message:'applySession called',data:{hasSession:!!supabaseSession,isMounted,userId:supabaseSession?.user?.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'});
-      // #endregion
       if (!supabaseSession) {
         setUser(null)
         setSession(null)
@@ -105,13 +99,7 @@ export function useAuthProvider() {
     }
 
     const syncSession = async () => {
-      // #region agent log
-      debugLog({location:'useAuth.ts:107',message:'syncSession starting',data:{isMounted},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'});
-      // #endregion
       const { data, error } = await supabase.auth.getSession()
-      // #region agent log
-      debugLog({location:'useAuth.ts:110',message:'syncSession after getSession',data:{isMounted,hasError:!!error,hasSession:!!data?.session},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'});
-      // #endregion
       if (!isMounted) return
 
       if (error) {
@@ -130,18 +118,12 @@ export function useAuthProvider() {
     }
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
-      // #region agent log
-      debugLog({location:'useAuth.ts:132',message:'onAuthStateChange callback',data:{event:_event,hasSession:!!newSession,isMounted},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'});
-      // #endregion
       applySession(newSession)
     })
 
     void syncSession()
 
     return () => {
-      // #region agent log
-      debugLog({location:'useAuth.ts:141',message:'useAuth cleanup running',data:{hasListener:!!listener},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'});
-      // #endregion
       isMounted = false
       listener.subscription.unsubscribe()
     }
@@ -151,9 +133,6 @@ export function useAuthProvider() {
     try {
       // Validar credenciales antes de enviarlas
       const validation = validateAndParse(loginCredentialsSchema, credentials, 'Credenciales inválidas')
-      // #region agent log
-      debugLog({location:'useAuth.ts:154',message:'Login validation result',data:{success:validation.success,hasDetails:!!('details' in validation ? validation.details : false),email:credentials.email},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'});
-      // #endregion
       if (!validation.success) {
         const errorMessage = ('details' in validation && validation.details?.issues?.[0]?.message) || 'Credenciales inválidas'
         logger.logAuth('login', undefined, new Error(errorMessage))

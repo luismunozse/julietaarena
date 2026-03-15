@@ -25,7 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Eye, Trash2, Mail, MessageCircle, History } from 'lucide-react'
+import { Eye, Trash2, Mail, MessageCircle, History, Inbox, BarChart3, Bell, EyeIcon, Phone, CheckCircle } from 'lucide-react'
 
 interface PropertyInquiry {
   id: string
@@ -79,14 +79,12 @@ export default function ConsultasPage() {
         .order('created_at', { ascending: false })
 
       if (error) {
-        console.error('Error al cargar consultas:', error)
         showError('Error al cargar las consultas')
         return
       }
 
       setInquiries(data || [])
-    } catch (err) {
-      console.error('Error:', err)
+    } catch {
       showError('Error al cargar las consultas')
     } finally {
       setIsLoading(false)
@@ -250,33 +248,33 @@ export default function ConsultasPage() {
       />
 
       {/* Estadísticas */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
         <AdminStatCard
-          icon={<span className="text-2xl">📊</span>}
+          icon={<BarChart3 className="h-6 w-6 text-blue-600" />}
           iconBgColor="bg-blue-50"
           title="Total"
           value={stats.total}
         />
         <AdminStatCard
-          icon={<span className="text-2xl">🔔</span>}
+          icon={<Bell className="h-6 w-6 text-amber-600" />}
           iconBgColor="bg-amber-50"
           title="Nuevas"
           value={stats.nuevas}
         />
         <AdminStatCard
-          icon={<span className="text-2xl">👁️</span>}
+          icon={<EyeIcon className="h-6 w-6 text-sky-600" />}
           iconBgColor="bg-sky-50"
           title="Leídas"
           value={stats.leidas}
         />
         <AdminStatCard
-          icon={<span className="text-2xl">📞</span>}
+          icon={<Phone className="h-6 w-6 text-green-600" />}
           iconBgColor="bg-green-50"
           title="Contactadas"
           value={stats.contactadas}
         />
         <AdminStatCard
-          icon={<span className="text-2xl">✅</span>}
+          icon={<CheckCircle className="h-6 w-6 text-slate-600" />}
           iconBgColor="bg-gray-100"
           title="Cerradas"
           value={stats.cerradas}
@@ -323,10 +321,23 @@ export default function ConsultasPage() {
           <>
             {paginatedItems.length === 0 ? (
               <Card className="text-center p-12">
-                <p className="text-4xl mb-4">📭</p>
-                <p className="text-muted-foreground">
-                  No hay consultas {filterStatus !== 'todas' ? `con estado "${statusLabels[filterStatus]}"` : ''}
+                <div className="flex justify-center mb-4">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100">
+                    <Inbox className="h-8 w-8 text-slate-400" />
+                  </div>
+                </div>
+                <p className="font-medium text-slate-700 mb-1">No hay consultas</p>
+                <p className="text-sm text-muted-foreground">
+                  {hasActiveFilters
+                    ? 'No se encontraron consultas con los filtros seleccionados'
+                    : 'Las consultas de clientes aparecerán aquí'
+                  }
                 </p>
+                {hasActiveFilters && (
+                  <Button variant="outline" size="sm" className="mt-4" onClick={clearFilters}>
+                    Limpiar filtros
+                  </Button>
+                )}
               </Card>
             ) : (
               <div className="space-y-4">
@@ -387,12 +398,12 @@ export default function ConsultasPage() {
                           Ver detalles
                         </Button>
 
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <Select
                             value={inquiry.status}
                             onValueChange={(value) => updateStatus(inquiry.id, value as PropertyInquiry['status'])}
                           >
-                            <SelectTrigger className="w-[140px]">
+                            <SelectTrigger className="w-full sm:w-[140px]">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>

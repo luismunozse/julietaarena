@@ -75,7 +75,8 @@ export default function About() {
               width={500}
               height={600}
               className="relative w-full aspect-[4/5] object-cover rounded-2xl sm:rounded-3xl shadow-2xl border-2 sm:border-4 border-white"
-              priority
+              loading="lazy"
+              sizes="(max-width: 640px) 280px, (max-width: 768px) 384px, (max-width: 1024px) 448px, 500px"
             />
           </div>
 

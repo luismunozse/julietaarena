@@ -15,7 +15,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Phone, Globe, Settings, Search, Link2, Save } from 'lucide-react'
+import { Phone, Globe, Settings, Search, Link2, Save, Bell } from 'lucide-react'
+import NotificationSettings from '@/components/NotificationSettings'
 
 interface SiteSettings {
   contactPhone: string
@@ -62,8 +63,8 @@ export default function ConfiguracionPage() {
       if (stored) {
         setSettings(JSON.parse(stored))
       }
-    } catch (err) {
-      console.error('Error cargando configuración:', err)
+    } catch {
+      // silently fail - settings fallback to defaults
     } finally {
       setIsLoading(false)
     }
@@ -74,8 +75,7 @@ export default function ConfiguracionPage() {
       setIsSaving(true)
       localStorage.setItem('site-settings', JSON.stringify(settings))
       success('Configuración guardada correctamente')
-    } catch (err) {
-      console.error('Error guardando configuración:', err)
+    } catch {
       showError('Error al guardar la configuración')
     } finally {
       setIsSaving(false)
@@ -275,6 +275,20 @@ export default function ConfiguracionPage() {
                 placeholder="inmobiliaria, propiedades, venta, alquiler"
               />
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Notificaciones */}
+        <Card className="bg-white">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Bell className="h-5 w-5 text-slate-600" />
+              <CardTitle className="text-lg">Notificaciones en Tiempo Real</CardTitle>
+            </div>
+            <CardDescription>Configura las alertas de nuevas consultas</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <NotificationSettings />
           </CardContent>
         </Card>
 

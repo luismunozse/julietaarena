@@ -76,7 +76,7 @@ export default function BulkActions({
         </Button>
       </div>
 
-      <div className="flex gap-2 flex-wrap md:w-auto w-full">
+      <div className="grid grid-cols-2 md:flex md:flex-wrap gap-2 w-full md:w-auto">
         <Select
           disabled={isProcessing}
           onValueChange={(value) => {
@@ -88,7 +88,7 @@ export default function BulkActions({
           <SelectTrigger
             className={cn(
               'bg-white text-gray-800 border-white font-semibold',
-              'md:w-[180px] flex-1 min-w-0'
+              'col-span-2 md:w-[180px]'
             )}
           >
             <SelectValue placeholder="Cambiar estado..." />
@@ -109,7 +109,7 @@ export default function BulkActions({
             'bg-white/10 border border-white/30 text-white font-semibold',
             'hover:bg-white/20 hover:text-white',
             'disabled:opacity-50 disabled:cursor-not-allowed',
-            'md:flex-none flex-1 min-w-0'
+            'md:flex-none'
           )}
         >
           <Star className="size-4" />
@@ -125,7 +125,7 @@ export default function BulkActions({
             'bg-white/10 border border-white/30 text-white font-semibold',
             'hover:bg-white/20 hover:text-white',
             'disabled:opacity-50 disabled:cursor-not-allowed',
-            'md:flex-none flex-1 min-w-0'
+            'md:flex-none'
           )}
         >
           <StarOff className="size-4" />
@@ -141,7 +141,7 @@ export default function BulkActions({
             'bg-white/10 border border-white/30 text-white font-semibold',
             'hover:bg-white/20 hover:text-white',
             'disabled:opacity-50 disabled:cursor-not-allowed',
-            'md:flex-none flex-1 min-w-0'
+            'md:flex-none'
           )}
         >
           <Download className="size-4" />
@@ -157,7 +157,7 @@ export default function BulkActions({
             'bg-red-500/80 border border-red-500/80 text-white font-semibold',
             'hover:bg-red-500 hover:text-white',
             'disabled:opacity-50 disabled:cursor-not-allowed',
-            'md:flex-none flex-1 min-w-0'
+            'md:flex-none'
           )}
         >
           <Trash2 className="size-4" />

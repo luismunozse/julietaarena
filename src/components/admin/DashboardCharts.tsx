@@ -1,6 +1,6 @@
 'use client'
 
-import { useDashboardStats } from '@/hooks/useDashboardStats'
+import { DashboardStats } from '@/hooks/useDashboardStats'
 import {
   LineChart,
   Line,
@@ -9,8 +9,6 @@ import {
   PieChart,
   Pie,
   Cell,
-  AreaChart,
-  Area,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -21,19 +19,23 @@ import {
 import { cn } from '@/lib/utils'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
-const COLORS = ['#2196F3', '#4CAF50', '#FF9800', '#E91E63', '#9C27B0', '#607D8B']
+// Brand-aligned palette: primary blue, gold accent, dark accent, teal, warm, neutral
+const COLORS = ['#2c5f7d', '#e8b86d', '#1a4158', '#14b8a6', '#f59e0b', '#64748b']
 
-export default function DashboardCharts() {
-  const { stats, isLoading } = useDashboardStats()
+interface DashboardChartsProps {
+  stats: DashboardStats | null
+  isLoading: boolean
+}
 
+export default function DashboardCharts({ stats, isLoading }: DashboardChartsProps) {
   if (isLoading || !stats) {
     return (
-      <div className="grid grid-cols-1 gap-6 mb-8 md:grid-cols-[repeat(auto-fit,minmax(400px,1fr))]">
+      <div className="grid grid-cols-1 gap-6 mb-8 md:grid-cols-2">
         {[...Array(4)].map((_, i) => (
           <div
             key={i}
             className={cn(
-              'h-[300px] rounded-xl',
+              'h-[280px] sm:h-[300px] rounded-xl',
               'bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100',
               'bg-[length:200%_100%] animate-pulse'
             )}
@@ -43,40 +45,37 @@ export default function DashboardCharts() {
     )
   }
 
-  // Preparar datos para grafico de propiedades por mes
   const monthlyData = stats.propertiesByMonth.map(item => ({
     name: item.month,
     propiedades: item.count,
   }))
 
-  // Preparar datos para grafico de barras (distribucion por tipo)
   const typeData = Object.entries(stats.propertiesByType).map(([name, value]) => ({
     name: name.charAt(0).toUpperCase() + name.slice(1),
     cantidad: value,
   }))
 
-  // Preparar datos para grafico de dona (estado)
   const statusData = Object.entries(stats.propertiesByStatus).map(([name, value]) => ({
     name: name.charAt(0).toUpperCase() + name.slice(1),
     value,
   }))
 
   return (
-    <div className="grid grid-cols-1 gap-6 mb-8 md:grid-cols-[repeat(auto-fit,minmax(400px,1fr))]">
+    <div className="grid grid-cols-1 gap-6 mb-8 md:grid-cols-2">
       {/* Grafico de lineas: Propiedades por mes */}
       <Card className="p-0">
         <CardHeader className="pb-2">
           <CardTitle className="text-lg text-[#2c5f7d]">Propiedades por Mes</CardTitle>
         </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={250}>
+        <CardContent className="px-2 sm:px-6">
+          <ResponsiveContainer width="100%" height={220}>
             <LineChart data={monthlyData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
+              <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+              <YAxis tick={{ fontSize: 11 }} width={30} />
               <Tooltip />
               <Legend />
-              <Line type="monotone" dataKey="propiedades" stroke="#2196F3" strokeWidth={2} />
+              <Line type="monotone" dataKey="propiedades" stroke="#2c5f7d" strokeWidth={2} dot={{ fill: '#2c5f7d', r: 3 }} activeDot={{ fill: '#e8b86d', r: 5 }} />
             </LineChart>
           </ResponsiveContainer>
         </CardContent>
@@ -85,17 +84,16 @@ export default function DashboardCharts() {
       {/* Grafico de barras: Distribucion por tipo */}
       <Card className="p-0">
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg text-[#2c5f7d]">Distribucion por Tipo</CardTitle>
+          <CardTitle className="text-lg text-[#2c5f7d]">Distribución por Tipo</CardTitle>
         </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={250}>
+        <CardContent className="px-2 sm:px-6">
+          <ResponsiveContainer width="100%" height={220}>
             <BarChart data={typeData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
+              <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+              <YAxis tick={{ fontSize: 11 }} width={30} />
               <Tooltip />
-              <Legend />
-              <Bar dataKey="cantidad" fill="#4CAF50" />
+              <Bar dataKey="cantidad" fill="#2c5f7d" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
@@ -106,46 +104,51 @@ export default function DashboardCharts() {
         <CardHeader className="pb-2">
           <CardTitle className="text-lg text-[#2c5f7d]">Estado de Propiedades</CardTitle>
         </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={250}>
+        <CardContent className="px-2 sm:px-6">
+          <ResponsiveContainer width="100%" height={220}>
             <PieChart>
               <Pie
                 data={statusData}
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={({ name, percent }) => `${name}: ${((percent || 0) * 100).toFixed(0)}%`}
-                outerRadius={80}
+                outerRadius={70}
                 fill="#8884d8"
                 dataKey="value"
               >
-                {statusData.map((entry, index) => (
+                {statusData.map((_entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
               <Tooltip />
+              <Legend
+                layout="vertical"
+                align="right"
+                verticalAlign="middle"
+                formatter={(value: string) => <span className="text-xs">{value}</span>}
+              />
             </PieChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>
 
-      {/* Grafico de area: Operacion (Venta vs Alquiler) */}
+      {/* Grafico de barras: Venta vs Alquiler */}
       <Card className="p-0">
         <CardHeader className="pb-2">
           <CardTitle className="text-lg text-[#2c5f7d]">Venta vs Alquiler</CardTitle>
         </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={250}>
-            <AreaChart data={[
+        <CardContent className="px-2 sm:px-6">
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={[
               { name: 'Venta', cantidad: stats.propertiesByOperation.venta || 0 },
               { name: 'Alquiler', cantidad: stats.propertiesByOperation.alquiler || 0 },
-            ]}>
+            ]} layout="vertical" barSize={40}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
+              <XAxis type="number" tick={{ fontSize: 11 }} />
+              <YAxis dataKey="name" type="category" width={65} tick={{ fontSize: 11 }} />
               <Tooltip />
-              <Area type="monotone" dataKey="cantidad" stroke="#FF9800" fill="#FF9800" fillOpacity={0.6} />
-            </AreaChart>
+              <Bar dataKey="cantidad" fill="#e8b86d" radius={[0, 6, 6, 0]} />
+            </BarChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>

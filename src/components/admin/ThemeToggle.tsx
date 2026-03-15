@@ -1,32 +1,21 @@
 'use client'
 
-import { useState, useEffect, CSSProperties } from 'react'
-
-const toggleStyle: CSSProperties = {
-  width: '40px',
-  height: '40px',
-  backgroundColor: 'rgba(44, 95, 125, 0.1)',
-  border: 'none',
-  borderRadius: '50%',
-  cursor: 'pointer',
-  fontSize: '1.25rem',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  transition: 'all 0.2s',
-}
+import { useState, useEffect } from 'react'
+import { Moon, Sun } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 export default function ThemeToggle() {
   const [isDark, setIsDark] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    // Cargar preferencia guardada
     const saved = localStorage.getItem('admin-theme')
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
     const shouldBeDark = saved === 'dark' || (!saved && prefersDark)
 
     setIsDark(shouldBeDark)
     applyTheme(shouldBeDark)
+    setMounted(true)
   }, [])
 
   const applyTheme = (dark: boolean) => {
@@ -44,9 +33,22 @@ export default function ThemeToggle() {
     applyTheme(newTheme)
   }
 
+  if (!mounted) return null
+
   return (
-    <button onClick={toggleTheme} style={toggleStyle} title={isDark ? 'Modo claro' : 'Modo oscuro'}>
-      {isDark ? '☀️' : '🌙'}
-    </button>
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={toggleTheme}
+      className="h-8 w-8 rounded-md"
+      title={isDark ? 'Modo claro' : 'Modo oscuro'}
+    >
+      {isDark ? (
+        <Sun className="h-4 w-4 text-amber-400" />
+      ) : (
+        <Moon className="h-4 w-4 text-slate-600" />
+      )}
+      <span className="sr-only">{isDark ? 'Modo claro' : 'Modo oscuro'}</span>
+    </Button>
   )
 }

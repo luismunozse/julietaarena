@@ -1,56 +1,8 @@
 'use client'
 
-import { useState, CSSProperties } from 'react'
+import { useState } from 'react'
 import { usePropertyComparator } from '@/hooks/usePropertyComparator'
 import PropertyComparison from './PropertyComparison'
-
-const styles: Record<string, CSSProperties> = {
-  floatingButton: {
-    position: 'fixed',
-    bottom: '2rem',
-    right: '2rem',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    zIndex: 999,
-  },
-  comparisonBtn: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.75rem',
-    padding: '0.875rem 1.5rem',
-    backgroundColor: '#2c5f7d',
-    color: '#ffffff',
-    border: 'none',
-    borderRadius: '50px',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-    cursor: 'pointer',
-    fontWeight: 600,
-    fontSize: '0.9375rem',
-    transition: 'all 0.3s',
-  },
-  comparisonIcon: {
-    fontSize: '1.25rem',
-  },
-  comparisonText: {
-    whiteSpace: 'nowrap',
-  },
-  clearBtn: {
-    width: '36px',
-    height: '36px',
-    backgroundColor: '#ffffff',
-    color: '#636e72',
-    border: '1px solid #e5e7eb',
-    borderRadius: '50%',
-    cursor: 'pointer',
-    fontSize: '0.875rem',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    transition: 'all 0.2s',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-  },
-}
 
 export default function ComparisonFloatingButton() {
   const { comparisonProperties, clearComparison } = usePropertyComparator()
@@ -62,21 +14,21 @@ export default function ComparisonFloatingButton() {
 
   return (
     <>
-      <div style={styles.floatingButton}>
+      <div className="fixed bottom-36 right-4 sm:bottom-6 sm:right-24 flex items-center gap-2 z-[999]">
         <button
-          style={styles.comparisonBtn}
+          className="flex items-center gap-3 py-3.5 px-6 bg-brand-primary text-white border-none rounded-full shadow-md cursor-pointer font-semibold text-[0.9375rem] transition-all duration-300 hover:bg-brand-accent hover:shadow-lg"
           onClick={() => setShowComparison(true)}
         >
-          <span style={styles.comparisonIcon}>⚖️</span>
-          <span style={styles.comparisonText}>
+          <span className="text-xl">&#x2696;&#xFE0F;</span>
+          <span className="whitespace-nowrap">
             Comparar ({comparisonProperties.length})
           </span>
         </button>
 
         <button
-          style={styles.clearBtn}
+          className="w-9 h-9 bg-white text-muted border border-border rounded-full cursor-pointer text-sm flex items-center justify-center transition-all duration-200 shadow-md hover:bg-surface hover:text-foreground"
           onClick={clearComparison}
-          title="Limpiar comparacion"
+          title="Limpiar comparación"
         >
           X
         </button>

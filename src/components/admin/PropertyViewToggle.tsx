@@ -79,7 +79,7 @@ export default function PropertyViewToggle({
           value={sortBy}
           onValueChange={(value) => onSortChange(value, sortOrder)}
         >
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-full sm:w-[180px]">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

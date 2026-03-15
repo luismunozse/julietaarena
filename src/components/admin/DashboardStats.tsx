@@ -1,6 +1,6 @@
 'use client'
 
-import { useDashboardStats } from '@/hooks/useDashboardStats'
+import { DashboardStats as DashboardStatsType, TrendData } from '@/hooks/useDashboardStats'
 import { cn } from '@/lib/utils'
 import { Card, CardContent } from '@/components/ui/card'
 import {
@@ -12,6 +12,10 @@ import {
   BarChart3,
   DollarSign,
   TrendingUp,
+  TrendingDown,
+  Minus,
+  ArrowUpRight,
+  ArrowDownRight,
 } from 'lucide-react'
 
 interface StatCardProps {
@@ -20,9 +24,45 @@ interface StatCardProps {
   title: string
   value: string | number
   label: string
+  trend?: TrendData
+  trendLabel?: string
 }
 
-function StatCard({ icon, iconBgColor, title, value, label }: StatCardProps) {
+interface DashboardStatsProps {
+  stats: DashboardStatsType | null
+  isLoading: boolean
+  error?: string | null
+}
+
+function TrendBadge({ trend, label }: { trend: TrendData; label: string }) {
+  const isPositive = trend.change > 0
+  const isNeutral = trend.change === 0
+
+  if (isNeutral) {
+    return (
+      <div className="flex items-center gap-1 text-xs text-slate-500">
+        <Minus className="h-3 w-3" />
+        <span>Sin cambios {label}</span>
+      </div>
+    )
+  }
+
+  return (
+    <div className={cn(
+      'flex items-center gap-1 text-xs font-medium',
+      isPositive ? 'text-emerald-600' : 'text-red-500'
+    )}>
+      {isPositive ? (
+        <ArrowUpRight className="h-3.5 w-3.5" />
+      ) : (
+        <ArrowDownRight className="h-3.5 w-3.5" />
+      )}
+      <span>{isPositive ? '+' : ''}{trend.change}% {label}</span>
+    </div>
+  )
+}
+
+function StatCard({ icon, iconBgColor, title, value, label, trend, trendLabel }: StatCardProps) {
   return (
     <Card className="flex flex-row items-center gap-4 p-4 md:p-6 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
       <div
@@ -40,7 +80,11 @@ function StatCard({ icon, iconBgColor, title, value, label }: StatCardProps) {
         <p className="mb-1 text-2xl font-bold leading-none text-[#2c5f7d] md:text-3xl">
           {value}
         </p>
-        <span className="text-sm text-muted-foreground">{label}</span>
+        {trend ? (
+          <TrendBadge trend={trend} label={trendLabel || ''} />
+        ) : (
+          <span className="text-sm text-muted-foreground">{label}</span>
+        )}
       </CardContent>
     </Card>
   )
@@ -54,8 +98,7 @@ function StatSkeleton() {
   )
 }
 
-export default function DashboardStats() {
-  const { stats, isLoading } = useDashboardStats()
+export default function DashboardStats({ stats, isLoading, error }: DashboardStatsProps) {
 
   if (isLoading) {
     return (
@@ -67,10 +110,11 @@ export default function DashboardStats() {
     )
   }
 
-  if (!stats) {
+  if (error || !stats) {
     return (
-      <div className="rounded-lg bg-red-50 p-8 text-center text-red-500">
-        Error al cargar estadisticas
+      <div className="rounded-lg bg-red-50 border border-red-200 p-8 text-center text-red-600">
+        <p className="font-medium">Error al cargar estadísticas</p>
+        {error && <p className="text-sm mt-1 text-red-500">{error}</p>}
       </div>
     )
   }
@@ -83,6 +127,8 @@ export default function DashboardStats() {
         title="Total Propiedades"
         value={stats.totalProperties}
         label="En el sistema"
+        trend={stats.trends.properties}
+        trendLabel="vs semana anterior"
       />
 
       <StatCard
@@ -106,7 +152,9 @@ export default function DashboardStats() {
         iconBgColor="bg-orange-50"
         title="Consultas 24h"
         value={stats.newInquiries24h}
-        label="Ultimas 24 horas"
+        label="Últimas 24 horas"
+        trend={stats.trends.inquiries}
+        trendLabel="vs día anterior"
       />
 
       <StatCard
@@ -114,13 +162,15 @@ export default function DashboardStats() {
         iconBgColor="bg-teal-50"
         title="Contactos 24h"
         value={stats.newContacts24h}
-        label="Ultimas 24 horas"
+        label="Últimas 24 horas"
+        trend={stats.trends.contacts}
+        trendLabel="vs día anterior"
       />
 
       <StatCard
         icon={<BarChart3 className="h-8 w-8 text-pink-600" />}
         iconBgColor="bg-pink-50"
-        title="Tasa Conversion"
+        title="Tasa Conversión"
         value={`${stats.conversionRate}%`}
         label="Consultas/Propiedades"
       />
@@ -136,7 +186,7 @@ export default function DashboardStats() {
       <StatCard
         icon={<TrendingUp className="h-8 w-8 text-sky-600" />}
         iconBgColor="bg-sky-50"
-        title="Distribucion"
+        title="Distribución"
         value={Object.keys(stats.propertiesByType).length}
         label="Tipos diferentes"
       />

@@ -5,8 +5,10 @@ import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/hooks/useAuth'
 import { useAdminKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
+import { useUnreadCount } from '@/hooks/useUnreadCount'
 import Modal from '@/components/Modal'
 import KeyboardShortcuts from '@/components/admin/KeyboardShortcuts'
+import ThemeToggle from '@/components/admin/ThemeToggle'
 import {
   LayoutDashboard,
   Home,
@@ -95,6 +97,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname()
   const { isAuthenticated, isLoading, user, logout } = useAuth()
   const [showLogoutModal, setShowLogoutModal] = useState(false)
+  const unreadCount = useUnreadCount()
 
   useAdminKeyboardShortcuts()
 
@@ -182,20 +185,28 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <SidebarGroupLabel>Menú Principal</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {menuItems.map((item) => (
-                  <SidebarMenuItem key={item.path}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={isActive(item.path, item.exact)}
-                      tooltip={item.label}
-                    >
-                      <Link href={item.path}>
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.label}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+                {menuItems.map((item) => {
+                  const showBadge = item.path === '/admin/consultas' && unreadCount > 0
+                  return (
+                    <SidebarMenuItem key={item.path}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={isActive(item.path, item.exact)}
+                        tooltip={item.label}
+                      >
+                        <Link href={item.path}>
+                          <item.icon className="h-4 w-4" />
+                          <span className="flex-1">{item.label}</span>
+                          {showBadge && (
+                            <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-500 px-1.5 text-[10px] font-bold text-white">
+                              {unreadCount > 99 ? '99+' : unreadCount}
+                            </span>
+                          )}
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  )
+                })}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -284,8 +295,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               ))}
             </BreadcrumbList>
           </Breadcrumb>
+          <div className="ml-auto">
+            <ThemeToggle />
+          </div>
         </header>
-        <main className="flex-1 overflow-auto p-6 md:p-8">
+        <main className="flex-1 overflow-auto p-6 md:p-8 animate-fade-in">
           {children}
         </main>
       </SidebarInset>

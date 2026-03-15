@@ -32,7 +32,7 @@ export default function PropertyFilters({
   return (
     <div className="bg-white rounded-xl p-6 shadow-md mb-8">
       <div className="flex gap-4 items-center flex-wrap md:flex-row flex-col">
-        <div className="flex-1 min-w-[300px] relative md:min-w-[300px] w-full">
+        <div className="flex-1 min-w-0 relative w-full md:min-w-[300px]">
           <Input
             type="text"
             placeholder="Buscar por título, descripción, ubicación..."

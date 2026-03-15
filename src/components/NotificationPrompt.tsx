@@ -1,95 +1,8 @@
 'use client'
 
-import { useState, useEffect, CSSProperties } from 'react'
+import { useState, useEffect } from 'react'
 import { useNotifications } from '@/hooks/useNotifications'
-
-const styles: Record<string, CSSProperties> = {
-  notificationPrompt: {
-    position: 'fixed',
-    bottom: '1.5rem',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    zIndex: 1000,
-    maxWidth: '500px',
-    width: 'calc(100% - 2rem)',
-  },
-  promptContent: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1rem',
-    padding: '1rem 1.5rem',
-    backgroundColor: '#ffffff',
-    borderRadius: '16px',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-    border: '1px solid #e5e7eb',
-    position: 'relative',
-  },
-  promptIcon: {
-    fontSize: '2rem',
-    flexShrink: 0,
-  },
-  promptText: {
-    flex: 1,
-  },
-  promptTextH3: {
-    margin: '0 0 0.25rem 0',
-    fontSize: '1rem',
-    fontWeight: 600,
-    color: '#1a4158',
-  },
-  promptTextP: {
-    margin: 0,
-    fontSize: '0.875rem',
-    color: '#636e72',
-    lineHeight: 1.4,
-  },
-  promptActions: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.5rem',
-    flexShrink: 0,
-  },
-  enableBtn: {
-    padding: '0.5rem 1rem',
-    backgroundColor: '#2c5f7d',
-    color: '#ffffff',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontWeight: 500,
-    fontSize: '0.875rem',
-    whiteSpace: 'nowrap',
-    transition: 'background-color 0.2s',
-  },
-  dismissBtn: {
-    padding: '0.5rem 1rem',
-    backgroundColor: 'transparent',
-    color: '#636e72',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontSize: '0.8125rem',
-    whiteSpace: 'nowrap',
-    transition: 'background-color 0.2s',
-  },
-  closeBtn: {
-    position: 'absolute',
-    top: '0.5rem',
-    right: '0.5rem',
-    width: '24px',
-    height: '24px',
-    backgroundColor: 'transparent',
-    border: 'none',
-    borderRadius: '50%',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: '#636e72',
-    fontSize: '0.875rem',
-    transition: 'background-color 0.2s',
-  },
-}
+import { Bell, X } from 'lucide-react'
 
 export default function NotificationPrompt() {
   const { permission, isSupported, requestPermission } = useNotifications()
@@ -97,12 +10,11 @@ export default function NotificationPrompt() {
   const [isDismissed, setIsDismissed] = useState(false)
 
   useEffect(() => {
-    // Mostrar el prompt si las notificaciones estan soportadas,
-    // el permiso no esta concedido y no se ha descartado
     if (isSupported && permission === 'default' && !isDismissed) {
       const dismissed = localStorage.getItem('notification-prompt-dismissed')
       if (!dismissed) {
-        setIsVisible(true)
+        const timer = setTimeout(() => setIsVisible(true), 3000)
+        return () => clearTimeout(timer)
       }
     }
   }, [isSupported, permission, isDismissed])
@@ -111,7 +23,6 @@ export default function NotificationPrompt() {
     const granted = await requestPermission()
     if (granted) {
       setIsVisible(false)
-      // Mostrar notificacion de confirmacion
       setTimeout(() => {
         new Notification('Notificaciones Activadas!', {
           body: 'Te mantendremos informado sobre nuevas propiedades y actualizaciones.',
@@ -130,38 +41,39 @@ export default function NotificationPrompt() {
   if (!isVisible) return null
 
   return (
-    <div style={styles.notificationPrompt}>
-      <div style={styles.promptContent}>
-        <div style={styles.promptIcon}>
-          🔔
+    <div className="fixed bottom-4 left-4 right-20 sm:left-auto sm:right-4 sm:bottom-6 sm:max-w-md z-[998] animate-fade-in-up">
+      <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-white rounded-2xl shadow-xl border border-border relative">
+        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-brand-primary to-brand-accent flex items-center justify-center flex-shrink-0">
+          <Bell className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
         </div>
-        <div style={styles.promptText}>
-          <h3 style={styles.promptTextH3}>Mantente Informado</h3>
-          <p style={styles.promptTextP}>
-            Recibe notificaciones sobre nuevas propiedades, cambios de precios
-            y recordatorios de citas.
+        <div className="flex-1 min-w-0">
+          <h3 className="text-sm sm:text-base font-semibold text-brand-accent mb-0.5">
+            Mantente Informado
+          </h3>
+          <p className="text-xs sm:text-sm text-muted leading-snug">
+            Recibe notificaciones sobre nuevas propiedades y cambios de precios.
           </p>
         </div>
-        <div style={styles.promptActions}>
+        <div className="flex flex-col gap-1.5 flex-shrink-0">
           <button
             onClick={handleEnable}
-            style={styles.enableBtn}
+            className="px-3 py-1.5 sm:px-4 sm:py-2 bg-brand-primary text-white text-xs sm:text-sm font-medium rounded-lg hover:bg-brand-accent transition-colors whitespace-nowrap"
           >
-            Activar Notificaciones
+            Activar
           </button>
           <button
             onClick={handleDismiss}
-            style={styles.dismissBtn}
+            className="px-3 py-1.5 text-xs text-muted hover:text-foreground transition-colors whitespace-nowrap"
           >
             Ahora no
           </button>
         </div>
         <button
           onClick={handleDismiss}
-          style={styles.closeBtn}
+          className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center text-muted hover:text-foreground rounded-full hover:bg-surface transition-colors"
           aria-label="Cerrar"
         >
-          X
+          <X className="w-3.5 h-3.5" />
         </button>
       </div>
     </div>

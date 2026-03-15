@@ -46,7 +46,7 @@ export default function InquirySearch({
   return (
     <Card className="p-6 mb-8">
       <div className="flex gap-4 items-center flex-wrap md:flex-row flex-col">
-        <div className="flex-1 min-w-[300px] md:min-w-[300px] w-full relative">
+        <div className="flex-1 min-w-0 w-full md:min-w-[300px] relative">
           <Input
             type="text"
             placeholder={type === 'consultas'

@@ -254,7 +254,7 @@ export default function AdminPropertiesPage() {
       />
 
       {/* Estadisticas principales */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="bg-white">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
@@ -347,7 +347,7 @@ export default function AdminPropertiesPage() {
             <CardTitle className="text-sm font-medium text-slate-600">Por Tipo</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
               {Object.entries(stats.porTipo).map(([type, count]) => (
                 <div
                   key={type}
@@ -417,6 +417,7 @@ export default function AdminPropertiesPage() {
           <>
             {viewMode === 'table' ? (
               <Card className="overflow-hidden bg-white">
+                <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-slate-50">
@@ -484,31 +485,33 @@ export default function AdminPropertiesPage() {
                         <TableCell>{getStatusBadge(prop.status)}</TableCell>
                         <TableCell>
                           <div className="flex gap-0.5">
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => router.push(`/propiedades/${prop.id}`)} title="Ver">
+                            <Button variant="ghost" size="icon" className="h-9 w-9 min-h-[44px] min-w-[44px]" onClick={() => router.push(`/propiedades/${prop.id}`)} title="Ver" aria-label="Ver propiedad">
                               <Eye className="h-4 w-4 text-blue-600" />
                             </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => router.push(`/admin/propiedades/${prop.id}`)} title="Editar">
+                            <Button variant="ghost" size="icon" className="h-9 w-9 min-h-[44px] min-w-[44px]" onClick={() => router.push(`/admin/propiedades/${prop.id}`)} title="Editar" aria-label="Editar propiedad">
                               <Pencil className="h-4 w-4 text-amber-600" />
                             </Button>
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8"
+                              className="h-9 w-9 min-h-[44px] min-w-[44px]"
                               onClick={async () => {
                                 const newId = await duplicateProperty(prop.id)
                                 if (newId) router.push(`/admin/propiedades/${newId}`)
                               }}
                               title="Duplicar"
+                              aria-label="Duplicar propiedad"
                             >
                               <Copy className="h-4 w-4 text-emerald-600" />
                             </Button>
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8"
+                              className="h-9 w-9 min-h-[44px] min-w-[44px]"
                               onClick={() => handleDeleteClick(prop.id)}
                               disabled={deletingId === prop.id}
                               title="Eliminar"
+                              aria-label="Eliminar propiedad"
                             >
                               <Trash2 className="h-4 w-4 text-red-600" />
                             </Button>
@@ -518,6 +521,7 @@ export default function AdminPropertiesPage() {
                     ))}
                   </TableBody>
                 </Table>
+                </div>
               </Card>
             ) : paginatedItems.length === 0 ? (
               <Card className="bg-white text-center py-16">
