@@ -14,13 +14,6 @@ export interface BlogPost {
 }
 
 export const blogPosts: BlogPost[] = [
-  // Los posts del blog se cargan dinámicamente o desde un CMS
-  // Agregar posts reales aquí
-]
-
-// Array temporal vacío - reemplazar con datos reales:
-/*
-export const blogPosts: BlogPost[] = [
   {
     id: 'blog-001',
     title: 'Guía Completa para Comprar tu Primera Casa',
@@ -106,7 +99,6 @@ export const blogPosts: BlogPost[] = [
     readTime: 9
   }
 ]
-*/
 
 export const getFeaturedPosts = (): BlogPost[] => {
   return blogPosts.filter(post => post.featured).slice(0, 3)

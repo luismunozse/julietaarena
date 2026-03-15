@@ -107,8 +107,7 @@ const validatePhone = (phone: string): string | undefined => {
   if (!phone.trim()) return 'El teléfono es requerido'
   const phoneLimpio = phone.replace(/[\s\-\(\)]/g, '')
   if (!/^\d+$/.test(phoneLimpio)) return 'El teléfono solo puede contener números'
-  if (phoneLimpio.length > 10) return 'El teléfono no puede tener más de 10 dígitos'
-  if (phoneLimpio.length < 8) return 'El teléfono debe tener al menos 8 dígitos'
+  if (phoneLimpio.length !== 10) return 'El teléfono debe tener 10 dígitos (ej: 3511234567)'
   return undefined
 }
 
@@ -320,6 +319,7 @@ export default function Contact() {
 
       logger.info('Contact inquiry saved successfully', { email: sanitizedData.customer_email })
 
+      let emailSent = true
       try {
         const emailResponse = await fetch('/api/send-email', {
           method: 'POST',
@@ -334,13 +334,19 @@ export default function Contact() {
         })
 
         if (!emailResponse.ok) {
+          emailSent = false
           logger.warn('Email notification failed but inquiry was saved', { email: sanitizedData.customer_email })
         }
       } catch (emailError) {
+        emailSent = false
         logger.warn('Email notification failed but inquiry was saved', { error: emailError })
       }
 
-      success('¡Mensaje enviado correctamente! Te contactaremos pronto.', 5000)
+      if (emailSent) {
+        success('¡Mensaje enviado correctamente! Te contactaremos pronto.', 5000)
+      } else {
+        success('Tu consulta fue registrada. Si no recibís respuesta en 24hs, contactanos por WhatsApp.', 7000)
+      }
       setFormData(INITIAL_FORM_DATA)
       setErrors({})
       setTouched({})

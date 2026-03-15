@@ -154,25 +154,41 @@ export default function GoogleMaps({
           },
         })
 
-        const infoWindow = new window.google.maps.InfoWindow({
-          content: `
-          <div class="gm-info-window">
-            <div class="gm-info-image" ${imageUrl ? `style="background-image:url('${imageUrl}')"` : ''}></div>
-            <div class="gm-info-content">
-              <h3>${property.title}</h3>
-              <p class="gm-info-location">📍 ${property.location}</p>
-              <p class="gm-info-price">${formatPrice(property.price)}${property.operation === 'alquiler' ? '/mes' : ''}</p>
-              <div class="gm-info-details">
-                <span>${property.area}m²</span>
-                ${property.bedrooms ? `<span>🛏️ ${property.bedrooms}</span>` : ''}
-                ${property.bathrooms ? `<span>🚿 ${property.bathrooms}</span>` : ''}
-              </div>
-              <button onclick="window.selectProperty('${property.id}')" class="gm-info-button">
-                Ver Detalles
-              </button>
+        const escapeHtml = (str: string) =>
+          str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+
+        const safeTitle = escapeHtml(property.title)
+        const safeLocation = escapeHtml(property.location)
+        const safeId = escapeHtml(property.id)
+
+        const infoWindowContent = document.createElement('div')
+        infoWindowContent.className = 'gm-info-window'
+        infoWindowContent.innerHTML = `
+          <div class="gm-info-image" ${imageUrl ? `style="background-image:url('${imageUrl}')"` : ''}></div>
+          <div class="gm-info-content">
+            <h3>${safeTitle}</h3>
+            <p class="gm-info-location">📍 ${safeLocation}</p>
+            <p class="gm-info-price">${formatPrice(property.price)}${property.operation === 'alquiler' ? '/mes' : ''}</p>
+            <div class="gm-info-details">
+              <span>${property.area}m²</span>
+              ${property.bedrooms ? `<span>🛏️ ${property.bedrooms}</span>` : ''}
+              ${property.bathrooms ? `<span>🚿 ${property.bathrooms}</span>` : ''}
             </div>
           </div>
-        `,
+        `
+
+        const button = document.createElement('button')
+        button.className = 'gm-info-button'
+        button.textContent = 'Ver Detalles'
+        button.addEventListener('click', () => {
+          if (onPropertySelect) {
+            onPropertySelect(property)
+          }
+        })
+        infoWindowContent.querySelector('.gm-info-content')?.appendChild(button)
+
+        const infoWindow = new window.google.maps.InfoWindow({
+          content: infoWindowContent,
         })
 
         marker.addListener('click', () => {
@@ -186,14 +202,6 @@ export default function GoogleMaps({
       })
 
       markersRef.current = newMarkers
-      ;(
-        window as unknown as { selectProperty?: (propertyId: string) => void }
-      ).selectProperty = (propertyId: string) => {
-        const property = properties.find((p) => p.id === propertyId)
-        if (property && onPropertySelect) {
-          onPropertySelect(property)
-        }
-      }
     },
     [onPropertySelect, properties]
   )

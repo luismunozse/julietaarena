@@ -65,7 +65,7 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: 'your-google-verification-code',
+    google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION || undefined,
   },
 }
 
@@ -101,8 +101,12 @@ export default function RootLayout({
             `,
           }}
         />
-        <GoogleAnalytics measurementId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || ''} />
-        <FacebookPixel pixelId={process.env.NEXT_PUBLIC_FB_PIXEL_ID || ''} />
+        {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
+          <GoogleAnalytics measurementId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID} />
+        )}
+        {process.env.NEXT_PUBLIC_FB_PIXEL_ID && (
+          <FacebookPixel pixelId={process.env.NEXT_PUBLIC_FB_PIXEL_ID} />
+        )}
         <ErrorBoundary>
           <ToastProvider>
             <AnalyticsProvider>

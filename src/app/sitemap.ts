@@ -1,11 +1,12 @@
 import { MetadataRoute } from 'next'
+import { blogPosts } from '@/data/blogPosts'
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://julietaarena.com.ar'
   const currentDate = new Date()
 
-  return [
-    // Main pages
+  // Páginas principales
+  const mainPages: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
       lastModified: currentDate,
@@ -37,53 +38,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/favoritos`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.6,
-    },
-    
-    // Blog posts
-    {
-      url: `${baseUrl}/blog/guia-compra-casa`,
+      url: `${baseUrl}/vender`,
       lastModified: currentDate,
       changeFrequency: 'monthly',
       priority: 0.7,
-    },
-    
-    // Section anchors
-    {
-      url: `${baseUrl}#servicios`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}#sobre-mi`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}#testimonios`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}#contacto`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    
-    // Admin pages (low priority, not indexed)
-    {
-      url: `${baseUrl}/admin/analytics`,
-      lastModified: currentDate,
-      changeFrequency: 'daily',
-      priority: 0.1,
     },
   ]
-}
 
+  // Blog posts dinámicos
+  const blogPages: MetadataRoute.Sitemap = blogPosts.map((post) => ({
+    url: `${baseUrl}/blog/${post.slug}`,
+    lastModified: new Date(post.date),
+    changeFrequency: 'monthly' as const,
+    priority: 0.7,
+  }))
+
+  return [...mainPages, ...blogPages]
+}

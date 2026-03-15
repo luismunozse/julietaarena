@@ -95,7 +95,7 @@ export default function Header() {
   const headerClasses = `
     fixed inset-x-0 top-0 z-[9999]
     transition-all duration-300 ease-out
-    ${isScrolled || needsSolidHeader
+    ${isScrolled || needsSolidHeader || isMobileMenuOpen
       ? 'bg-white/95 backdrop-blur-md shadow-md py-3'
       : 'bg-transparent py-5'
     }
@@ -103,7 +103,7 @@ export default function Header() {
 
   const linkClasses = `
     text-sm font-medium transition-colors duration-200
-    ${isScrolled || needsSolidHeader
+    ${isScrolled || needsSolidHeader || isMobileMenuOpen
       ? 'text-foreground hover:text-brand-secondary'
       : 'text-white hover:text-brand-secondary'
     }
@@ -121,7 +121,7 @@ export default function Header() {
           >
             <span className={`
               block text-xl font-bold transition-colors duration-200
-              ${isScrolled || needsSolidHeader
+              ${isScrolled || needsSolidHeader || isMobileMenuOpen
                 ? 'text-brand-primary group-hover:text-brand-secondary'
                 : 'text-white group-hover:text-brand-secondary'
               }
@@ -130,7 +130,7 @@ export default function Header() {
             </span>
             <span className={`
               block text-xs transition-colors duration-200 -mt-0.5
-              ${isScrolled || needsSolidHeader ? 'text-muted' : 'text-white/70'}
+              ${isScrolled || needsSolidHeader || isMobileMenuOpen ? 'text-muted' : 'text-white/70'}
             `}>
               Martillera Pública
             </span>
@@ -224,7 +224,7 @@ export default function Header() {
           <button
             className={`
               md:hidden p-2 rounded-lg transition-colors duration-200
-              ${isScrolled || needsSolidHeader
+              ${isScrolled || needsSolidHeader || isMobileMenuOpen
                 ? 'text-foreground hover:bg-surface'
                 : 'text-white hover:bg-white/10'
               }

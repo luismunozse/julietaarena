@@ -15,7 +15,7 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
   const router = useRouter()
   const { getPropertyById, isLoading } = useProperties()
   const [property, setProperty] = useState<Property | undefined>(undefined)
-  
+
   // Unwrap params Promise using React.use() for Next.js 15 compatibility
   const { id } = use(params)
 
@@ -29,6 +29,19 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
       }
     }
   }, [id, isLoading, getPropertyById, router])
+
+  // Dynamic document title
+  useEffect(() => {
+    if (property) {
+      const priceFormatted = property.currency === 'USD'
+        ? `USD ${property.price.toLocaleString()}`
+        : `$ ${property.price.toLocaleString()}`
+      document.title = `${property.title} - ${priceFormatted} | Julieta Arena`
+    }
+    return () => {
+      document.title = 'Julieta Arena - Martillera Pública | Servicios Inmobiliarios Córdoba'
+    }
+  }, [property])
 
   if (isLoading) {
     return (
@@ -55,8 +68,3 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
     </main>
   )
 }
-
-
-
-
-

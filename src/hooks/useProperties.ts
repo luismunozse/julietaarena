@@ -8,7 +8,6 @@ import { properties as initialProperties } from '@/data/properties'
 import { useAuth } from '@/hooks/useAuth'
 import { getPublicImageUrl } from '@/lib/storage'
 import { validateAndParse, supabasePropertySchema } from '@/lib/validation'
-import { debugLog } from '@/lib/debugLogger'
 import { logger } from '@/lib/logger'
 import { normalizeError, getUserFriendlyMessage } from '@/lib/errors'
 import { useToast } from '@/components/ToastContainer'
@@ -167,9 +166,6 @@ export function useProperties() {
 
   const migrateInitialProperties = useCallback(async (userId?: string | null) => {
     if (!userId) {
-      // #region agent log
-      debugLog({location:'useProperties.ts:127',message:'Migration skipped - no userId',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'});
-      // #endregion
       console.warn('Se requiere un usuario autenticado para migrar propiedades de ejemplo.')
       return
     }
@@ -186,38 +182,23 @@ export function useProperties() {
       const { error } = await supabase.from('properties').insert(supabaseProperties)
 
       if (error) {
-        // #region agent log
-        debugLog({location:'useProperties.ts:142',message:'Migration error from Supabase',data:{errorMessage:error?.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'});
-        // #endregion
         console.error('Error migrando propiedades:', error)
       }
     } catch (err) {
-      // #region agent log
-      debugLog({location:'useProperties.ts:145',message:'Migration exception caught',data:{errorMessage:err instanceof Error?err.message:String(err)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'});
-      // #endregion
       console.error('Error en migración:', err)
     }
   }, [])
 
   const loadProperties = useCallback(async () => {
-    // #region agent log
-    debugLog({location:'useProperties.ts:159',message:'loadProperties called',data:{userId:user?.id,useSupabase},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'});
-    // #endregion
     try {
       setIsLoading(true)
       setError(null)
 
       // Intentar cargar desde Supabase primero
-      // #region agent log
-      debugLog({location:'useProperties.ts:167',message:'Before Supabase query',data:{userId:user?.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'});
-      // #endregion
       const { data, error: supabaseError } = await supabase
         .from('properties')
         .select('*')
         .order('created_at', { ascending: false })
-      // #region agent log
-      debugLog({location:'useProperties.ts:171',message:'After Supabase query',data:{hasData:!!data,hasError:!!supabaseError,dataLength:data?.length,errorMessage:supabaseError?.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'});
-      // #endregion
 
       if (!supabaseError && data) {
         // Supabase está disponible
@@ -228,18 +209,12 @@ export function useProperties() {
 
         // Si no hay propiedades en Supabase pero hay en initialProperties, migrar
         if (mappedProperties.length === 0 && initialProperties.length > 0) {
-          // #region agent log
-          debugLog({location:'useProperties.ts:180',message:'Starting migration',data:{initialPropertiesCount:initialProperties.length,userId:user?.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'});
-          // #endregion
           await migrateInitialProperties(user?.id)
           // Recargar después de migrar
           const { data: newData } = await supabase
             .from('properties')
             .select('*')
             .order('created_at', { ascending: false })
-          // #region agent log
-          debugLog({location:'useProperties.ts:186',message:'After migration reload',data:{newDataLength:newData?.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'});
-          // #endregion
           if (newData) {
             const reloadedProperties = newData
               .map(supabaseToProperty)
@@ -265,9 +240,6 @@ export function useProperties() {
         }
       }
     } catch (err) {
-      // #region agent log
-      debugLog({location:'useProperties.ts:211',message:'Error caught in loadProperties',data:{errorMessage:err instanceof Error?err.message:String(err),errorType:err?.constructor?.name},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'});
-      // #endregion
       const error = normalizeError(err)
       logger.error('Error loading properties', { userId: user?.id }, error)
       const errorMessage = getUserFriendlyMessage(error)
@@ -303,9 +275,6 @@ export function useProperties() {
   // Cargar propiedades (desde Supabase o localStorage)
   // Usar useCallback para evitar recreación de loadProperties en cada render
   useEffect(() => {
-    // #region agent log
-    debugLog({location:'useProperties.ts:245',message:'useEffect loadProperties executing',data:{loadPropertiesDefined:!!loadProperties},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'});
-    // #endregion
     void loadProperties()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // Solo ejecutar una vez al montar el componente
@@ -317,9 +286,6 @@ export function useProperties() {
       setProperties(updatedProperties)
       return true
     } catch (err) {
-      // #region agent log
-      debugLog({location:'useProperties.ts:277',message:'Error saving to localStorage',data:{errorMessage:err instanceof Error?err.message:String(err)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'});
-      // #endregion
       console.error('Error saving to localStorage:', err)
       setError('Error al guardar propiedades')
       return false
@@ -532,12 +498,15 @@ export function useProperties() {
         updatedBy: user?.id,
       }
 
-      const success = await createProperty(duplicatedProperty)
-      if (success) {
-        // Esperar a que se cargue la nueva propiedad
-        await loadProperties()
-        const newProperty = properties.find(p => p.title === duplicatedProperty.title)
-        return newProperty?.id || null
+      const duplicatedId = `prop-${Date.now()}`
+      const propertyWithId: Property = {
+        ...duplicatedProperty,
+        id: duplicatedId,
+      } as Property
+
+      const createSuccess = await createProperty(propertyWithId)
+      if (createSuccess) {
+        return duplicatedId
       }
       return null
     } catch (err) {
