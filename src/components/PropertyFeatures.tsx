@@ -1,54 +1,10 @@
 'use client'
 
+import { Card, CardContent } from '@/components/ui/card'
+import { Check } from 'lucide-react'
+
 interface PropertyFeaturesProps {
   features: string[]
-}
-
-const inlineStyles = {
-  features: {
-    backgroundColor: '#fff',
-    borderRadius: '16px',
-    padding: '1.5rem',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-  } as React.CSSProperties,
-  title: {
-    fontSize: '1.25rem',
-    fontWeight: 600,
-    color: '#1a4158',
-    marginBottom: '1rem',
-    margin: '0 0 1rem 0',
-  } as React.CSSProperties,
-  featuresGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-    gap: '0.75rem',
-  } as React.CSSProperties,
-  feature: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.75rem',
-    padding: '0.75rem',
-    backgroundColor: '#f8f9fa',
-    borderRadius: '8px',
-    border: '1px solid #e5e7eb',
-  } as React.CSSProperties,
-  checkIcon: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '24px',
-    height: '24px',
-    backgroundColor: '#2c5f7d',
-    color: '#fff',
-    borderRadius: '50%',
-    fontSize: '0.75rem',
-    fontWeight: 700,
-    flexShrink: 0,
-  } as React.CSSProperties,
-  featureText: {
-    color: '#1a4158',
-    fontSize: '0.95rem',
-  } as React.CSSProperties,
 }
 
 export default function PropertyFeatures({ features }: PropertyFeaturesProps) {
@@ -57,16 +13,23 @@ export default function PropertyFeatures({ features }: PropertyFeaturesProps) {
   }
 
   return (
-    <div style={inlineStyles.features}>
-      <h2 style={inlineStyles.title}>Caracteristicas</h2>
-      <div style={inlineStyles.featuresGrid}>
-        {features.map((feature, index) => (
-          <div key={index} style={inlineStyles.feature}>
-            <span style={inlineStyles.checkIcon}>✓</span>
-            <span style={inlineStyles.featureText}>{feature}</span>
-          </div>
-        ))}
-      </div>
-    </div>
+    <Card className="bg-white shadow-sm">
+      <CardContent className="p-4 sm:p-6">
+        <h2 className="text-lg font-semibold text-slate-900 mb-4">Características</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+          {features.map((feature, index) => (
+            <div
+              key={index}
+              className="flex items-center gap-3 rounded-lg px-3.5 py-2.5 bg-slate-50 border border-slate-100"
+            >
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#2c5f7d] text-white">
+                <Check className="h-3.5 w-3.5" strokeWidth={3} />
+              </div>
+              <span className="text-sm text-slate-700">{feature}</span>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   )
 }

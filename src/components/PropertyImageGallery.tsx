@@ -1,207 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import Image from 'next/image'
 import { useSwipe } from '@/hooks/useSwipe'
+import { ChevronLeft, ChevronRight, X, Maximize2, ImageOff } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface PropertyImageGalleryProps {
   images: string[]
   title: string
-}
-
-const inlineStyles = {
-  gallery: {
-    width: '100%',
-  } as React.CSSProperties,
-  mainImageContainer: {
-    position: 'relative' as const,
-    width: '100%',
-    height: '450px',
-    backgroundColor: '#f8f9fa',
-    overflow: 'hidden',
-  } as React.CSSProperties,
-  mainImage: {
-    objectFit: 'cover' as const,
-  } as React.CSSProperties,
-  placeholderImage: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-    height: '100%',
-    backgroundColor: '#f8f9fa',
-  } as React.CSSProperties,
-  placeholderIcon: {
-    fontSize: '4rem',
-    marginBottom: '1rem',
-  } as React.CSSProperties,
-  placeholderText: {
-    color: '#636e72',
-    fontSize: '1rem',
-  } as React.CSSProperties,
-  imageCounter: {
-    position: 'absolute' as const,
-    bottom: '1rem',
-    left: '1rem',
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    color: '#fff',
-    padding: '0.5rem 1rem',
-    borderRadius: '20px',
-    fontSize: '0.875rem',
-    fontWeight: 500,
-  } as React.CSSProperties,
-  navButton: {
-    position: 'absolute' as const,
-    top: '50%',
-    transform: 'translateY(-50%)',
-    width: '48px',
-    height: '48px',
-    borderRadius: '50%',
-    border: 'none',
-    backgroundColor: 'rgba(255,255,255,0.9)',
-    color: '#1a4158',
-    fontSize: '1.25rem',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-    transition: 'all 0.2s ease',
-  } as React.CSSProperties,
-  navButtonLeft: {
-    left: '1rem',
-  } as React.CSSProperties,
-  navButtonRight: {
-    right: '1rem',
-  } as React.CSSProperties,
-  fullscreenButton: {
-    position: 'absolute' as const,
-    top: '1rem',
-    right: '1rem',
-    width: '40px',
-    height: '40px',
-    borderRadius: '8px',
-    border: 'none',
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    color: '#fff',
-    fontSize: '1rem',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    transition: 'all 0.2s ease',
-  } as React.CSSProperties,
-  thumbnails: {
-    display: 'flex',
-    gap: '0.5rem',
-    padding: '1rem',
-    overflowX: 'auto' as const,
-    backgroundColor: '#f8f9fa',
-  } as React.CSSProperties,
-  thumbnail: {
-    position: 'relative' as const,
-    width: '100px',
-    height: '80px',
-    flexShrink: 0,
-    borderRadius: '8px',
-    overflow: 'hidden',
-    cursor: 'pointer',
-    border: '2px solid transparent',
-    padding: 0,
-    background: 'none',
-    transition: 'border-color 0.2s ease',
-  } as React.CSSProperties,
-  thumbnailActive: {
-    position: 'relative' as const,
-    width: '100px',
-    height: '80px',
-    flexShrink: 0,
-    borderRadius: '8px',
-    overflow: 'hidden',
-    cursor: 'pointer',
-    border: '2px solid #2c5f7d',
-    padding: 0,
-    background: 'none',
-    transition: 'border-color 0.2s ease',
-  } as React.CSSProperties,
-  thumbnailImage: {
-    objectFit: 'cover' as const,
-    width: '100%',
-    height: '100%',
-  } as React.CSSProperties,
-  fullscreenModal: {
-    position: 'fixed' as const,
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.95)',
-    zIndex: 9999,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  } as React.CSSProperties,
-  fullscreenContent: {
-    position: 'relative' as const,
-    maxWidth: '90vw',
-    maxHeight: '90vh',
-  } as React.CSSProperties,
-  closeButton: {
-    position: 'absolute' as const,
-    top: '-40px',
-    right: '0',
-    width: '36px',
-    height: '36px',
-    borderRadius: '50%',
-    border: 'none',
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    color: '#fff',
-    fontSize: '1.25rem',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    transition: 'background-color 0.2s ease',
-  } as React.CSSProperties,
-  fullscreenImage: {
-    maxWidth: '100%',
-    maxHeight: '85vh',
-    objectFit: 'contain' as const,
-    borderRadius: '8px',
-  } as React.CSSProperties,
-  fullscreenNav: {
-    position: 'absolute' as const,
-    top: '50%',
-    transform: 'translateY(-50%)',
-    width: '56px',
-    height: '56px',
-    borderRadius: '50%',
-    border: 'none',
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    color: '#fff',
-    fontSize: '1.5rem',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    transition: 'background-color 0.2s ease',
-  } as React.CSSProperties,
-  fullscreenNavLeft: {
-    left: '-70px',
-  } as React.CSSProperties,
-  fullscreenNavRight: {
-    right: '-70px',
-  } as React.CSSProperties,
-  fullscreenCounter: {
-    position: 'absolute' as const,
-    bottom: '-40px',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    color: '#fff',
-    fontSize: '1rem',
-    fontWeight: 500,
-  } as React.CSSProperties,
 }
 
 export default function PropertyImageGallery({ images, title }: PropertyImageGalleryProps) {
@@ -211,112 +18,101 @@ export default function PropertyImageGallery({ images, title }: PropertyImageGal
   const totalImages = images.length
   const currentImage = images[currentIndex] || images[0]
 
-  const goToNext = () => {
+  const goToNext = useCallback(() => {
     setCurrentIndex((prev) => (prev + 1) % totalImages)
-  }
+  }, [totalImages])
 
-  const goToPrevious = () => {
+  const goToPrevious = useCallback(() => {
     setCurrentIndex((prev) => (prev - 1 + totalImages) % totalImages)
-  }
+  }, [totalImages])
 
-  const goToImage = (index: number) => {
-    setCurrentIndex(index)
-  }
-
-  // Swipe gestures
   const swipeHandlers = useSwipe({
     onSwipeLeft: goToNext,
     onSwipeRight: goToPrevious,
     minSwipeDistance: 50,
   })
 
-  const toggleFullscreen = () => {
-    setIsFullscreen(!isFullscreen)
-  }
-
   if (!images || images.length === 0) {
     return (
-      <div style={inlineStyles.gallery}>
-        <div style={inlineStyles.mainImageContainer}>
-          <div style={inlineStyles.placeholderImage}>
-            <span style={inlineStyles.placeholderIcon}>🏠</span>
-            <p style={inlineStyles.placeholderText}>Sin imagenes disponibles</p>
-          </div>
-        </div>
+      <div className="flex flex-col items-center justify-center h-[350px] sm:h-[450px] bg-slate-50">
+        <ImageOff className="h-12 w-12 text-slate-300 mb-3" />
+        <p className="text-sm text-slate-500">Sin imágenes disponibles</p>
       </div>
     )
   }
 
   return (
     <>
-      <div style={inlineStyles.gallery}>
-        {/* Imagen principal */}
-        <div
-          style={inlineStyles.mainImageContainer}
-          {...swipeHandlers}
-        >
+      <div className="w-full">
+        {/* Main image */}
+        <div className="relative w-full h-[350px] sm:h-[450px] bg-slate-100 overflow-hidden" {...swipeHandlers}>
           <Image
             src={currentImage}
             alt={`${title} - Imagen ${currentIndex + 1}`}
             fill
             sizes="(max-width: 768px) 100vw, 800px"
-            style={inlineStyles.mainImage}
+            className="object-cover"
             priority
           />
 
-          {/* Indicador de imagen */}
+          {/* Counter pill */}
           {totalImages > 1 && (
-            <div style={inlineStyles.imageCounter}>
+            <div className="absolute bottom-4 left-4 bg-black/60 text-white px-3 py-1.5 rounded-full text-sm font-medium backdrop-blur-sm">
               {currentIndex + 1} / {totalImages}
             </div>
           )}
 
-          {/* Botones de navegacion */}
+          {/* Nav buttons */}
           {totalImages > 1 && (
             <>
               <button
-                style={{...inlineStyles.navButton, ...inlineStyles.navButtonLeft}}
+                className="absolute left-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-lg backdrop-blur-sm transition-all hover:bg-white hover:scale-105"
                 onClick={goToPrevious}
                 aria-label="Imagen anterior"
               >
-                ←
+                <ChevronLeft className="h-5 w-5" />
               </button>
               <button
-                style={{...inlineStyles.navButton, ...inlineStyles.navButtonRight}}
+                className="absolute right-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-lg backdrop-blur-sm transition-all hover:bg-white hover:scale-105"
                 onClick={goToNext}
                 aria-label="Imagen siguiente"
               >
-                →
+                <ChevronRight className="h-5 w-5" />
               </button>
             </>
           )}
 
-          {/* Boton de fullscreen */}
+          {/* Fullscreen button */}
           <button
-            style={inlineStyles.fullscreenButton}
-            onClick={toggleFullscreen}
+            className="absolute top-4 right-4 flex h-9 w-9 items-center justify-center rounded-lg bg-black/50 text-white backdrop-blur-sm transition-all hover:bg-black/70"
+            onClick={() => setIsFullscreen(true)}
             aria-label="Ver en pantalla completa"
           >
-            🔍
+            <Maximize2 className="h-4 w-4" />
           </button>
         </div>
 
         {/* Thumbnails */}
         {totalImages > 1 && (
-          <div style={inlineStyles.thumbnails}>
+          <div className="flex gap-2 p-3 overflow-x-auto bg-slate-50 scrollbar-thin">
             {images.map((image, index) => (
               <button
                 key={index}
-                style={index === currentIndex ? inlineStyles.thumbnailActive : inlineStyles.thumbnail}
-                onClick={() => goToImage(index)}
+                className={cn(
+                  "relative w-[80px] h-[60px] sm:w-[100px] sm:h-[72px] shrink-0 rounded-lg overflow-hidden border-2 transition-all",
+                  index === currentIndex
+                    ? "border-[#2c5f7d] ring-1 ring-[#2c5f7d]/30"
+                    : "border-transparent opacity-70 hover:opacity-100"
+                )}
+                onClick={() => setCurrentIndex(index)}
                 aria-label={`Ver imagen ${index + 1}`}
               >
                 <Image
                   src={image}
                   alt={`${title} - Miniatura ${index + 1}`}
-                  width={100}
-                  height={80}
-                  style={inlineStyles.thumbnailImage}
+                  fill
+                  sizes="100px"
+                  className="object-cover"
                 />
               </button>
             ))}
@@ -326,40 +122,46 @@ export default function PropertyImageGallery({ images, title }: PropertyImageGal
 
       {/* Fullscreen modal */}
       {isFullscreen && (
-        <div style={inlineStyles.fullscreenModal} onClick={toggleFullscreen}>
-          <div style={inlineStyles.fullscreenContent} onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 backdrop-blur-sm"
+          onClick={() => setIsFullscreen(false)}
+        >
+          <div className="relative max-w-[90vw] max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+            {/* Close */}
             <button
-              style={inlineStyles.closeButton}
-              onClick={toggleFullscreen}
-              aria-label="Cerrar pantalla completa"
+              className="absolute -top-12 right-0 flex h-9 w-9 items-center justify-center rounded-full bg-white/20 text-white transition-colors hover:bg-white/30"
+              onClick={() => setIsFullscreen(false)}
+              aria-label="Cerrar"
             >
-              ✕
+              <X className="h-5 w-5" />
             </button>
+
             <Image
               src={currentImage}
               alt={`${title} - Imagen ${currentIndex + 1}`}
               width={1600}
               height={900}
-              style={{ width: '100%', height: 'auto', maxHeight: '85vh', objectFit: 'contain', borderRadius: '8px' }}
+              className="max-w-full max-h-[85vh] object-contain rounded-lg"
               sizes="100vw"
             />
+
             {totalImages > 1 && (
               <>
                 <button
-                  style={{...inlineStyles.fullscreenNav, ...inlineStyles.fullscreenNavLeft}}
+                  className="absolute left-0 sm:-left-16 top-1/2 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full bg-white/20 text-white transition-colors hover:bg-white/30"
                   onClick={goToPrevious}
                   aria-label="Imagen anterior"
                 >
-                  ←
+                  <ChevronLeft className="h-6 w-6" />
                 </button>
                 <button
-                  style={{...inlineStyles.fullscreenNav, ...inlineStyles.fullscreenNavRight}}
+                  className="absolute right-0 sm:-right-16 top-1/2 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full bg-white/20 text-white transition-colors hover:bg-white/30"
                   onClick={goToNext}
                   aria-label="Imagen siguiente"
                 >
-                  →
+                  <ChevronRight className="h-6 w-6" />
                 </button>
-                <div style={inlineStyles.fullscreenCounter}>
+                <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 text-white text-sm font-medium">
                   {currentIndex + 1} / {totalImages}
                 </div>
               </>

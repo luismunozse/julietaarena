@@ -12,9 +12,10 @@ import PropertyLocationMap from './PropertyLocationMap'
 import { useAnalytics } from '@/hooks/useAnalytics'
 import { sanitizeText } from '@/lib/sanitize'
 import { cn } from '@/lib/utils'
-import { MapPin, Share2, ChevronRight, Camera, Map, ExternalLink, Navigation } from 'lucide-react'
+import { MapPin, Share2, ChevronRight, Camera, Map, ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Card, CardContent } from '@/components/ui/card'
 
 interface PropertyDetailProps {
   property: Property
@@ -142,32 +143,29 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                 <Camera className="w-4 h-4" />
                 Fotos {property.images.length > 0 && `(${property.images.length})`}
               </button>
-              {property.coordinates && (
-                <button
-                  className={cn(
-                    "flex-1 flex items-center justify-center gap-2 py-3.5 px-4 text-sm font-medium transition-all border-b-2 -mb-px",
-                    activeView === 'mapa'
-                      ? "text-brand-primary border-brand-primary bg-brand-primary/5"
-                      : "text-muted border-transparent hover:text-foreground hover:bg-surface"
-                  )}
-                  onClick={() => setActiveView('mapa')}
-                >
-                  <Map className="w-4 h-4" />
-                  Ubicacion
-                </button>
-              )}
+              <button
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-2 py-3.5 px-4 text-sm font-medium transition-all border-b-2 -mb-px",
+                  activeView === 'mapa'
+                    ? "text-brand-primary border-brand-primary bg-brand-primary/5"
+                    : "text-muted border-transparent hover:text-foreground hover:bg-surface"
+                )}
+                onClick={() => setActiveView('mapa')}
+              >
+                <Map className="w-4 h-4" />
+                Ubicación
+              </button>
             </div>
 
             {activeView === 'fotos' ? (
               <PropertyImageGallery images={property.images} title={property.title} />
             ) : (
-              property.coordinates && (
-                <PropertyLocationMap
-                  latitude={property.coordinates.lat}
-                  longitude={property.coordinates.lng}
-                  propertyTitle={property.title}
-                />
-              )
+              <PropertyLocationMap
+                latitude={property.coordinates?.lat}
+                longitude={property.coordinates?.lng}
+                address={property.location}
+                propertyTitle={property.title}
+              />
             )}
           </div>
 
@@ -269,7 +267,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                   <div className="p-3 bg-surface rounded-lg">
                     <span className="text-xs text-muted block mb-1">Expensas</span>
                     <span className="text-sm font-semibold text-brand-dark">
-                      ${property.expenses.toLocaleString('es-AR')}
+                      $ {property.expenses.toLocaleString('es-AR')}
                     </span>
                   </div>
                 )}
@@ -306,56 +304,23 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
           )}
 
           {/* Mapa de ubicación - siempre visible */}
-          {property.coordinates && (
-            <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-border">
-              <div className="p-6 pb-4">
-                <div className="flex items-center justify-between flex-wrap gap-3">
-                  <div>
-                    <h2 className="text-lg font-semibold text-brand-dark">Ubicación</h2>
-                    <p className="text-sm text-muted flex items-center gap-1.5 mt-1">
-                      <MapPin className="w-4 h-4" />
-                      {property.location}
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-sm"
-                      onClick={() => {
-                        window.open(
-                          `https://www.google.com/maps/dir/?api=1&destination=${property.coordinates!.lat},${property.coordinates!.lng}`,
-                          '_blank'
-                        )
-                      }}
-                    >
-                      <Navigation className="w-4 h-4" />
-                      <span className="hidden sm:inline">Cómo llegar</span>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-sm"
-                      onClick={() => {
-                        window.open(
-                          `https://www.google.com/maps/@${property.coordinates!.lat},${property.coordinates!.lng},17z`,
-                          '_blank'
-                        )
-                      }}
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                      <span className="hidden sm:inline">Abrir en Google Maps</span>
-                    </Button>
-                  </div>
-                </div>
+          <Card className="overflow-hidden shadow-sm">
+            <CardContent className="p-0">
+              <div className="p-5 pb-3">
+                <h2 className="text-lg font-semibold text-slate-900">Ubicación</h2>
+                <p className="text-sm text-slate-500 flex items-center gap-1.5 mt-1">
+                  <MapPin className="w-4 h-4 shrink-0" />
+                  {property.location}
+                </p>
               </div>
               <PropertyLocationMap
-                latitude={property.coordinates.lat}
-                longitude={property.coordinates.lng}
+                latitude={property.coordinates?.lat}
+                longitude={property.coordinates?.lng}
+                address={property.location}
                 propertyTitle={property.title}
               />
-            </div>
-          )}
+            </CardContent>
+          </Card>
         </div>
 
         {/* Sidebar derecho */}

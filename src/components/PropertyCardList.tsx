@@ -2,164 +2,57 @@
 
 import { useState, useMemo, useCallback, memo } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { Property } from '@/data/properties'
 import FavoriteButton from './FavoriteButton'
 import { useSwipe } from '@/hooks/useSwipe'
+import { Card } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { MapPin, Ruler, BedDouble, Bath, Car, MessageCircle, ChevronLeft, ChevronRight } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface PropertyCardListProps {
   property: Property
 }
 
-const inlineStyles = {
-  propertyCardList: {
-    display: 'flex',
-    backgroundColor: '#fff',
-    borderRadius: '16px',
-    overflow: 'hidden',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-    border: '1px solid #e5e7eb',
-    transition: 'all 0.2s ease',
-  } as React.CSSProperties,
-  imageContainer: {
-    position: 'relative' as const,
-    width: '300px',
-    minHeight: '200px',
-    flexShrink: 0,
-  } as React.CSSProperties,
-  propertyImage: {
-    objectFit: 'cover' as const,
-  } as React.CSSProperties,
-  favoriteButton: {
-    position: 'absolute' as const,
-    top: '0.75rem',
-    right: '0.75rem',
-    zIndex: 10,
-  } as React.CSSProperties,
-  featuredBadge: {
-    position: 'absolute' as const,
-    top: '0.75rem',
-    left: '0.75rem',
-    backgroundColor: '#e8b86d',
-    color: '#1a4158',
-    padding: '0.25rem 0.75rem',
-    borderRadius: '20px',
-    fontSize: '0.75rem',
-    fontWeight: 600,
-  } as React.CSSProperties,
-  propertyContent: {
-    flex: 1,
-    padding: '1.25rem',
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: '0.75rem',
-  } as React.CSSProperties,
-  propertyHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    gap: '1rem',
-  } as React.CSSProperties,
-  propertyTitle: {
-    fontSize: '1.25rem',
-    fontWeight: 600,
-    color: '#1a4158',
-    margin: 0,
-  } as React.CSSProperties,
-  propertyLocation: {
-    fontSize: '0.9rem',
-    color: '#636e72',
-    margin: '0.25rem 0 0 0',
-  } as React.CSSProperties,
-  priceSection: {
-    textAlign: 'right' as const,
-    flexShrink: 0,
-  } as React.CSSProperties,
-  price: {
-    fontSize: '1.25rem',
-    fontWeight: 700,
-    color: '#2c5f7d',
-    display: 'block',
-  } as React.CSSProperties,
-  priceLabel: {
-    fontSize: '0.8rem',
-    color: '#636e72',
-    display: 'block',
-  } as React.CSSProperties,
-  propertyDescription: {
-    fontSize: '0.9rem',
-    color: '#636e72',
-    lineHeight: 1.6,
-    margin: 0,
-    overflow: 'hidden',
-    display: '-webkit-box',
-    WebkitLineClamp: 2,
-    WebkitBoxOrient: 'vertical' as const,
-  } as React.CSSProperties,
-  propertyFeatures: {
-    display: 'flex',
-    flexWrap: 'wrap' as const,
-    gap: '1rem',
-  } as React.CSSProperties,
-  feature: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    backgroundColor: '#f8f9fa',
-    padding: '0.5rem 0.75rem',
-    borderRadius: '8px',
-    border: '1px solid #e5e7eb',
-  } as React.CSSProperties,
-  featureIcon: {
-    fontSize: '1rem',
-  } as React.CSSProperties,
-  featureText: {
-    fontSize: '0.85rem',
-    color: '#1a4158',
-    fontWeight: 500,
-  } as React.CSSProperties,
-  propertyActions: {
-    display: 'flex',
-    gap: '0.75rem',
-    marginTop: 'auto',
-    paddingTop: '0.75rem',
-    borderTop: '1px solid #e5e7eb',
-  } as React.CSSProperties,
-  actionBtn: {
-    padding: '0.5rem 1rem',
-    borderRadius: '8px',
-    border: '1px solid #e5e7eb',
-    backgroundColor: '#fff',
-    color: '#1a4158',
-    fontSize: '0.85rem',
-    fontWeight: 500,
-    cursor: 'pointer',
-    transition: 'all 0.2s ease',
-  } as React.CSSProperties,
+const WhatsAppIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+  </svg>
+)
+
+const operationLabels: Record<string, string> = {
+  venta: 'Venta',
+  alquiler: 'Alquiler',
+  alquiler_temporal: 'Temporal',
 }
 
 function PropertyCardList({ property }: PropertyCardListProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
-  const nextImage = useCallback(() => {
+  const nextImage = useCallback((e?: React.MouseEvent) => {
+    e?.preventDefault()
+    e?.stopPropagation()
     setCurrentImageIndex((prev) =>
       prev === property.images.length - 1 ? 0 : prev + 1
     )
   }, [property.images.length])
 
-  const prevImage = useCallback(() => {
+  const prevImage = useCallback((e?: React.MouseEvent) => {
+    e?.preventDefault()
+    e?.stopPropagation()
     setCurrentImageIndex((prev) =>
       prev === 0 ? property.images.length - 1 : prev - 1
     )
   }, [property.images.length])
 
-  // Swipe gestures para navegacion de imagenes
   const swipeHandlers = useSwipe({
-    onSwipeLeft: nextImage,
-    onSwipeRight: prevImage,
-    minSwipeDistance: 50
+    onSwipeLeft: () => nextImage(),
+    onSwipeRight: () => prevImage(),
+    minSwipeDistance: 50,
   })
 
-  // Memoizar precio formateado
   const formattedPrice = useMemo(() => {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
@@ -169,100 +62,151 @@ function PropertyCardList({ property }: PropertyCardListProps) {
     }).format(property.price)
   }, [property.price, property.currency])
 
-  // Memoizar label de tipo
-  const typeLabel = useMemo(() => {
-    const types: { [key: string]: string } = {
-      'casa': 'Casa',
-      'departamento': 'Departamento',
-      'terreno': 'Terreno',
-      'local': 'Local Comercial',
-      'oficina': 'Oficina',
-      'cochera': 'Cochera'
-    }
-    return types[property.type] || property.type
-  }, [property.type])
+  const handleWhatsApp = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const message = `Hola, estoy interesado/a en ${property.title} - ${property.location}`
+    window.open(`https://wa.me/5493517410580?text=${encodeURIComponent(message)}`, '_blank')
+  }
 
   return (
-    <div style={inlineStyles.propertyCardList} className="hover-lift">
-      {/* Imagen con swipe */}
-      <div style={inlineStyles.imageContainer} {...swipeHandlers}>
-        <Image
-          src={property.images[currentImageIndex]}
-          alt={property.title}
-          fill
-          sizes="(max-width: 768px) 100vw, 300px"
-          style={inlineStyles.propertyImage}
-        />
-        <div style={inlineStyles.favoriteButton}>
-          <FavoriteButton propertyId={property.id} size="small" />
-        </div>
-        {property.featured && (
-          <div style={inlineStyles.featuredBadge}>Destacada</div>
-        )}
-      </div>
+    <Link href={`/propiedades/${property.id}`} className="block group">
+      <Card className="flex flex-col sm:flex-row overflow-hidden bg-white transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5">
+        {/* Image */}
+        <div className="relative w-full sm:w-[280px] lg:w-[320px] h-[220px] sm:h-auto sm:min-h-[200px] shrink-0 bg-slate-100" {...swipeHandlers}>
+          <Image
+            src={property.images[currentImageIndex]}
+            alt={property.title}
+            fill
+            sizes="(max-width: 640px) 100vw, 320px"
+            className="object-cover"
+          />
 
-      {/* Contenido */}
-      <div style={inlineStyles.propertyContent}>
-        <div style={inlineStyles.propertyHeader}>
-          <div>
-            <h3 style={inlineStyles.propertyTitle}>{property.title}</h3>
-            <p style={inlineStyles.propertyLocation}>📍 {property.location}</p>
+          {/* Favorite */}
+          <div className="absolute top-3 right-3 z-10">
+            <FavoriteButton propertyId={property.id} size="small" />
           </div>
-          <div style={inlineStyles.priceSection}>
-            <span style={inlineStyles.price}>{formattedPrice}</span>
-            <span style={inlineStyles.priceLabel}>
-              {property.operation === 'venta' ? 'Venta' : 'Alquiler'}
-            </span>
+
+          {/* Badges */}
+          <div className="absolute top-3 left-3 flex flex-col gap-1.5">
+            {property.featured && (
+              <Badge className="bg-amber-400 text-slate-900 hover:bg-amber-400 text-xs font-semibold shadow-sm">
+                Destacada
+              </Badge>
+            )}
+            {property.aptCredit && (
+              <Badge className="bg-emerald-500 text-white hover:bg-emerald-500 text-xs font-semibold shadow-sm">
+                Apto crédito
+              </Badge>
+            )}
+          </div>
+
+          {/* Image nav */}
+          {property.images.length > 1 && (
+            <>
+              <button
+                className="absolute left-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={(e) => prevImage(e)}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <button
+                className="absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={(e) => nextImage(e)}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1">
+                {property.images.slice(0, 5).map((_, i) => (
+                  <div
+                    key={i}
+                    className={cn(
+                      "h-1.5 rounded-full transition-all",
+                      i === currentImageIndex ? "w-4 bg-white" : "w-1.5 bg-white/60"
+                    )}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 p-4 sm:p-5 flex flex-col gap-3 min-w-0">
+          {/* Header */}
+          <div className="flex justify-between items-start gap-3">
+            <div className="min-w-0">
+              <h3 className="text-lg font-semibold text-slate-900 truncate group-hover:text-[#2c5f7d] transition-colors">
+                {property.title}
+              </h3>
+              <p className="text-sm text-slate-500 flex items-center gap-1 mt-0.5">
+                <MapPin className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">{property.location}</span>
+              </p>
+            </div>
+            <div className="text-right shrink-0">
+              <span className="text-lg font-bold text-[#2c5f7d] block">{formattedPrice}</span>
+              <Badge variant="outline" className="text-xs mt-1">
+                {operationLabels[property.operation] || property.operation}
+              </Badge>
+            </div>
+          </div>
+
+          {/* Description */}
+          <p className="text-sm text-slate-500 leading-relaxed line-clamp-2">{property.description}</p>
+
+          {/* Features */}
+          <div className="flex flex-wrap gap-2">
+            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-100 rounded-lg px-2.5 py-1.5">
+              <Ruler className="h-3.5 w-3.5 text-slate-400" />
+              <span className="text-xs font-medium text-slate-700">{property.area} m²</span>
+            </div>
+            {property.bedrooms && (
+              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-100 rounded-lg px-2.5 py-1.5">
+                <BedDouble className="h-3.5 w-3.5 text-slate-400" />
+                <span className="text-xs font-medium text-slate-700">{property.bedrooms} dorm.</span>
+              </div>
+            )}
+            {property.bathrooms && (
+              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-100 rounded-lg px-2.5 py-1.5">
+                <Bath className="h-3.5 w-3.5 text-slate-400" />
+                <span className="text-xs font-medium text-slate-700">{property.bathrooms} baños</span>
+              </div>
+            )}
+            {property.parking && property.parking > 0 && (
+              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-100 rounded-lg px-2.5 py-1.5">
+                <Car className="h-3.5 w-3.5 text-slate-400" />
+                <span className="text-xs font-medium text-slate-700">{property.parking} coch.</span>
+              </div>
+            )}
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-2 mt-auto pt-3 border-t border-slate-100">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-xs"
+              onClick={(e) => { e.preventDefault(); e.stopPropagation() }}
+            >
+              <MessageCircle className="h-3.5 w-3.5" />
+              Contactar
+            </Button>
+            <Button
+              size="sm"
+              className="text-xs bg-[#25D366] hover:bg-[#20bd5a] text-white"
+              onClick={handleWhatsApp}
+            >
+              <WhatsAppIcon className="h-3.5 w-3.5" />
+              WhatsApp
+            </Button>
           </div>
         </div>
-
-        <p style={inlineStyles.propertyDescription}>{property.description}</p>
-
-        <div style={inlineStyles.propertyFeatures}>
-          <div style={inlineStyles.feature}>
-            <span style={inlineStyles.featureIcon}>📐</span>
-            <span style={inlineStyles.featureText}>{property.area} m2</span>
-          </div>
-          {property.bedrooms && (
-            <div style={inlineStyles.feature}>
-              <span style={inlineStyles.featureIcon}>🛏️</span>
-              <span style={inlineStyles.featureText}>{property.bedrooms} hab.</span>
-            </div>
-          )}
-          {property.bathrooms && (
-            <div style={inlineStyles.feature}>
-              <span style={inlineStyles.featureIcon}>🚿</span>
-              <span style={inlineStyles.featureText}>{property.bathrooms} banos</span>
-            </div>
-          )}
-          {property.parking && (
-            <div style={inlineStyles.feature}>
-              <span style={inlineStyles.featureIcon}>🚗</span>
-              <span style={inlineStyles.featureText}>{property.parking} cochera</span>
-            </div>
-          )}
-        </div>
-
-        <div style={inlineStyles.propertyActions}>
-          <button style={inlineStyles.actionBtn}>
-            📧 Contactar
-          </button>
-          <button style={{...inlineStyles.actionBtn, display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#25D366', color: '#fff', border: 'none'}}>
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-            </svg>
-            WhatsApp
-          </button>
-          <button style={inlineStyles.actionBtn}>
-            ℹ️ Ver detalles
-          </button>
-        </div>
-      </div>
-    </div>
+      </Card>
+    </Link>
   )
 }
 
-// Memoizar componente para evitar re-renders innecesarios
 export default memo(PropertyCardList, (prevProps, nextProps) => {
   return (
     prevProps.property.id === nextProps.property.id &&

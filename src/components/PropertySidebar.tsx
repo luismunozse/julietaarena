@@ -103,7 +103,7 @@ export default function PropertySidebar({ property }: PropertySidebarProps) {
         {property.expenses && (
           <div className="px-5 py-3 bg-surface text-center border-t border-border">
             <span className="text-sm text-muted">
-              + {formatPrice(property.expenses, property.currency)} expensas
+              + {formatPrice(property.expenses, 'ARS')} expensas
             </span>
           </div>
         )}

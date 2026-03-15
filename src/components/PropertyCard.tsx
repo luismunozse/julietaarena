@@ -69,11 +69,11 @@ function PropertyCard({ property }: PropertyCardProps) {
     if (!property.expenses) return null
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
-      currency: property.currency || 'USD',
+      currency: 'ARS',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(property.expenses)
-  }, [property.expenses, property.currency])
+  }, [property.expenses])
 
   const typeLabel = useMemo(() => {
     const types: { [key: string]: string } = {

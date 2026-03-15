@@ -50,7 +50,7 @@ export default function PropertyComparison({ onClose }: PropertyComparisonProps)
       { label: 'Baños', key: 'bathrooms', format: (property: Property) => property.bathrooms || 'N/A' },
       { label: 'Cocheras', key: 'parking', format: (property: Property) => property.parking || 'N/A' },
       { label: 'Año', key: 'yearBuilt', format: (property: Property) => property.yearBuilt || 'N/A' },
-      { label: 'Expensas', key: 'expenses', format: (property: Property) => property.expenses ? formatPrice(property.expenses, property.currency) : 'N/A' },
+      { label: 'Expensas', key: 'expenses', format: (property: Property) => property.expenses ? formatPrice(property.expenses, 'ARS') : 'N/A' },
       { label: 'Estado', key: 'status', format: (property: Property) => property.status === 'disponible' ? 'Disponible' : property.status },
     ]
 
