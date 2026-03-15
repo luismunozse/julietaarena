@@ -1,12 +1,11 @@
-import { createClient } from '@supabase/supabase-js'
+import { createBrowserClient } from '@supabase/ssr'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 
-// Crear cliente con valores por defecto si no están configurados
-// Esto permite que la aplicación funcione en desarrollo sin Supabase configurado
-// El cliente fallará silenciosamente en operaciones que requieran autenticación
-export const supabase = createClient(
+// Usar createBrowserClient de @supabase/ssr para que la sesión
+// se almacene en cookies (necesario para el middleware server-side)
+export const supabase = createBrowserClient(
   supabaseUrl || 'https://placeholder.supabase.co',
   supabaseAnonKey || 'placeholder-anon-key'
 )
