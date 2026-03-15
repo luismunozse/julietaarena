@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { Property } from '@/data/properties'
 import { useRouter } from 'next/navigation'
 import FavoriteButton from './FavoriteButton'
@@ -12,7 +11,7 @@ import PropertyLocationMap from './PropertyLocationMap'
 import { useAnalytics } from '@/hooks/useAnalytics'
 import { sanitizeText } from '@/lib/sanitize'
 import { cn } from '@/lib/utils'
-import { MapPin, Share2, ChevronRight, Camera, Map, ExternalLink } from 'lucide-react'
+import { MapPin, Share2, ChevronRight, ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
@@ -22,7 +21,6 @@ interface PropertyDetailProps {
 }
 
 export default function PropertyDetail({ property }: PropertyDetailProps) {
-  const [activeView, setActiveView] = useState<'fotos' | 'mapa'>('fotos')
   const router = useRouter()
   const analytics = useAnalytics()
 
@@ -129,45 +127,9 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6 lg:gap-8">
         <div className="flex flex-col gap-6">
           {/* Galeria de imagenes */}
-          <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-border">
-            <div className="flex border-b border-border">
-              <button
-                className={cn(
-                  "flex-1 flex items-center justify-center gap-2 py-3.5 px-4 text-sm font-medium transition-all border-b-2 -mb-px",
-                  activeView === 'fotos'
-                    ? "text-brand-primary border-brand-primary bg-brand-primary/5"
-                    : "text-muted border-transparent hover:text-foreground hover:bg-surface"
-                )}
-                onClick={() => setActiveView('fotos')}
-              >
-                <Camera className="w-4 h-4" />
-                Fotos {property.images.length > 0 && `(${property.images.length})`}
-              </button>
-              <button
-                className={cn(
-                  "flex-1 flex items-center justify-center gap-2 py-3.5 px-4 text-sm font-medium transition-all border-b-2 -mb-px",
-                  activeView === 'mapa'
-                    ? "text-brand-primary border-brand-primary bg-brand-primary/5"
-                    : "text-muted border-transparent hover:text-foreground hover:bg-surface"
-                )}
-                onClick={() => setActiveView('mapa')}
-              >
-                <Map className="w-4 h-4" />
-                Ubicación
-              </button>
-            </div>
-
-            {activeView === 'fotos' ? (
-              <PropertyImageGallery images={property.images} title={property.title} />
-            ) : (
-              <PropertyLocationMap
-                latitude={property.coordinates?.lat}
-                longitude={property.coordinates?.lng}
-                address={property.location}
-                propertyTitle={property.title}
-              />
-            )}
-          </div>
+          <Card className="overflow-hidden shadow-sm">
+            <PropertyImageGallery images={property.images} title={property.title} />
+          </Card>
 
           {/* Metricas de la propiedad */}
           <PropertyMetrics property={property} />

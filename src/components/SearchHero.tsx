@@ -295,21 +295,6 @@ export default function SearchHero() {
             </div>
           </div>
 
-          {/* Quick stats */}
-          <div className="mt-6 sm:mt-10 grid grid-cols-3 gap-4 sm:flex sm:flex-wrap sm:justify-center sm:gap-8 text-white/70 px-2">
-            <div className="text-center">
-              <div className="text-xl sm:text-2xl font-bold text-white">+500</div>
-              <div className="text-xs sm:text-sm">Propiedades</div>
-            </div>
-            <div className="text-center">
-              <div className="text-xl sm:text-2xl font-bold text-white">+15</div>
-              <div className="text-xs sm:text-sm">Años experiencia</div>
-            </div>
-            <div className="text-center">
-              <div className="text-xl sm:text-2xl font-bold text-white">+300</div>
-              <div className="text-xs sm:text-sm">Clientes</div>
-            </div>
-          </div>
         </div>
       </div>
     </section>

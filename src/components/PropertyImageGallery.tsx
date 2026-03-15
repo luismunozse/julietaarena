@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import Image from 'next/image'
 import { useSwipe } from '@/hooks/useSwipe'
 import { ChevronLeft, ChevronRight, X, Maximize2, ImageOff } from 'lucide-react'
@@ -14,6 +14,22 @@ interface PropertyImageGalleryProps {
 export default function PropertyImageGallery({ images, title }: PropertyImageGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const thumbnailsRef = useRef<HTMLDivElement>(null)
+
+  // Auto-scroll thumbnails to keep active one visible
+  useEffect(() => {
+    if (!thumbnailsRef.current) return
+    const container = thumbnailsRef.current
+    const activeThumb = container.children[currentIndex] as HTMLElement
+    if (!activeThumb) return
+
+    const containerRect = container.getBoundingClientRect()
+    const thumbRect = activeThumb.getBoundingClientRect()
+
+    if (thumbRect.left < containerRect.left || thumbRect.right > containerRect.right) {
+      activeThumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+    }
+  }, [currentIndex])
 
   const totalImages = images.length
   const currentImage = images[currentIndex] || images[0]
@@ -94,28 +110,34 @@ export default function PropertyImageGallery({ images, title }: PropertyImageGal
 
         {/* Thumbnails */}
         {totalImages > 1 && (
-          <div className="flex gap-2 p-3 overflow-x-auto bg-slate-50 scrollbar-thin">
-            {images.map((image, index) => (
-              <button
-                key={index}
-                className={cn(
-                  "relative w-[80px] h-[60px] sm:w-[100px] sm:h-[72px] shrink-0 rounded-lg overflow-hidden border-2 transition-all",
-                  index === currentIndex
-                    ? "border-[#2c5f7d] ring-1 ring-[#2c5f7d]/30"
-                    : "border-transparent opacity-70 hover:opacity-100"
-                )}
-                onClick={() => setCurrentIndex(index)}
-                aria-label={`Ver imagen ${index + 1}`}
-              >
-                <Image
-                  src={image}
-                  alt={`${title} - Miniatura ${index + 1}`}
-                  fill
-                  sizes="100px"
-                  className="object-cover"
-                />
-              </button>
-            ))}
+          <div className="relative bg-slate-50 border-t border-slate-100">
+            <div
+              ref={thumbnailsRef}
+              className="flex gap-1.5 px-3 py-2.5 overflow-x-auto scrollbar-none"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {images.map((image, index) => (
+                <button
+                  key={index}
+                  className={cn(
+                    "relative w-[64px] h-[48px] sm:w-[80px] sm:h-[56px] shrink-0 rounded-md overflow-hidden border-2 transition-all duration-200",
+                    index === currentIndex
+                      ? "border-[#2c5f7d] ring-1 ring-[#2c5f7d]/20 opacity-100 scale-105"
+                      : "border-transparent opacity-60 hover:opacity-90"
+                  )}
+                  onClick={() => setCurrentIndex(index)}
+                  aria-label={`Ver imagen ${index + 1}`}
+                >
+                  <Image
+                    src={image}
+                    alt={`${title} - Miniatura ${index + 1}`}
+                    fill
+                    sizes="80px"
+                    className="object-cover"
+                  />
+                </button>
+              ))}
+            </div>
           </div>
         )}
       </div>
