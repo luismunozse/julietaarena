@@ -235,7 +235,7 @@ export default function ContactosPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2c5f7d] mx-auto mb-4" />
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-700 mx-auto mb-4" />
           <p className="text-muted-foreground">Cargando contactos...</p>
         </div>
       </div>
@@ -279,7 +279,7 @@ export default function ContactosPage() {
             variant={filterStatus === status ? 'default' : 'outline'}
             size="sm"
             onClick={() => setFilterStatus(status)}
-            className={cn(filterStatus === status && 'bg-[#2c5f7d] hover:bg-[#1a4158]')}
+            className={cn(filterStatus === status && 'bg-slate-800 hover:bg-slate-900')}
           >
             {status === 'todas' ? 'Todas' : statusLabels[status]} (
             {status === 'todas' ? stats.total : stats[status === 'leida' ? 'leidas' : status === 'nueva' ? 'nuevas' : status === 'contactada' ? 'contactadas' : 'cerradas']}
@@ -312,7 +312,7 @@ export default function ContactosPage() {
                       <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
-                            <h3 className="text-lg font-semibold text-[#1a4158]">{inquiry.customer_name}</h3>
+                            <h3 className="text-lg font-semibold text-slate-900">{inquiry.customer_name}</h3>
                             <Badge className={cn('font-medium', statusVariants[inquiry.status])}>{statusLabels[inquiry.status]}</Badge>
                           </div>
                           <p className="text-sm text-muted-foreground mb-1">📋 {serviceLabels[inquiry.service] || inquiry.service}</p>
@@ -377,31 +377,31 @@ export default function ContactosPage() {
         <Modal isOpen={showDetailModal} onClose={() => setShowDetailModal(false)} title={`Contacto de ${selectedInquiry.customer_name}`} type="alert" message="">
           <div className="space-y-6">
             <div className="p-4 bg-slate-50 rounded-lg">
-              <h3 className="font-semibold text-[#1a4158] mb-3">Información del Servicio</h3>
+              <h3 className="font-semibold text-slate-900 mb-3">Información del Servicio</h3>
               <p className="text-sm"><strong>Servicio:</strong> {serviceLabels[selectedInquiry.service] || selectedInquiry.service}</p>
               <p className="text-sm"><strong>Fecha:</strong> {formatDate(selectedInquiry.created_at)}</p>
             </div>
 
             <div className="p-4 bg-slate-50 rounded-lg">
-              <h3 className="font-semibold text-[#1a4158] mb-3">Información del Cliente</h3>
+              <h3 className="font-semibold text-slate-900 mb-3">Información del Cliente</h3>
               <p className="text-sm"><strong>Nombre:</strong> {selectedInquiry.customer_name}</p>
               <p className="text-sm"><strong>Email:</strong> {selectedInquiry.customer_email}</p>
               <p className="text-sm"><strong>Teléfono:</strong> {selectedInquiry.customer_phone}</p>
             </div>
 
             <div className="p-4 bg-slate-50 rounded-lg">
-              <h3 className="font-semibold text-[#1a4158] mb-3">Mensaje</h3>
+              <h3 className="font-semibold text-slate-900 mb-3">Mensaje</h3>
               <p className="text-sm">{selectedInquiry.message}</p>
             </div>
 
             <div>
-              <h3 className="font-semibold text-[#1a4158] mb-3">Notas Internas</h3>
+              <h3 className="font-semibold text-slate-900 mb-3">Notas Internas</h3>
               <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Agrega notas internas sobre este contacto..." rows={4} className="mb-3" />
               <Button onClick={saveNotes} size="sm">Guardar Notas</Button>
             </div>
 
             <div>
-              <h3 className="font-semibold text-[#1a4158] mb-3">Etiquetas</h3>
+              <h3 className="font-semibold text-slate-900 mb-3">Etiquetas</h3>
               <TagsManager entityType="contact_inquiry" entityId={selectedInquiry.id} currentTags={selectedInquiry.tags || []} onTagsChange={(tags) => { setSelectedInquiry({ ...selectedInquiry, tags }); loadInquiries() }} />
             </div>
 

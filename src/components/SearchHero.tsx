@@ -121,9 +121,13 @@ export default function SearchHero() {
 
         autocomplete.addListener('place_changed', () => {
           const place = autocomplete.getPlace()
-          if (place.geometry && place.formatted_address) {
+          if (place.geometry) {
             setSelectedPlace(place)
-            setSearchLocation(place.formatted_address)
+            // Extraer nombre de ciudad en vez de la dirección completa de Google
+            const cityComponent = place.address_components?.find(c =>
+              c.types.includes('locality') || c.types.includes('administrative_area_level_2')
+            )
+            setSearchLocation(cityComponent?.long_name || place.name || place.formatted_address || '')
           }
         })
 

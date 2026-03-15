@@ -1,14 +1,14 @@
 'use client'
 
 import Link from 'next/link'
-import { ChevronRight, Home, Plus, MessageSquare, Mail, BarChart3, Globe } from 'lucide-react'
+import { Home, Plus, MessageSquare, Mail, BarChart3, Globe, ArrowRight } from 'lucide-react'
 import { useDashboardStats } from '@/hooks/useDashboardStats'
 import { useAuth } from '@/hooks/useAuth'
 import DashboardStats from '@/components/admin/DashboardStats'
 import RecentActivity from '@/components/admin/RecentActivity'
 import DashboardCharts from '@/components/admin/DashboardCharts'
 import PermissionGuard from '@/components/admin/PermissionGuard'
-import { Card } from '@/components/ui/card'
+import { cn } from '@/lib/utils'
 
 function getGreeting(): string {
   const hour = new Date().getHours()
@@ -21,60 +21,60 @@ const dashboardCards = [
   {
     href: '/admin/propiedades',
     icon: Home,
-    iconColor: 'text-blue-600',
-    iconBg: 'bg-blue-50 group-hover:bg-blue-100',
+    color: 'text-blue-600',
+    bg: 'bg-blue-50',
     title: 'Propiedades',
-    description: 'Gestionar propiedades en venta y alquiler',
+    description: 'Gestionar propiedades',
     section: 'properties' as const,
     permission: 'read' as const,
   },
   {
     href: '/admin/propiedades/nueva',
     icon: Plus,
-    iconColor: 'text-emerald-600',
-    iconBg: 'bg-emerald-50 group-hover:bg-emerald-100',
+    color: 'text-emerald-600',
+    bg: 'bg-emerald-50',
     title: 'Nueva Propiedad',
-    description: 'Agregar una nueva propiedad al catálogo',
+    description: 'Agregar al catálogo',
     section: 'properties' as const,
     permission: 'create' as const,
   },
   {
     href: '/admin/consultas',
     icon: MessageSquare,
-    iconColor: 'text-amber-600',
-    iconBg: 'bg-amber-50 group-hover:bg-amber-100',
+    color: 'text-amber-600',
+    bg: 'bg-amber-50',
     title: 'Consultas',
-    description: 'Ver y gestionar consultas de propiedades',
+    description: 'Consultas de clientes',
     section: 'inquiries' as const,
     permission: 'read' as const,
   },
   {
     href: '/admin/contactos',
     icon: Mail,
-    iconColor: 'text-teal-600',
-    iconBg: 'bg-teal-50 group-hover:bg-teal-100',
+    color: 'text-teal-600',
+    bg: 'bg-teal-50',
     title: 'Contactos',
-    description: 'Ver y gestionar contactos generales',
+    description: 'Contactos generales',
     section: 'contacts' as const,
     permission: 'read' as const,
   },
   {
     href: '/admin/analytics',
     icon: BarChart3,
-    iconColor: 'text-purple-600',
-    iconBg: 'bg-purple-50 group-hover:bg-purple-100',
+    color: 'text-purple-600',
+    bg: 'bg-purple-50',
     title: 'Analytics',
-    description: 'Ver métricas y estadísticas del sitio',
+    description: 'Métricas del sitio',
     section: 'analytics' as const,
     permission: 'read' as const,
   },
   {
     href: '/',
     icon: Globe,
-    iconColor: 'text-slate-600',
-    iconBg: 'bg-slate-100 group-hover:bg-slate-200',
-    title: 'Ver Sitio Web',
-    description: 'Ir al sitio web público',
+    color: 'text-slate-600',
+    bg: 'bg-slate-50',
+    title: 'Ver Sitio',
+    description: 'Ir al sitio público',
     section: null,
     permission: null,
   },
@@ -87,61 +87,62 @@ export default function AdminDashboard() {
   const firstName = user?.name?.split(' ')[0] || 'Administrador'
 
   return (
-    <div className="space-y-8">
-      {/* Welcome banner dinámico */}
+    <div className="space-y-6">
+      {/* Welcome */}
       <div>
-        <h1 className="text-3xl font-bold text-[#1a4158]">
+        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
           {getGreeting()}, {firstName}
         </h1>
-        <p className="mt-1 text-muted-foreground">
-          Resumen de actividad de Julieta Arena
-        </p>
+        <p className="text-sm text-slate-500">Resumen de actividad de Julieta Arena</p>
       </div>
 
-      {/* Estadísticas en tiempo real */}
+      {/* Stats */}
       <DashboardStats stats={stats} isLoading={isLoading} error={error} />
 
-      {/* Gráficos */}
+      {/* Charts */}
       <DashboardCharts stats={stats} isLoading={isLoading} />
 
-      {/* Actividad reciente */}
-      <RecentActivity />
+      {/* Activity + Navigation */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
+        <div className="lg:col-span-3">
+          <RecentActivity />
+        </div>
 
-      {/* Cards de navegación con permisos */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {dashboardCards.map((card) => {
-          const Icon = card.icon
-          const cardContent = (
-            <Link key={card.href} href={card.href}>
-              <Card className="group flex items-center gap-5 p-5 bg-white border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all duration-200 cursor-pointer h-full">
-                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-colors ${card.iconBg}`}>
-                  <Icon className={`h-5 w-5 ${card.iconColor}`} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h2 className="text-base font-semibold text-slate-800 mb-0.5">
-                    {card.title}
-                  </h2>
-                  <p className="text-sm text-slate-500 truncate">{card.description}</p>
-                </div>
-                <ChevronRight className="h-5 w-5 text-slate-400 group-hover:text-slate-600 group-hover:translate-x-0.5 transition-all shrink-0" />
-              </Card>
-            </Link>
-          )
+        <div className="lg:col-span-2">
+          <div className="rounded-xl bg-white border border-slate-100 p-5">
+            <h3 className="text-sm font-medium text-slate-900 mb-3">Accesos Rápidos</h3>
+            <div className="space-y-1">
+              {dashboardCards.map((card) => {
+                const Icon = card.icon
+                const link = (
+                  <Link
+                    href={card.href}
+                    className="group flex items-center gap-3 rounded-lg px-2 py-2.5 transition-colors hover:bg-slate-50"
+                  >
+                    <div className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-lg', card.bg)}>
+                      <Icon className={cn('h-4 w-4', card.color)} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-slate-800">{card.title}</p>
+                      <p className="text-xs text-slate-400">{card.description}</p>
+                    </div>
+                    <ArrowRight className="h-3.5 w-3.5 text-slate-300 group-hover:text-slate-500 transition-colors shrink-0" />
+                  </Link>
+                )
 
-          if (card.section && card.permission) {
-            return (
-              <PermissionGuard
-                key={card.href}
-                section={card.section}
-                permission={card.permission}
-              >
-                {cardContent}
-              </PermissionGuard>
-            )
-          }
+                if (card.section && card.permission) {
+                  return (
+                    <PermissionGuard key={card.href} section={card.section} permission={card.permission}>
+                      {link}
+                    </PermissionGuard>
+                  )
+                }
 
-          return <div key={card.href}>{cardContent}</div>
-        })}
+                return <div key={card.href}>{link}</div>
+              })}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )

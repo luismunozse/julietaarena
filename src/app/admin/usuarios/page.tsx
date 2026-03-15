@@ -227,7 +227,7 @@ export default function UsuariosPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2c5f7d] mx-auto mb-4" />
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-700 mx-auto mb-4" />
           <p className="text-muted-foreground">Cargando usuarios...</p>
         </div>
       </div>
@@ -265,7 +265,7 @@ export default function UsuariosPage() {
                     <CardContent className="p-4 md:p-6">
                       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div className="flex-1">
-                          <h3 className="text-lg font-semibold text-[#1a4158]">
+                          <h3 className="text-lg font-semibold text-slate-900">
                             {user.user_name || user.user_email || `Usuario ${user.user_id.substring(0, 8)}`}
                           </h3>
                           <p className="text-sm text-muted-foreground">

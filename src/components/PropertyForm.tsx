@@ -336,7 +336,7 @@ export default function PropertyForm({
       {/* Informacion basica */}
       <Card className="bg-white">
         <CardHeader className="pb-4">
-          <CardTitle className="border-b-2 border-amber-400 pb-3 text-lg text-[#1a4158]">
+          <CardTitle className="border-b-2 border-amber-400 pb-3 text-lg text-slate-900">
             Información Básica
           </CardTitle>
         </CardHeader>
@@ -510,7 +510,7 @@ export default function PropertyForm({
               </div>
             </div>
             {(formData.price ?? 0) > 0 && (
-              <p className="text-xs text-[#2c5f7d]">
+              <p className="text-xs text-slate-700">
                 {new Intl.NumberFormat('es-AR', {
                   style: 'currency',
                   currency: formData.currency || 'USD',
@@ -531,7 +531,7 @@ export default function PropertyForm({
       {/* Caracteristicas */}
       <Card className="bg-white">
         <CardHeader className="pb-4">
-          <CardTitle className="border-b-2 border-amber-400 pb-3 text-lg text-[#1a4158]">
+          <CardTitle className="border-b-2 border-amber-400 pb-3 text-lg text-slate-900">
             Características
             {formData.type === 'cochera' ? ' de la Cochera' : ''}
           </CardTitle>
@@ -773,7 +773,7 @@ export default function PropertyForm({
       {/* Imagenes */}
       <Card className="bg-white" data-field="images">
         <CardHeader className="pb-4">
-          <CardTitle className="border-b-2 border-amber-400 pb-3 text-lg text-[#1a4158]">
+          <CardTitle className="border-b-2 border-amber-400 pb-3 text-lg text-slate-900">
             Imágenes *
           </CardTitle>
         </CardHeader>
@@ -803,7 +803,7 @@ export default function PropertyForm({
       {/* Caracteristicas adicionales */}
       <Card className="bg-white">
         <CardHeader className="pb-4">
-          <CardTitle className="border-b-2 border-amber-400 pb-3 text-lg text-[#1a4158]">
+          <CardTitle className="border-b-2 border-amber-400 pb-3 text-lg text-slate-900">
             Características Adicionales
           </CardTitle>
         </CardHeader>
@@ -857,7 +857,7 @@ export default function PropertyForm({
       {/* Opciones */}
       <Card className="bg-white">
         <CardHeader className="pb-4">
-          <CardTitle className="border-b-2 border-amber-400 pb-3 text-lg text-[#1a4158]">
+          <CardTitle className="border-b-2 border-amber-400 pb-3 text-lg text-slate-900">
             Opciones
           </CardTitle>
         </CardHeader>

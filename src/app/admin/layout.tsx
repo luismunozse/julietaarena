@@ -165,9 +165,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   return (
     <SidebarProvider>
-      <Sidebar collapsible="icon" className="border-r border-slate-200">
+      <Sidebar collapsible="icon" className="border-r border-slate-100">
         {/* Header - debe coincidir con la altura del header principal (h-14) */}
-        <SidebarHeader className="h-14 border-b border-slate-200 px-3 flex items-center">
+        <SidebarHeader className="h-12 border-b border-slate-100 px-3 flex items-center">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-slate-800 to-slate-700 text-white shadow-sm">
               <Building2 className="h-4 w-4" />
@@ -214,7 +214,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </SidebarContent>
 
         {/* Footer - Usuario */}
-        <SidebarFooter className="border-t border-slate-200 p-2">
+        <SidebarFooter className="border-t border-slate-100 p-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex w-full items-center gap-3 rounded-lg p-2 text-left hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-200">
@@ -273,8 +273,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       </Sidebar>
 
       {/* Main Content */}
-      <SidebarInset className="bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50">
-        <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b border-slate-200 bg-white px-4">
+      <SidebarInset className="bg-slate-50/50">
+        <header className="sticky top-0 z-10 flex h-12 items-center gap-3 border-b border-slate-100 bg-white/80 backdrop-blur-sm px-4">
           <SidebarTrigger className="h-8 w-8 hover:bg-slate-100 rounded-md transition-colors" />
           <Separator orientation="vertical" className="h-5 bg-slate-200" />
           <Breadcrumb>

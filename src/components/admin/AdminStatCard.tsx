@@ -1,7 +1,6 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import { Card, CardContent } from '@/components/ui/card'
 
 interface AdminStatCardProps {
   icon: React.ReactNode
@@ -21,31 +20,29 @@ export default function AdminStatCard({
   className,
 }: AdminStatCardProps) {
   return (
-    <Card
+    <div
       className={cn(
-        'flex flex-row items-center gap-4 p-4 md:p-6 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md',
+        'flex items-center gap-3 rounded-xl bg-white p-4 border border-slate-100 transition-shadow hover:shadow-sm',
         className
       )}
     >
       <div
         className={cn(
-          'flex h-14 w-14 shrink-0 items-center justify-center rounded-xl',
+          'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg',
           iconBgColor
         )}
       >
         {icon}
       </div>
-      <CardContent className="flex-1 p-0">
-        <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-          {title}
-        </h3>
-        <p className="mb-1 text-2xl font-bold leading-none text-[#2c5f7d] md:text-3xl">
+      <div className="min-w-0">
+        <p className="text-2xl font-semibold tracking-tight text-slate-900">
           {value}
         </p>
+        <p className="text-xs text-slate-500">{title}</p>
         {label && (
-          <span className="text-sm text-muted-foreground">{label}</span>
+          <p className="text-[11px] text-slate-400 truncate">{label}</p>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }

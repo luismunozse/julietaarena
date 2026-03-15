@@ -95,7 +95,7 @@ export default function LogsPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2c5f7d] mx-auto mb-4" />
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-700 mx-auto mb-4" />
           <p className="text-muted-foreground">Cargando logs...</p>
         </div>
       </div>
@@ -199,7 +199,7 @@ export default function LogsPage() {
                         <div className="flex items-center gap-3">
                           <span className="text-2xl">{actionIcons[log.action_type] || '📝'}</span>
                           <div>
-                            <span className="font-semibold text-[#1a4158]">{actionLabels[log.action_type] || log.action_type}</span>
+                            <span className="font-semibold text-slate-900">{actionLabels[log.action_type] || log.action_type}</span>
                             <span className="text-muted-foreground mx-2">·</span>
                             <span className="text-muted-foreground">{entityLabels[log.entity_type] || log.entity_type}</span>
                           </div>

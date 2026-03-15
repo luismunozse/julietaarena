@@ -241,7 +241,7 @@ export default function Header() {
       {/* Mobile Menu Overlay */}
       <div
         className={`
-          fixed inset-0 bg-black/40 md:hidden z-40
+          fixed inset-0 bg-black/40 md:hidden z-[10000]
           transition-opacity duration-300
           ${isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}
         `}
@@ -253,7 +253,7 @@ export default function Header() {
       <div
         className={`
           fixed inset-y-0 right-0 w-full max-w-sm
-          bg-white shadow-2xl md:hidden z-50
+          bg-white shadow-2xl md:hidden z-[10001]
           transition-transform duration-300 ease-out
           ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}
         `}

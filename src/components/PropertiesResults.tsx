@@ -135,16 +135,19 @@ export default function PropertiesResults() {
 
         if (searchTerm && searchTerm.trim()) {
           const searchLower = searchTerm.toLowerCase().trim()
-          const titleMatch = property.title.toLowerCase().includes(searchLower)
-          const locationMatch = property.location.toLowerCase().includes(searchLower)
-          const descriptionMatch = property.description.toLowerCase().includes(searchLower)
+          const titleLower = property.title.toLowerCase()
+          const locationLower = property.location.toLowerCase()
+          const descriptionLower = property.description.toLowerCase()
+          // Buscar en ambas direcciones: la propiedad contiene el término O el término contiene la ubicación
+          const titleMatch = titleLower.includes(searchLower) || searchLower.includes(titleLower)
+          const locationMatch = locationLower.includes(searchLower) || searchLower.includes(locationLower)
+          const descriptionMatch = descriptionLower.includes(searchLower)
           if (!titleMatch && !locationMatch && !descriptionMatch) return false
-        }
-
-        if (selectedLocation !== 'all' && selectedLocation) {
+        } else if (selectedLocation !== 'all' && selectedLocation) {
+          // Solo aplicar filtro de selectedLocation si no hay searchTerm (evitar duplicar)
           const locationLower = property.location.toLowerCase()
           const selectedLower = selectedLocation.toLowerCase()
-          if (!locationLower.includes(selectedLower)) return false
+          if (!locationLower.includes(selectedLower) && !selectedLower.includes(locationLower)) return false
         }
 
         if (minPrice && property.price < parseFloat(minPrice)) return false

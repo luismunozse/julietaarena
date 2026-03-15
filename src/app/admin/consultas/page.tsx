@@ -233,7 +233,7 @@ export default function ConsultasPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2c5f7d] mx-auto mb-4" />
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-700 mx-auto mb-4" />
           <p className="text-muted-foreground">Cargando consultas...</p>
         </div>
       </div>
@@ -303,7 +303,7 @@ export default function ConsultasPage() {
             size="sm"
             onClick={() => setFilterStatus(status)}
             className={cn(
-              filterStatus === status && 'bg-[#2c5f7d] hover:bg-[#1a4158]'
+              filterStatus === status && 'bg-slate-800 hover:bg-slate-900'
             )}
           >
             {status === 'todas' ? 'Todas' : statusLabels[status]} (
@@ -353,7 +353,7 @@ export default function ConsultasPage() {
                       <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
-                            <h3 className="text-lg font-semibold text-[#1a4158]">
+                            <h3 className="text-lg font-semibold text-slate-900">
                               {inquiry.customer_name}
                             </h3>
                             <Badge className={cn('font-medium', statusVariants[inquiry.status])}>
@@ -363,7 +363,7 @@ export default function ConsultasPage() {
                           <p className="text-sm text-muted-foreground mb-1">
                             🏠 {inquiry.property_title} - {inquiry.property_location}
                           </p>
-                          <p className="text-sm font-medium text-[#2c5f7d] mb-1">
+                          <p className="text-sm font-medium text-slate-700 mb-1">
                             💰 {inquiry.property_price}
                           </p>
                           <p className="text-xs text-muted-foreground">
@@ -475,14 +475,14 @@ export default function ConsultasPage() {
         >
           <div className="space-y-6">
             <div className="p-4 bg-slate-50 rounded-lg">
-              <h3 className="font-semibold text-[#1a4158] mb-3">Información de la Propiedad</h3>
+              <h3 className="font-semibold text-slate-900 mb-3">Información de la Propiedad</h3>
               <p className="text-sm"><strong>Propiedad:</strong> {selectedInquiry.property_title}</p>
               <p className="text-sm"><strong>Ubicación:</strong> {selectedInquiry.property_location}</p>
               <p className="text-sm"><strong>Precio:</strong> {selectedInquiry.property_price}</p>
             </div>
 
             <div className="p-4 bg-slate-50 rounded-lg">
-              <h3 className="font-semibold text-[#1a4158] mb-3">Información del Cliente</h3>
+              <h3 className="font-semibold text-slate-900 mb-3">Información del Cliente</h3>
               <p className="text-sm"><strong>Nombre:</strong> {selectedInquiry.customer_name}</p>
               <p className="text-sm"><strong>Email:</strong> {selectedInquiry.customer_email}</p>
               <p className="text-sm"><strong>Teléfono:</strong> {selectedInquiry.customer_phone}</p>
@@ -491,13 +491,13 @@ export default function ConsultasPage() {
 
             {selectedInquiry.message && (
               <div className="p-4 bg-slate-50 rounded-lg">
-                <h3 className="font-semibold text-[#1a4158] mb-3">Mensaje</h3>
+                <h3 className="font-semibold text-slate-900 mb-3">Mensaje</h3>
                 <p className="text-sm">{selectedInquiry.message}</p>
               </div>
             )}
 
             <div>
-              <h3 className="font-semibold text-[#1a4158] mb-3">Notas Internas</h3>
+              <h3 className="font-semibold text-slate-900 mb-3">Notas Internas</h3>
               <Textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
@@ -511,7 +511,7 @@ export default function ConsultasPage() {
             </div>
 
             <div>
-              <h3 className="font-semibold text-[#1a4158] mb-3">Etiquetas</h3>
+              <h3 className="font-semibold text-slate-900 mb-3">Etiquetas</h3>
               <TagsManager
                 entityType="property_inquiry"
                 entityId={selectedInquiry.id}
