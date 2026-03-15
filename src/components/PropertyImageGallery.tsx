@@ -15,6 +15,7 @@ export default function PropertyImageGallery({ images, title }: PropertyImageGal
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const thumbnailsRef = useRef<HTMLDivElement>(null)
+  const galleryRef = useRef<HTMLDivElement>(null)
 
   // Auto-scroll thumbnails to keep active one visible
   useEffect(() => {
@@ -41,6 +42,21 @@ export default function PropertyImageGallery({ images, title }: PropertyImageGal
   const goToPrevious = useCallback(() => {
     setCurrentIndex((prev) => (prev - 1 + totalImages) % totalImages)
   }, [totalImages])
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isFullscreen) {
+        setIsFullscreen(false)
+        return
+      }
+      if (e.key === 'ArrowRight') goToNext()
+      if (e.key === 'ArrowLeft') goToPrevious()
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isFullscreen, goToNext, goToPrevious])
 
   const swipeHandlers = useSwipe({
     onSwipeLeft: goToNext,
