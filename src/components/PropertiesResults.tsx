@@ -30,6 +30,52 @@ type OperationTab = 'venta' | 'alquiler'
 const normalize = (text: string): string =>
   text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
 
+/** Expande abreviaturas y sinónimos comunes en búsquedas inmobiliarias */
+const expandSearchTerms = (term: string): string[] => {
+  const synonyms: Record<string, string[]> = {
+    'dto': ['departamento'],
+    'depto': ['departamento'],
+    'dpto': ['departamento'],
+    'dept': ['departamento'],
+    'cba': ['cordoba'],
+    'bsas': ['buenos aires'],
+    'bs as': ['buenos aires'],
+    'caba': ['capital federal', 'buenos aires'],
+    'bv': ['boulevard'],
+    'av': ['avenida'],
+    'bo': ['barrio'],
+    'b°': ['barrio'],
+    'nva': ['nueva'],
+  }
+  const normalized = normalize(term)
+  const extra: string[] = []
+  for (const [abbr, expansions] of Object.entries(synonyms)) {
+    if (normalized.includes(abbr)) {
+      for (const exp of expansions) {
+        extra.push(normalized.replace(abbr, exp))
+      }
+    }
+  }
+  return [normalized, ...extra]
+}
+
+/** Verifica si un texto de búsqueda matchea contra el contenido de una propiedad */
+const matchesSearch = (searchText: string, propertyText: string): boolean => {
+  const searchVariants = expandSearchTerms(searchText)
+  const propNorm = normalize(propertyText)
+
+  for (const variant of searchVariants) {
+    // Match exacto del término completo
+    if (propNorm.includes(variant)) return true
+
+    // Match por palabras: todas las palabras deben aparecer
+    const words = variant.split(/\s+/).filter(w => w.length > 1)
+    if (words.length > 0 && words.every(word => propNorm.includes(word))) return true
+  }
+
+  return false
+}
+
 /* =============================================================================
    CONSTANTS
 ============================================================================= */
@@ -142,25 +188,19 @@ export default function PropertiesResults() {
         if (selectedType !== 'all' && property.type !== selectedType) return false
 
         if (searchTerm && searchTerm.trim()) {
-          const searchLower = normalize(searchTerm)
-          const titleNorm = normalize(property.title)
-          const locationNorm = normalize(property.location)
-          const descriptionNorm = normalize(property.description)
-          const combined = `${titleNorm} ${locationNorm} ${descriptionNorm}`
+          // Buscar en: título, ubicación, descripción, features y tipo
+          const searchable = [
+            property.title,
+            property.location,
+            property.description,
+            property.type,
+            ...(property.features || []),
+          ].join(' ')
 
-          // Separar en palabras y verificar que TODAS aparezcan en algún campo
-          const words = searchLower.split(/\s+/).filter(w => w.length > 1)
-          const allWordsMatch = words.length > 0 && words.every(word => combined.includes(word))
-          // También probar con el término completo por si es una frase exacta
-          const exactMatch = combined.includes(searchLower)
-          if (!allWordsMatch && !exactMatch) return false
+          if (!matchesSearch(searchTerm, searchable)) return false
         } else if (selectedLocation !== 'all' && selectedLocation) {
-          const selectedNorm = normalize(selectedLocation)
-          const locationNorm = normalize(property.location)
-          const words = selectedNorm.split(/\s+/).filter(w => w.length > 1)
-          const allWordsMatch = words.length > 0 && words.every(word => locationNorm.includes(word))
-          const exactMatch = locationNorm.includes(selectedNorm) || selectedNorm.includes(locationNorm)
-          if (!allWordsMatch && !exactMatch) return false
+          // Búsqueda solo por ubicación
+          if (!matchesSearch(selectedLocation, property.location)) return false
         }
 
         if (minPrice && property.price < parseFloat(minPrice)) return false
@@ -302,7 +342,7 @@ export default function PropertiesResults() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
               <input
                 type="search"
-                placeholder="Buscar ubicación..."
+                placeholder="Buscar por barrio, ciudad, calle..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className={`${inputClasses} pl-10`}

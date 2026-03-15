@@ -25,7 +25,7 @@ const PLACEHOLDERS = [
   "¿Dónde querés mudarte?",
   "Ejemplo: Córdoba Capital",
   "Ejemplo: Villa Carlos Paz",
-  "Ejemplo: Alta Gracia",
+  "Ejemplo: Nueva Córdoba",
   "Ejemplo: Río Cuarto"
 ]
 
@@ -55,7 +55,6 @@ export default function SearchHero() {
   const [operation, setOperation] = useState<Operation>(null)
   const [isLoadingMaps, setIsLoadingMaps] = useState(true)
   const [mapsError, setMapsError] = useState<string | null>(null)
-  const [selectedPlace, setSelectedPlace] = useState<google.maps.places.PlaceResult | null>(null)
   const [placeholderIndex, setPlaceholderIndex] = useState(0)
 
   const router = useRouter()
@@ -113,21 +112,37 @@ export default function SearchHero() {
 
         if (!inputRef.current) return
 
+        // Permitir ciudades, barrios, direcciones y regiones
         const autocomplete = new google.maps.places.Autocomplete(inputRef.current, {
           componentRestrictions: { country: 'ar' },
           fields: ['address_components', 'geometry', 'name', 'formatted_address'],
-          types: ['(cities)']
         })
 
         autocomplete.addListener('place_changed', () => {
           const place = autocomplete.getPlace()
           if (place.geometry) {
-            setSelectedPlace(place)
-            // Extraer nombre de ciudad en vez de la dirección completa de Google
-            const cityComponent = place.address_components?.find(c =>
+            // Extraer las partes más relevantes de la dirección
+            const components = place.address_components || []
+            const neighborhood = components.find(c =>
+              c.types.includes('sublocality_level_1') || c.types.includes('neighborhood')
+            )
+            const city = components.find(c =>
               c.types.includes('locality') || c.types.includes('administrative_area_level_2')
             )
-            setSearchLocation(cityComponent?.long_name || place.name || place.formatted_address || '')
+
+            // Usar barrio + ciudad, o solo ciudad, o el nombre del lugar
+            let locationText = ''
+            if (neighborhood && city) {
+              locationText = `${neighborhood.long_name}, ${city.long_name}`
+            } else if (city) {
+              locationText = city.long_name
+            } else if (neighborhood) {
+              locationText = neighborhood.long_name
+            } else {
+              locationText = place.name || place.formatted_address || ''
+            }
+
+            setSearchLocation(locationText)
           }
         })
 
@@ -148,35 +163,39 @@ export default function SearchHero() {
     }
   }, [])
 
-  const handleSearch = () => {
+  const buildSearchUrl = (overrideOperation?: string) => {
     const params = new URLSearchParams()
-    params.append('operation', operation || 'venta')
+    params.append('operation', overrideOperation || operation || 'venta')
 
-    if (searchLocation) {
-      params.append('location', searchLocation.toLowerCase())
+    if (searchLocation.trim()) {
+      params.append('location', searchLocation.trim())
     }
 
     if (propertyType && propertyType !== 'all') {
       params.append('type', propertyType)
     }
 
-    if (selectedPlace?.geometry?.location) {
-      params.append('lat', selectedPlace.geometry.location.lat().toString())
-      params.append('lng', selectedPlace.geometry.location.lng().toString())
-    }
+    return `/propiedades/resultado?${params.toString()}`
+  }
 
-    router.push(`/propiedades/resultado?${params.toString()}`)
+  const handleSearch = () => {
+    router.push(buildSearchUrl())
   }
 
   const handleActionClick = (id: ActionButton['id']) => {
     if (id === 'vender') {
       router.push('/vender')
-    } else if (id === 'emprendimientos') {
-      router.push('/propiedades/resultado?featured=true&operation=venta')
-    } else {
-      setOperation(id)
-      router.push(`/propiedades/resultado?operation=${id}`)
+      return
     }
+
+    if (id === 'emprendimientos') {
+      router.push('/propiedades/resultado?featured=true&operation=venta')
+      return
+    }
+
+    // Para comprar/alquilar: setear la operación y navegar con los filtros actuales
+    setOperation(id)
+    router.push(buildSearchUrl(id as string))
   }
 
   return (
@@ -237,7 +256,7 @@ export default function SearchHero() {
                   placeholder={isLoadingMaps ? "Cargando ubicaciones..." : PLACEHOLDERS[placeholderIndex]}
                   value={searchLocation}
                   onChange={(e) => setSearchLocation(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                   disabled={isLoadingMaps}
                   className="w-full h-12 sm:h-14 px-4 sm:px-5 text-sm sm:text-base bg-surface border-2 border-border rounded-xl outline-none transition-all duration-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 disabled:opacity-60"
                 />
