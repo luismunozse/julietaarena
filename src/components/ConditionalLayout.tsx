@@ -17,7 +17,9 @@ export default function ConditionalLayout({ children }: { children: React.ReactN
   return (
     <>
       <Header />
-      {children}
+      <div className="animate-fade-in">
+        {children}
+      </div>
       <Footer />
     </>
   )

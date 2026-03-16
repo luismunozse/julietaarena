@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import Image from 'next/image'
+import PageBreadcrumb from '@/components/PageBreadcrumb'
 
 
 export const metadata: Metadata = {
@@ -16,6 +17,9 @@ export const metadata: Metadata = {
 export default function RematesJudicialesPage() {
   return (
     <main className="pageContainer">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-24">
+        <PageBreadcrumb items={[{ label: 'Servicios', href: '/#servicios' }, { label: 'Remates Judiciales' }]} />
+      </div>
       {/* Hero Section */}
       <section className="heroSection">
         <div className="container">

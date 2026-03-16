@@ -1,4 +1,5 @@
 import LegalServices from '@/components/LegalServices'
+import PageBreadcrumb from '@/components/PageBreadcrumb'
 import { Scale, FileText, Building2, UserCheck, CheckCircle, Mail } from 'lucide-react'
 
 export const metadata = {
@@ -65,7 +66,10 @@ const CTA_BENEFITS = [
 
 export default function AsesoramientoLegalPage() {
   return (
-    <main className="min-h-screen pt-16">
+    <main className="min-h-screen pt-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4">
+        <PageBreadcrumb items={[{ label: 'Servicios', href: '/#servicios' }, { label: 'Asesoramiento Legal' }]} />
+      </div>
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-brand-primary via-brand-accent to-brand-dark text-white py-16 lg:py-24 overflow-hidden">
         {/* Decorative elements */}

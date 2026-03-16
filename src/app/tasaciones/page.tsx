@@ -1,4 +1,5 @@
 import AppraisalForm from '@/components/AppraisalForm'
+import PageBreadcrumb from '@/components/PageBreadcrumb'
 
 export const metadata = {
   title: 'Tasaciones Profesionales | Julieta Arena',
@@ -9,6 +10,9 @@ export const metadata = {
 export default function TasacionesPage() {
   return (
     <main style={{ minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-24">
+        <PageBreadcrumb items={[{ label: 'Tasaciones' }]} />
+      </div>
       <section style={{
         background: 'linear-gradient(135deg, #2c5f7d 0%, #1a4158 100%)',
         padding: '80px 0 60px',

@@ -7,6 +7,7 @@ import { Property } from '@/data/properties'
 import { useProperties } from '@/hooks/useProperties'
 import PropertyCard from '@/components/PropertyCard'
 import FavoriteButton from '@/components/FavoriteButton'
+import PageBreadcrumb from '@/components/PageBreadcrumb'
 
 export default function FavoritosPage() {
   const { favorites, clearFavorites } = useFavorites()
@@ -51,6 +52,9 @@ export default function FavoritosPage() {
 
   return (
     <main className="min-h-screen pt-24 bg-gray-50">
+      <div className="max-w-6xl mx-auto px-6">
+        <PageBreadcrumb items={[{ label: 'Mis Favoritos' }]} />
+      </div>
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-[#2c5f7d] to-[#1a4158] text-white py-16">
         <div className="max-w-6xl mx-auto px-6 text-center">

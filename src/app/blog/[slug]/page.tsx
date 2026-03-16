@@ -58,7 +58,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   return (
     <main className="min-h-screen bg-surface">
       {/* Header */}
-      <div className="bg-gradient-to-br from-brand-dark via-brand-accent to-brand-primary py-12 sm:py-16">
+      <div className="bg-gradient-to-br from-brand-dark via-brand-accent to-brand-primary pt-24 pb-12 sm:pb-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <nav className="flex items-center gap-2 text-sm text-white/60 mb-6">
             <Link href="/" className="hover:text-white transition-colors">Inicio</Link>

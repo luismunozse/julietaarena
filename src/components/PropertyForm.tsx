@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import type { Property } from '@/data/properties'
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import ImageUpload from './ImageUpload'
 import LocationInput from './LocationInput'
 import Modal from './Modal'
@@ -176,6 +177,12 @@ export default function PropertyForm({
   const [hasDraft, setHasDraft] = useState(false)
   const [priceDisplay, setPriceDisplay] = useState('')
   const [clearDraftModal, setClearDraftModal] = useState(false)
+
+  // Warn on page leave if form has unsaved data
+  const hasUnsavedChanges = Boolean(
+    formData.title || formData.description || (formData.price && formData.price > 0) || formData.location
+  ) && !isSubmitting
+  useUnsavedChanges(hasUnsavedChanges)
   const submitBarRef = useRef<HTMLDivElement>(null)
 
   // Init price display

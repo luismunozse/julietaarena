@@ -1,0 +1,21 @@
+'use client'
+
+import { useEffect } from 'react'
+
+/**
+ * Shows a browser confirmation dialog when the user tries to leave
+ * a page with unsaved changes.
+ */
+export function useUnsavedChanges(hasChanges: boolean) {
+  useEffect(() => {
+    if (!hasChanges) return
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault()
+      e.returnValue = ''
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [hasChanges])
+}
