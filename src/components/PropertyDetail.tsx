@@ -145,7 +145,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
   --------------------------------------------------------------------------- */
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-24 pb-28 lg:pb-12">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-24 pb-28 md:pb-12">
       {/* ================================================================
           HEADER
       ================================================================ */}
@@ -243,7 +243,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
       {/* ================================================================
           MAIN CONTENT
       ================================================================ */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 lg:gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_340px] gap-6 md:gap-8">
         <div className="flex flex-col gap-6">
           {/* Gallery */}
           <Card className="overflow-hidden shadow-sm print:shadow-none">
@@ -469,7 +469,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
         {/* ================================================================
             SIDEBAR
         ================================================================ */}
-        <div className="lg:sticky lg:top-24 h-fit space-y-6 print:hidden">
+        <div className="md:sticky md:top-24 h-fit space-y-6 print:hidden">
           <PropertySidebar property={property} />
         </div>
       </div>
@@ -477,7 +477,7 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
       {/* ================================================================
           MOBILE BOTTOM CTA BAR
       ================================================================ */}
-      <div className="fixed bottom-0 inset-x-0 z-30 lg:hidden print:hidden bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-[0_-4px_12px_rgba(0,0,0,0.08)]">
+      <div className="fixed bottom-0 inset-x-0 z-30 md:hidden print:hidden bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-[0_-4px_12px_rgba(0,0,0,0.08)]">
         <div className="flex items-center gap-2 px-4 py-3 max-w-lg mx-auto">
           <Button
             className="flex-1 bg-[#25D366] hover:bg-[#20bd5a] text-white font-semibold h-11"
