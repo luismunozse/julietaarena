@@ -60,7 +60,7 @@ export default function FavoriteButton({
         "rounded-full bg-white/90 hover:bg-white shadow-sm transition-all",
         sizeClasses[size],
         isAnimating && "scale-110",
-        favorite && "bg-primary hover:bg-primary/90"
+        favorite && "bg-red-500 hover:bg-red-600"
       )}
       onClick={handleClick}
       aria-label={favorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}

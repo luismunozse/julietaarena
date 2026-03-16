@@ -130,8 +130,8 @@ export default function PropertySidebar({ property }: PropertySidebarProps) {
             <h3 className="text-lg font-semibold text-brand-dark truncate">
               {property.broker?.name || 'Julieta Arena'}
             </h3>
-            <p className="text-sm text-muted">Martillera Publica</p>
-            <p className="text-xs text-brand-primary font-medium mt-1">Mat. CPCPI Cordoba</p>
+            <p className="text-sm text-muted">Martillera Pública · Perito Tasador</p>
+            <p className="text-xs text-brand-primary font-medium mt-1">MP: 06-1216 · CPCPI Córdoba</p>
           </div>
         </div>
 

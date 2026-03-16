@@ -2,9 +2,9 @@
 export const getOrganizationSchema = () => ({
   "@context": "https://schema.org",
   "@type": "Organization",
-  "name": "Julieta Arena - Martillera Pública",
+  "name": "Julieta Arena - Martillera Pública y Perito Tasador",
   "alternateName": "Julieta Arena",
-  "description": "Martillera Pública especializada en remates judiciales, asesoramiento legal inmobiliario y gestión de propiedades en Córdoba, Argentina.",
+  "description": "Martillera Pública y Perito Tasador (MP: 06-1216) especializada en tasaciones, remates judiciales, compraventa, alquiler y administración de propiedades en Córdoba, Argentina.",
   "url": "https://julietaarena.com",
   "logo": "https://julietaarena.com/logo.png",
   "image": "https://julietaarena.com/og-image.jpg",
@@ -86,8 +86,8 @@ export const getPersonSchema = () => ({
   "@context": "https://schema.org",
   "@type": "Person",
   "name": "Julieta Arena",
-  "jobTitle": "Martillera Pública",
-  "description": "Martillera Pública con más de 10 años de experiencia en remates judiciales y asesoramiento legal inmobiliario en Córdoba, Argentina.",
+  "jobTitle": "Martillera Pública y Perito Tasador",
+  "description": "Martillera Pública y Perito Tasador (MP: 06-1216 · CPCPI Córdoba) especializada en tasaciones, remates judiciales, compraventa y alquiler de propiedades en Córdoba, Argentina.",
   "url": "https://julietaarena.com",
   "image": "https://julietaarena.com/images/perfil.jpeg",
   "telephone": "+54-351-123-4567",
@@ -102,7 +102,7 @@ export const getPersonSchema = () => ({
   },
   "worksFor": {
     "@type": "Organization",
-    "name": "Julieta Arena - Martillera Pública"
+    "name": "Julieta Arena - Martillera Pública y Perito Tasador"
   },
   "knowsAbout": [
     "Remates Judiciales",
@@ -133,7 +133,7 @@ export const getLocalBusinessSchema = () => ({
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
   "@id": "https://julietaarena.com/#business",
-  "name": "Julieta Arena - Martillera Pública",
+  "name": "Julieta Arena - Martillera Pública y Perito Tasador",
   "description": "Servicios profesionales de martillero público, remates judiciales y asesoramiento legal inmobiliario en Córdoba.",
   "url": "https://julietaarena.com",
   "telephone": "+54-351-123-4567",
@@ -184,7 +184,7 @@ export const getServiceSchema = (serviceName: string, description: string) => ({
   "description": description,
   "provider": {
     "@type": "Organization",
-    "name": "Julieta Arena - Martillera Pública",
+    "name": "Julieta Arena - Martillera Pública y Perito Tasador",
     "url": "https://julietaarena.com"
   },
   "areaServed": {
@@ -219,7 +219,7 @@ export const getArticleSchema = (article: {
   },
   "publisher": {
     "@type": "Organization",
-    "name": "Julieta Arena - Martillera Pública",
+    "name": "Julieta Arena - Martillera Pública y Perito Tasador",
     "logo": {
       "@type": "ImageObject",
       "url": "https://julietaarena.com/logo.png"
@@ -269,7 +269,7 @@ export const getPropertySchema = (property: {
 }) => ({
   "@context": "https://schema.org",
   "@type": "RealEstateAgent",
-  "name": "Julieta Arena - Martillera Pública",
+  "name": "Julieta Arena - Martillera Pública y Perito Tasador",
   "url": "https://julietaarena.com",
   "hasOfferCatalog": {
     "@type": "OfferCatalog",

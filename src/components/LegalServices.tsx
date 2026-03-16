@@ -225,10 +225,10 @@ export default function LegalServices() {
           Nuestros Servicios
         </span>
         <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-brand-accent mb-4">
-          Servicios Legales Especializados
+          Nuestros Servicios Profesionales
         </h2>
         <p className="text-muted max-w-2xl mx-auto">
-          Asesoramiento jurídico profesional en derecho argentino para resolver sus necesidades legales
+          Servicios de martillera pública matriculada para todas tus operaciones inmobiliarias
         </p>
       </div>
 

@@ -92,7 +92,7 @@ export default function About() {
               Julieta Arena
             </h2>
             <p className="text-lg sm:text-xl text-brand-secondary font-medium mb-4 sm:mb-6">
-              Martillera Pública Matriculada
+              Martillera Pública · Perito Tasador
             </p>
 
             {/* Quote */}
@@ -106,9 +106,9 @@ export default function About() {
 
             {/* Description */}
             <p className="text-sm sm:text-base text-muted leading-relaxed mb-6 sm:mb-8 text-left">
-              Soy martillera pública matriculada con amplia experiencia en el mercado inmobiliario de Córdoba.
+              Soy martillera pública y perito tasador matriculada (MP: 06-1216 · CPCPI Córdoba) con amplia experiencia en el mercado inmobiliario.
               Me especializo en ofrecer soluciones integrales que abarcan desde la compra-venta y alquiler
-              de propiedades, hasta la gestión de remates judiciales y asesoramiento en trámites en general.
+              de propiedades, tasaciones profesionales y remates judiciales.
             </p>
 
             {/* Features */}

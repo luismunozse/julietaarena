@@ -9,6 +9,7 @@ import PropertyImageGallery from './PropertyImageGallery'
 import PropertySidebar from './PropertySidebar'
 import PropertyMetrics from './PropertyMetrics'
 import PropertyFeatures from './PropertyFeatures'
+import PropertyCard from './PropertyCard'
 import PropertyLocationMap from './PropertyLocationMap'
 import { useAnalytics } from '@/hooks/useAnalytics'
 import { useProperties } from '@/hooks/useProperties'
@@ -243,8 +244,8 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
       {/* ================================================================
           MAIN CONTENT
       ================================================================ */}
-      <div className="grid grid-cols-1 md:grid-cols-[1fr_340px] gap-6 md:gap-8">
-        <div className="flex flex-col gap-6">
+      <div className="property-detail-grid">
+        <div className="flex flex-col gap-6 min-w-0">
           {/* Gallery */}
           <Card className="overflow-hidden shadow-sm print:shadow-none">
             <PropertyImageGallery images={property.images} title={property.title} />
@@ -409,61 +410,6 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
             </CardContent>
           </Card>
 
-          {/* ================================================================
-              SIMILAR PROPERTIES
-          ================================================================ */}
-          {similarProperties.length > 0 && (
-            <div className="print:hidden">
-              <h2 className="text-xl font-bold text-slate-900 mb-4">Propiedades similares</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {similarProperties.map((p) => (
-                  <Link
-                    key={p.id}
-                    href={`/propiedades/${p.id}`}
-                    className="group block"
-                  >
-                    <Card className="overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5">
-                      {/* Image */}
-                      <div className="relative h-[160px] bg-slate-100">
-                        {p.images[0] && (
-                          <img
-                            src={p.images[0]}
-                            alt={p.title}
-                            className="w-full h-full object-cover"
-                          />
-                        )}
-                        <Badge className="absolute top-2 left-2 text-xs bg-black/60 text-white hover:bg-black/60">
-                          {operationLabels[p.operation]}
-                        </Badge>
-                      </div>
-                      {/* Content */}
-                      <CardContent className="p-4">
-                        <p className="text-base font-bold text-[#2c5f7d]">
-                          {new Intl.NumberFormat('es-AR', {
-                            style: 'currency',
-                            currency: p.currency || 'USD',
-                            minimumFractionDigits: 0,
-                          }).format(p.price)}
-                        </p>
-                        <h3 className="text-sm font-semibold text-slate-900 truncate mt-1 group-hover:text-[#2c5f7d] transition-colors">
-                          {p.title}
-                        </h3>
-                        <p className="text-xs text-slate-500 flex items-center gap-1 mt-1">
-                          <MapPin className="w-3 h-3" />
-                          <span className="truncate">{p.location}</span>
-                        </p>
-                        <div className="flex gap-3 mt-2 text-xs text-slate-500">
-                          {p.area && <span>{p.area} m²</span>}
-                          {p.bedrooms && <span>{p.bedrooms} dorm.</span>}
-                          {p.bathrooms && <span>{p.bathrooms} baños</span>}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
         {/* ================================================================
@@ -473,6 +419,20 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
           <PropertySidebar property={property} />
         </div>
       </div>
+
+      {/* ================================================================
+          SIMILAR PROPERTIES (full width, outside grid)
+      ================================================================ */}
+      {similarProperties.length > 0 && (
+        <div className="mt-8 print:hidden">
+          <h2 className="text-xl font-bold text-slate-900 mb-4">Propiedades similares</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {similarProperties.map((p) => (
+              <PropertyCard key={p.id} property={p} />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ================================================================
           MOBILE BOTTOM CTA BAR

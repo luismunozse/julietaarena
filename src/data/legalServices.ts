@@ -14,220 +14,207 @@ export interface LegalService {
 
 export const legalServices: LegalService[] = [
   {
-    id: 'redaccion-contratos',
-    title: 'Redacciones de Contratos',
-    description: 'Elaboración profesional de contratos civiles y comerciales adaptados a la legislación argentina vigente.',
-    icon: '📋',
-    features: [
-      'Contratos de compraventa inmobiliaria',
-      'Contratos de locación residencial y comercial',
-      'Contratos de obra y servicios',
-      'Contratos de sociedad y asociaciones',
-      'Contratos laborales y de prestación de servicios',
-      'Contratos de mandato y representación'
-    ],
-    requirements: [
-      'Datos completos de las partes intervinientes',
-      'Documentación de identidad vigente',
-      'Especificaciones del objeto del contrato',
-      'Condiciones comerciales acordadas'
-    ],
-    process: [
-      'Consulta inicial y análisis de necesidades',
-      'Recopilación de documentación',
-      'Redacción del borrador del contrato',
-      'Revisión y ajustes con las partes',
-      'Redacción final y entrega del documento'
-    ],
-    duration: '5-10 días hábiles',
-    cost: 'Consultar según complejidad',
-    legalBasis: [
-      'Código Civil y Comercial de la Nación',
-      'Ley de Contrato de Trabajo',
-      'Código de Comercio',
-      'Jurisprudencia vigente'
-    ],
-    documents: [
-      'DNI de todas las partes',
-      'Constancia de CUIT/CUIL si corresponde',
-      'Títulos de propiedad (para inmuebles)',
-      'Documentación específica del negocio'
-    ]
-  },
-  {
-    id: 'declaratoria-herederos',
-    title: 'Declaratoria de Herederos',
-    description: 'Proceso judicial para establecer la calidad de herederos legítimos según el orden sucesorio establecido en el Código Civil.',
-    icon: '👥',
-    features: [
-      'Tramitación ante Juzgado de Primera Instancia',
-      'Citación de herederos presuntos',
-      'Publicaciones en medios oficiales',
-      'Avalúo de bienes de la herencia',
-      'Obtención de declaratoria firme',
-      'Asesoramiento en distribución de bienes'
-    ],
-    requirements: [
-      'Partida de defunción del causante',
-      'Partidas de nacimiento de herederos',
-      'Documentación de parentesco',
-      'Inventario de bienes del fallecido'
-    ],
-    process: [
-      'Evaluación de la situación sucesoria',
-      'Preparación de la demanda judicial',
-      'Presentación ante el Juzgado competente',
-      'Seguimiento del expediente',
-      'Obtención de la declaratoria firme'
-    ],
-    duration: '6-12 meses',
-    cost: 'Consultar según complejidad del caso',
-    legalBasis: [
-      'Código Civil y Comercial de la Nación',
-      'Ley de Procedimientos Civiles',
-      'Jurisprudencia de la Corte Suprema'
-    ],
-    documents: [
-      'Partida de defunción',
-      'Partidas de nacimiento de herederos',
-      'Documentos que acrediten parentesco',
-      'Inventario de bienes',
-      'Documentación de propiedades'
-    ]
-  },
-  {
-    id: 'sucesiones',
-    title: 'Sucesiones',
-    description: 'Tramitación completa del proceso sucesorio, incluyendo partición de bienes y transferencias de dominio.',
+    id: 'sucesiones-inmobiliarias',
+    title: 'Acompañamiento en Sucesiones Inmobiliarias',
+    description: 'Coordinamos con abogados y escribanos el proceso sucesorio cuando involucra bienes inmuebles, aportando tasaciones y gestión de la venta posterior.',
     icon: '🏛️',
     features: [
-      'Tramitación de sucesión testamentaria',
-      'Sucesión intestada (sin testamento)',
-      'Partición de bienes entre herederos',
-      'Transferencia de dominio de inmuebles',
-      'Gestión ante organismos públicos',
-      'Asesoramiento en derechos sucesorios'
+      'Tasación de inmuebles del acervo hereditario',
+      'Coordinación con abogado para el trámite sucesorio',
+      'Gestión de la venta de bienes una vez obtenida la declaratoria',
+      'Intermediación entre herederos para la venta',
+      'Acompañamiento en la inscripción de dominio',
+      'Derivación a escribanos y contadores de confianza'
     ],
     requirements: [
-      'Declaratoria de herederos firme',
-      'Inventario completo de bienes',
-      'Avalúos actualizados',
-      'Documentación de propiedades'
+      'Declaratoria de herederos (o voluntad de iniciarla)',
+      'Datos de los bienes inmuebles involucrados',
+      'Acuerdo entre herederos sobre la venta (si corresponde)',
+      'Documentación de las propiedades'
     ],
     process: [
-      'Análisis de la situación sucesoria',
-      'Preparación de documentación',
-      'Tramitación ante organismos competentes',
-      'Gestión de transferencias',
-      'Finalización y entrega de títulos'
+      'Consulta inicial para entender la situación',
+      'Tasación profesional de los inmuebles involucrados',
+      'Derivación al abogado para el trámite judicial',
+      'Coordinación con escribano para la transferencia de dominio',
+      'Gestión de la comercialización del inmueble si los herederos deciden vender'
     ],
-    duration: '3-6 meses (post declaratoria)',
-    cost: 'Consultar según patrimonio',
+    duration: 'Variable según el trámite judicial',
+    cost: 'Consultar - la tasación tiene costo independiente',
     legalBasis: [
-      'Código Civil y Comercial de la Nación',
-      'Ley de Procedimientos Civiles',
-      'Registro de la Propiedad Inmueble',
-      'AFIP - Administración Federal de Ingresos Públicos'
+      'Ley 20.266 - Martilleros y Corredores (régimen nacional)',
+      'Ley 7191 - Ejercicio de Martilleros en Córdoba',
+      'Código Civil y Comercial - Libro V, Sucesiones'
     ],
     documents: [
-      'Declaratoria de herederos',
-      'Inventario de bienes',
-      'Avalúos de propiedades',
-      'Títulos de dominio',
-      'Documentación fiscal'
+      'Títulos de propiedad de los inmuebles',
+      'Partida de defunción del causante',
+      'Declaratoria de herederos (si ya se tramitó)',
+      'Documentación catastral de las propiedades'
     ]
   },
   {
-    id: 'trato-abreviado',
-    title: 'Trato Abreviado',
-    description: 'Proceso acelerado para la transmisión de bienes hereditarios, evitando la tramitación judicial completa.',
-    icon: '⚡',
+    id: 'contratos-locacion',
+    title: 'Contratos de Locación',
+    description: 'Gestionamos contratos de alquiler entre propietarios e inquilinos, conforme a la normativa vigente de locaciones.',
+    icon: '📋',
     features: [
-      'Transmisión directa de bienes',
-      'Evita el proceso judicial completo',
-      'Reducción significativa de tiempos',
-      'Menor costo en honorarios',
-      'Aplicable en casos específicos',
-      'Gestión ante organismos públicos'
+      'Redacción de contratos de locación habitacional',
+      'Contratos de locación comercial',
+      'Gestión de garantías y depósitos',
+      'Actualización de valores según índice ICL/IPC',
+      'Administración del alquiler durante la vigencia',
+      'Mediación ante conflictos entre partes'
     ],
     requirements: [
-      'Acuerdo entre todos los herederos',
-      'Bienes de bajo valor económico',
-      'Documentación completa de parentesco',
-      'Avalúos de los bienes'
+      'Datos del propietario y del inquilino',
+      'Título de propiedad del inmueble',
+      'Garantía del inquilino (propietaria, seguro de caución, etc.)',
+      'Acuerdo de precio y condiciones entre las partes'
     ],
     process: [
-      'Evaluación de viabilidad del trato abreviado',
-      'Preparación de documentación',
-      'Gestión ante organismos competentes',
-      'Transferencias de dominio',
-      'Finalización del proceso'
+      'Verificación de documentación del propietario e inquilino',
+      'Análisis de la garantía presentada',
+      'Redacción del contrato conforme a la ley vigente',
+      'Firma de las partes y entrega de llaves',
+      'Administración mensual (si se contrata)'
     ],
-    duration: '1-3 meses',
-    cost: 'Consultar según caso',
+    duration: '3-7 días hábiles',
+    cost: 'Según arancel del CPCPI Córdoba',
     legalBasis: [
-      'Código Civil y Comercial de la Nación',
-      'Registro de la Propiedad Inmueble',
-      'Jurisprudencia especializada',
-      'AFIP'
+      'Ley 27.551 - Ley de Alquileres (y modificatorias)',
+      'Código Civil y Comercial - Contratos de Locación',
+      'Ley 20.266 - Martilleros y Corredores'
     ],
     documents: [
-      'Partida de defunción',
-      'Partidas de nacimiento',
-      'Documentos de parentesco',
-      'Inventario de bienes',
-      'Avalúos actualizados'
+      'DNI de propietario e inquilino',
+      'Título de propiedad o autorización del propietario',
+      'Documentación de garantía',
+      'Recibos de servicios del inmueble'
     ]
   },
   {
-    id: 'cuota-alimentaria',
-    title: 'Cuota Alimentaria',
-    description: 'Proceso judicial para la fijación, modificación o ejecución de cuotas alimentarias según las necesidades del alimentario.',
-    icon: '🍽️',
+    id: 'tasaciones',
+    title: 'Tasaciones Profesionales',
+    description: 'Valuación objetiva de inmuebles realizada por perito tasador matriculado (MP: 06-1216), válida para trámites judiciales, bancarios y particulares.',
+    icon: '📊',
     features: [
-      'Fijación de cuota alimentaria',
-      'Modificación de cuota existente',
-      'Ejecución de cuota alimentaria',
-      'Índice de actualización automática',
-      'Gestión de embargos y medidas cautelares',
-      'Asesoramiento en derecho de familia'
+      'Tasaciones para compraventa',
+      'Tasaciones para sucesiones y divorcios',
+      'Valuaciones para créditos hipotecarios',
+      'Tasaciones para seguros',
+      'Informes de valor de mercado',
+      'Certificado firmado por perito tasador MP: 06-1216'
     ],
     requirements: [
-      'Demostración de necesidad del alimentario',
-      'Capacidad económica del alimentante',
-      'Documentación de ingresos y gastos',
-      'Prueba del vínculo familiar'
+      'Dirección completa del inmueble',
+      'Acceso al inmueble para inspección',
+      'Documentación de la propiedad (si está disponible)',
+      'Destino de la tasación (judicial, bancario, particular)'
     ],
     process: [
-      'Evaluación de la situación familiar',
-      'Recopilación de documentación probatoria',
-      'Preparación de la demanda',
-      'Seguimiento del proceso judicial',
-      'Obtención de sentencia firme'
+      'Coordinación de visita al inmueble',
+      'Inspección y relevamiento técnico',
+      'Análisis comparativo de mercado',
+      'Elaboración del informe de tasación',
+      'Entrega del certificado firmado y sellado'
     ],
-    duration: '3-8 meses',
-    cost: 'Consultar según complejidad',
+    duration: '3-5 días hábiles',
+    cost: 'Según arancel del CPCPI Córdoba',
     legalBasis: [
-      'Código Civil y Comercial de la Nación',
-      'Ley de Procedimientos Civiles',
-      'Jurisprudencia de familia',
-      'Convención sobre Derechos del Niño'
+      'Ley 20.266 - Régimen de Martilleros y Corredores',
+      'Ley 7191 - Ejercicio profesional en Córdoba',
+      'Resoluciones del CPCPI Córdoba'
     ],
     documents: [
-      'DNI de las partes',
-      'Partida de nacimiento del menor',
-      'Constancias de ingresos',
-      'Comprobantes de gastos',
-      'Documentación médica si corresponde'
+      'Escritura o boleto de compraventa',
+      'Plano de mensura (si existe)',
+      'Impuesto inmobiliario al día',
+      'Documentación catastral'
+    ]
+  },
+  {
+    id: 'remates-judiciales',
+    title: 'Remates Judiciales',
+    description: 'Organización y ejecución de subastas judiciales designadas por los tribunales de Córdoba, con total transparencia y respaldo legal.',
+    icon: '⚖️',
+    features: [
+      'Subastas designadas por juzgados',
+      'Publicación de edictos en medios oficiales',
+      'Exhibición del bien a rematar',
+      'Conducción de la subasta pública',
+      'Rendición de cuentas al juzgado',
+      'Asesoramiento a compradores interesados'
+    ],
+    requirements: [
+      'Designación judicial como martillera',
+      'Expediente judicial del remate',
+      'Base de subasta fijada por el juzgado',
+      'Autorización judicial para publicitar'
+    ],
+    process: [
+      'Recepción de la designación judicial',
+      'Publicación de edictos conforme a la ley',
+      'Exhibición del inmueble en fecha designada',
+      'Realización de la subasta pública',
+      'Rendición de cuentas y adjudicación al mejor postor'
+    ],
+    duration: 'Según plazos judiciales (30-60 días)',
+    cost: 'Comisión regulada por ley al comprador',
+    legalBasis: [
+      'Código Procesal Civil y Comercial de Córdoba',
+      'Ley 20.266 - Martilleros y Corredores',
+      'Acordadas del Tribunal Superior de Justicia de Córdoba'
+    ],
+    documents: [
+      'Expediente judicial',
+      'Auto de subasta del juzgado',
+      'Informe de dominio del inmueble',
+      'Certificado catastral'
+    ]
+  },
+  {
+    id: 'administracion-propiedades',
+    title: 'Administración de Propiedades',
+    description: 'Gestión integral de propiedades en alquiler: cobro de rentas, mantenimiento, relación con inquilinos y rendición mensual al propietario.',
+    icon: '🏠',
+    features: [
+      'Cobro y seguimiento de alquileres',
+      'Gestión de reparaciones y mantenimiento',
+      'Rendición mensual de cuentas al propietario',
+      'Mediación con inquilinos',
+      'Control de vencimientos de contrato',
+      'Actualización de valores según índice vigente'
+    ],
+    requirements: [
+      'Contrato de administración firmado',
+      'Contrato de locación vigente',
+      'Datos del inmueble y del inquilino',
+      'Autorización del propietario'
+    ],
+    process: [
+      'Firma del contrato de administración',
+      'Relevamiento del estado del inmueble',
+      'Gestión mensual de cobros y pagos',
+      'Informe mensual al propietario',
+      'Gestión de renovación o finalización del contrato'
+    ],
+    duration: 'Servicio mensual continuo',
+    cost: 'Porcentaje sobre el alquiler (según arancel)',
+    legalBasis: [
+      'Ley 20.266 - Martilleros y Corredores',
+      'Ley 27.551 - Ley de Alquileres',
+      'Código Civil y Comercial - Mandato'
+    ],
+    documents: [
+      'Contrato de locación vigente',
+      'Título de propiedad',
+      'DNI del propietario',
+      'Datos bancarios para transferencias'
     ]
   }
 ]
 
 export const getLegalServiceById = (id: string): LegalService | undefined => {
   return legalServices.find(service => service.id === id)
-}
-
-export const getLegalServicesByCategory = (category: string): LegalService[] => {
-  // Esta función puede ser expandida si agregamos categorías
-  return legalServices
 }

@@ -19,9 +19,9 @@ const poppins = Poppins({
 })
 
 export const metadata: Metadata = {
-  title: 'Julieta Arena - Martillera Pública | Servicios Inmobiliarios Córdoba',
-  description: 'Martillera Pública en Córdoba, Argentina. Servicios profesionales de venta, alquiler de propiedades, remates judiciales, jubilaciones y tasaciones. Experiencia y transparencia garantizada.',
-  keywords: ['martillera pública', 'inmobiliaria Córdoba', 'venta propiedades', 'alquiler', 'remates judiciales', 'tasaciones', 'jubilaciones', 'Julieta Arena'],
+  title: 'Julieta Arena - Martillera Pública y Perito Tasador | Servicios Inmobiliarios Córdoba',
+  description: 'Martillera Pública y Perito Tasador (MP: 06-1216) en Córdoba, Argentina. Servicios profesionales de venta, alquiler de propiedades, tasaciones, remates judiciales y administración de propiedades.',
+  keywords: ['martillera pública', 'perito tasador', 'inmobiliaria Córdoba', 'venta propiedades', 'alquiler', 'remates judiciales', 'tasaciones', 'Julieta Arena', 'CPCPI Córdoba'],
   authors: [{ name: 'Julieta Arena' }],
   creator: 'Julieta Arena',
   publisher: 'Julieta Arena Servicios Inmobiliarios',

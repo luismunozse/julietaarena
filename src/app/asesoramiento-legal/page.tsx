@@ -1,74 +1,74 @@
 import LegalServices from '@/components/LegalServices'
 import PageBreadcrumb from '@/components/PageBreadcrumb'
-import { Scale, FileText, Building2, UserCheck, CheckCircle, Mail } from 'lucide-react'
+import { Scale, FileText, Building2, UserCheck, CheckCircle, Mail, AlertTriangle } from 'lucide-react'
 
 export const metadata = {
-  title: 'Asesoramiento Legal | Julieta Arena - Martillera Pública',
-  description: 'Servicios legales especializados en derecho argentino: redacciones de contratos, declaratoria de herederos, sucesiones, trato abreviado y cuota alimentaria.',
-  keywords: 'asesoramiento legal, derecho argentino, sucesiones, declaratoria herederos, contratos, cuota alimentaria, trato abreviado',
+  title: 'Servicios Profesionales | Julieta Arena - Martillera Pública',
+  description: 'Servicios de martillera pública y perito tasador (MP: 06-1216) en Córdoba: tasaciones, contratos de locación, remates judiciales, administración de propiedades y acompañamiento en sucesiones inmobiliarias.',
+  keywords: 'martillera pública Córdoba, tasaciones, remates judiciales, contratos alquiler, administración propiedades, sucesiones inmobiliarias',
 }
 
 const HERO_BADGES = [
-  { icon: Scale, text: 'Derecho Argentino' },
-  { icon: FileText, text: 'Documentación Legal' },
-  { icon: Building2, text: 'Tribunales' },
+  { icon: Scale, text: 'Martillera Matriculada' },
+  { icon: FileText, text: 'Contratos de Locación' },
+  { icon: Building2, text: 'Remates Judiciales' },
   { icon: UserCheck, text: 'Asesoría Personalizada' },
 ]
 
 const REGULATORY_CARDS = [
   {
-    title: 'Código Civil y Comercial',
+    title: 'Habilitación Profesional',
     items: [
-      'Contratos (arts. 957-1707)',
-      'Derechos reales y sucesiones (arts. 1882-2532)',
-      'Derecho de familia y alimentos (arts. 401-704)'
+      'Matrícula CPCPI Córdoba vigente',
+      'Ley 20.266 - Martilleros y Corredores',
+      'Ley 7191 - Ejercicio profesional en Córdoba'
     ]
   },
   {
-    title: 'Procedimiento Provincial',
+    title: 'Locaciones',
     items: [
-      'Trámite de sucesiones en Córdoba',
-      'Medidas cautelares y edictos',
-      'Actuaciones ante Juzgados de 1ª Instancia'
+      'Ley 27.551 - Ley de Alquileres',
+      'Contratos habitacionales y comerciales',
+      'Índices de actualización ICL/IPC'
     ]
   },
   {
-    title: 'Organismos de control',
+    title: 'Remates y Subastas',
     items: [
-      'AFIP y rentas provinciales',
-      'Registro de la Propiedad Inmueble',
-      'Inspección de Personas Jurídicas'
+      'Designación por tribunales de Córdoba',
+      'Código Procesal Civil y Comercial',
+      'Acordadas del TSJ de Córdoba'
     ]
   },
   {
-    title: 'Protección del consumidor',
+    title: 'Red de profesionales',
     items: [
-      'Ley 24.240 y normas complementarias',
-      'Contratos inmobiliarios y locación',
-      'Prevención de cláusulas abusivas'
+      'Abogados especializados en inmobiliario',
+      'Escribanos para escrituración',
+      'Contadores para aspectos impositivos'
     ]
   }
 ]
 
 const PROCESS_STEPS = [
-  'Entrevista inicial, análisis de antecedentes y firma de carta de servicio.',
-  'Auditoría documental y pedidos de partidas/legajos en registros oficiales.',
-  'Estrategia jurídica y estimación de honorarios según aranceles vigentes.',
-  'Presentaciones y gestiones ante juzgados, registros o escribanías.',
-  'Informe final y acompañamiento en la ejecución (transferencias, inscripción, etc.).'
+  'Consulta inicial gratuita para entender tu necesidad y evaluar cómo podemos ayudarte.',
+  'Relevamiento de documentación y análisis de la situación del inmueble.',
+  'Propuesta de trabajo con honorarios claros según el arancel del CPCPI Córdoba.',
+  'Ejecución del servicio con coordinación de profesionales si es necesario (abogados, escribanos).',
+  'Seguimiento y acompañamiento hasta la resolución completa del trámite.'
 ]
 
 const CTA_BENEFITS = [
-  'Honorarios regulados y acuerdo de confidencialidad.',
-  'Atención virtual en todo el país y presencial en Córdoba.',
-  'Seguimiento del expediente con reportes mensuales.'
+  'Honorarios regulados por el CPCPI Córdoba.',
+  'Atención presencial en Córdoba y virtual en toda la provincia.',
+  'Trabajo en equipo con abogados y escribanos de confianza.'
 ]
 
 export default function AsesoramientoLegalPage() {
   return (
     <main className="min-h-screen pt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4">
-        <PageBreadcrumb items={[{ label: 'Servicios', href: '/#servicios' }, { label: 'Asesoramiento Legal' }]} />
+        <PageBreadcrumb items={[{ label: 'Servicios', href: '/#servicios' }, { label: 'Servicios Profesionales' }]} />
       </div>
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-brand-primary via-brand-accent to-brand-dark text-white py-16 lg:py-24 overflow-hidden">
@@ -80,14 +80,14 @@ export default function AsesoramientoLegalPage() {
           {/* Badge */}
           <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-brand-secondary/20 text-brand-secondary rounded-full text-sm font-medium mb-6">
             <Scale className="w-4 h-4" />
-            Servicios Legales
+            Martillera Pública Matriculada
           </span>
 
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
-            Asesoramiento Legal Especializado
+            Servicios Profesionales Inmobiliarios
           </h1>
           <p className="text-lg lg:text-xl text-white/80 mb-10 max-w-3xl mx-auto">
-            Servicios jurídicos profesionales en derecho argentino para particulares y empresas
+            Tasaciones, contratos de locación, remates judiciales y acompañamiento integral en operaciones inmobiliarias en Córdoba
           </p>
 
           {/* Hero badges */}
@@ -105,20 +105,32 @@ export default function AsesoramientoLegalPage() {
         </div>
       </section>
 
+      {/* Disclaimer */}
+      <section className="bg-amber-50 border-b border-amber-200">
+        <div className="max-w-6xl mx-auto px-6 py-4">
+          <div className="flex items-start gap-3 text-sm text-amber-800">
+            <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
+            <p>
+              <strong>Importante:</strong> Los servicios son prestados por Julieta Arena en su carácter de martillera pública y perito tasador matriculada (MP: 06-1216 · CPCPI Córdoba).
+              Para trámites que requieran intervención de abogados o escribanos, trabajamos en coordinación con profesionales matriculados en cada área.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Regulatory Section */}
       <section className="py-16 lg:py-20 bg-surface">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-12">
             <span className="inline-block px-4 py-1.5 bg-brand-secondary/10 text-brand-primary rounded-full text-sm font-medium mb-4">
-              Marco Legal
+              Marco Profesional
             </span>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-brand-accent mb-4">
-              Marco normativo argentino
+              Respaldo profesional y normativo
             </h2>
             <p className="text-muted max-w-3xl mx-auto">
-              Trabajamos conforme al Código Civil y Comercial de la Nación, la Ley de Procedimiento Civil y
-              Comercial de Córdoba, normas de AFIP y registros provinciales. Cada informe incluye citas legales
-              y jurisprudenciales vigentes para respaldar la estrategia.
+              Todos nuestros servicios se enmarcan en la legislación vigente para martilleros y corredores públicos,
+              con el respaldo del Colegio Profesional de Corredores Públicos Inmobiliarios de Córdoba.
             </p>
           </div>
 
@@ -143,7 +155,7 @@ export default function AsesoramientoLegalPage() {
         </div>
       </section>
 
-      {/* Legal Services Component */}
+      {/* Services Component */}
       <section className="py-16 lg:py-20 bg-white">
         <LegalServices />
       </section>
@@ -156,10 +168,10 @@ export default function AsesoramientoLegalPage() {
               Proceso
             </span>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-brand-accent mb-4">
-              Metodología de trabajo
+              Cómo trabajamos
             </h2>
             <p className="text-muted max-w-2xl mx-auto">
-              Seguimos un proceso transparente compatible con los requisitos de los tribunales y organismos argentinos.
+              Un proceso transparente con honorarios regulados y acompañamiento en cada etapa.
             </p>
           </div>
 
@@ -185,11 +197,11 @@ export default function AsesoramientoLegalPage() {
             <div className="md:flex md:items-start md:gap-10">
               <div className="flex-1 mb-8 md:mb-0">
                 <h2 className="text-2xl lg:text-3xl font-bold text-brand-accent mb-4">
-                  Consultá tu caso
+                  Consultá sin compromiso
                 </h2>
                 <p className="text-muted mb-6">
-                  Elaboramos presupuestos claros y por escrito, acorde al arancel profesional de Córdoba (Ley 9459).
-                  Enviá tu consulta y recibí una respuesta dentro de las próximas 24/48 h hábiles.
+                  Primera consulta sin cargo. Evaluamos tu situación y te proponemos la mejor alternativa
+                  con honorarios claros según el arancel del CPCPI Córdoba.
                 </p>
                 <ul className="space-y-3">
                   {CTA_BENEFITS.map((benefit, index) => (
@@ -218,7 +230,7 @@ export default function AsesoramientoLegalPage() {
                   className="flex items-center justify-center gap-2 px-6 py-4 border-2 border-brand-primary text-brand-primary font-semibold rounded-xl hover:bg-brand-primary hover:text-white transition-all duration-200"
                 >
                   <Mail className="w-5 h-5" />
-                  Enviar antecedentes
+                  Enviar consulta
                 </a>
               </div>
             </div>

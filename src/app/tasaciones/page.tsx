@@ -59,7 +59,7 @@ export default function TasacionesPage() {
                 gap: '0.75rem'
               }}>
                 {[
-                  'Informe firmado por martillera pública (Ley 7191 / CBA)',
+                  'Informe firmado por perito tasador MP: 06-1216 (Ley 7191 / CBA)',
                   'Compatibles con gestiones bancarias y organismos públicos',
                   'Entrega digital en 48/72 h hábiles luego de la visita'
                 ].map((item, index) => (

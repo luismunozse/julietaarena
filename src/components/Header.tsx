@@ -28,7 +28,7 @@ const NAV_LINKS: NavLink[] = [
 
 const SERVICE_LINKS: NavLink[] = [
   { href: '/propiedades', label: 'Propiedades' },
-  { href: '/asesoramiento-legal', label: 'Asesoramiento Legal' },
+  { href: '/asesoramiento-legal', label: 'Servicios Profesionales' },
   { href: '/remates-judiciales', label: 'Remates Judiciales' },
   { href: '/tasaciones', label: 'Tasaciones' },
 ]

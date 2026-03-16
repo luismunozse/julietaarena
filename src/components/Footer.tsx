@@ -36,7 +36,8 @@ export default function Footer() {
           {/* Brand */}
           <div className="text-center md:text-left">
             <h3 className="text-2xl font-bold mb-2">Julieta Arena</h3>
-            <p className="text-white/90 text-sm">Martillera Pública Matriculada</p>
+            <p className="text-white/90 text-sm">Martillera Pública · Perito Tasador</p>
+            <p className="text-white/60 text-xs mt-0.5">MP: 06-1216 · CPCPI Córdoba</p>
             <p className="text-white/80 text-sm mt-2 flex items-center justify-center md:justify-start gap-1.5">
               <MapPin className="h-4 w-4" />
               Córdoba, Argentina
