@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { getFeaturedPosts, getRecentPosts, BlogPost } from '@/data/blogPosts'
+import { useBlogPosts } from '@/hooks/useBlogPosts'
+import type { BlogPost } from '@/data/blogPosts'
 import { ArrowRight, Clock } from 'lucide-react'
 
 interface BlogSectionProps {
@@ -13,8 +14,11 @@ interface BlogSectionProps {
 
 export default function BlogSection({ showHeader = true, showFooter = true }: BlogSectionProps) {
   const [activeTab, setActiveTab] = useState<'featured' | 'recent'>('featured')
-  const featuredPosts = getFeaturedPosts()
-  const recentPosts = getRecentPosts()
+  const { blogPosts, isLoading } = useBlogPosts()
+
+  const publishedPosts = blogPosts.filter(p => p.status === 'published')
+  const featuredPosts = publishedPosts.filter(p => p.featured).slice(0, 3)
+  const recentPosts = [...publishedPosts].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 6)
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)

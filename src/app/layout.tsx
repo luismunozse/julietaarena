@@ -66,6 +66,10 @@ export const metadata: Metadata = {
   },
   verification: {
     google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION || undefined,
+    yandex: process.env.NEXT_PUBLIC_YANDEX_VERIFICATION || undefined,
+  },
+  alternates: {
+    canonical: 'https://julietaarena.com.ar',
   },
 }
 
@@ -78,6 +82,10 @@ export default function RootLayout({
     <html lang="es" data-theme="light" style={{ colorScheme: 'light' }}>
       <head>
         <StructuredData />
+        {process.env.NEXT_PUBLIC_BING_VERIFICATION && (
+          <meta name="msvalidate.01" content={process.env.NEXT_PUBLIC_BING_VERIFICATION} />
+        )}
+        <link rel="manifest" href="/manifest.json" />
       </head>
       <body
         className={poppins.className}

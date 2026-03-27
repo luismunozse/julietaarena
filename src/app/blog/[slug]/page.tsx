@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { getPostBySlug, blogPosts } from '@/data/blogPosts'
+import { getPublishedPostBySlug, getAllPublishedPosts } from '@/lib/blogQueries'
 import { Clock, ArrowLeft, Tag } from 'lucide-react'
 
 interface BlogPostPageProps {
@@ -10,14 +10,15 @@ interface BlogPostPageProps {
 }
 
 export async function generateStaticParams() {
-  return blogPosts.map((post) => ({
+  const posts = await getAllPublishedPosts()
+  return posts.map((post) => ({
     slug: post.slug,
   }))
 }
 
 export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
   const { slug } = await params
-  const post = getPostBySlug(slug)
+  const post = await getPublishedPostBySlug(slug)
 
   if (!post) {
     return { title: 'Post no encontrado - Julieta Arena' }
@@ -40,7 +41,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { slug } = await params
-  const post = getPostBySlug(slug)
+  const post = await getPublishedPostBySlug(slug)
 
   if (!post) {
     notFound()

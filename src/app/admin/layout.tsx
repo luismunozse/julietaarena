@@ -24,6 +24,7 @@ import {
   Globe,
   LogOut,
   Building2,
+  BookOpen,
 } from 'lucide-react'
 import {
   Sidebar,
@@ -68,6 +69,7 @@ const menuItems = [
   { path: '/admin', icon: LayoutDashboard, label: 'Dashboard', exact: true },
   { path: '/admin/propiedades', icon: Home, label: 'Propiedades', exact: true },
   { path: '/admin/propiedades/nueva?clear=true', icon: Plus, label: 'Nueva Propiedad', exact: true },
+  { path: '/admin/blog', icon: BookOpen, label: 'Blog', exact: false },
   { path: '/admin/consultas', icon: MessageSquare, label: 'Consultas', exact: false },
   { path: '/admin/contactos', icon: Mail, label: 'Contactos', exact: false },
   { path: '/admin/analytics', icon: BarChart3, label: 'Analytics', exact: false },
@@ -82,6 +84,8 @@ const pathLabels: Record<string, string> = {
   admin: 'Admin',
   propiedades: 'Propiedades',
   nueva: 'Nueva',
+  blog: 'Blog',
+  nuevo: 'Nuevo',
   consultas: 'Consultas',
   contactos: 'Contactos',
   analytics: 'Analytics',

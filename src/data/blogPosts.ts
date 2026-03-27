@@ -11,6 +11,7 @@ export interface BlogPost {
   slug: string
   featured: boolean
   readTime: number
+  status: 'draft' | 'published'
 }
 
 export const blogPosts: BlogPost[] = [
@@ -26,7 +27,8 @@ export const blogPosts: BlogPost[] = [
     image: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&h=400&fit=crop&crop=center',
     slug: 'guia-compra-casa',
     featured: true,
-    readTime: 8
+    readTime: 8,
+    status: 'published'
   },
   {
     id: 'blog-002',
@@ -40,7 +42,8 @@ export const blogPosts: BlogPost[] = [
     image: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800&h=400&fit=crop&crop=center',
     slug: 'remates-judiciales-oportunidades-riesgos',
     featured: true,
-    readTime: 6
+    readTime: 6,
+    status: 'published'
   },
   {
     id: 'blog-003',
@@ -54,7 +57,8 @@ export const blogPosts: BlogPost[] = [
     image: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&h=400&fit=crop&crop=center',
     slug: 'tendencias-mercado-inmobiliario-cordoba-2024',
     featured: true,
-    readTime: 7
+    readTime: 7,
+    status: 'published'
   },
   {
     id: 'blog-004',
@@ -68,7 +72,8 @@ export const blogPosts: BlogPost[] = [
     image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&h=400&fit=crop&crop=center',
     slug: 'documentacion-necesaria-alquilar-propiedad',
     featured: false,
-    readTime: 5
+    readTime: 5,
+    status: 'published'
   },
   {
     id: 'blog-005',
@@ -82,7 +87,8 @@ export const blogPosts: BlogPost[] = [
     image: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&h=400&fit=crop&crop=center',
     slug: 'calcular-valor-real-propiedad',
     featured: false,
-    readTime: 6
+    readTime: 6,
+    status: 'published'
   },
   {
     id: 'blog-006',
@@ -96,7 +102,8 @@ export const blogPosts: BlogPost[] = [
     image: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800&h=400&fit=crop&crop=center',
     slug: 'sucesiones-guia-legal-herederos',
     featured: false,
-    readTime: 9
+    readTime: 9,
+    status: 'published'
   }
 ]
 

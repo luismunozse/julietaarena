@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import PropertyDetailClient from './PropertyDetailClient'
+import PropertyStructuredData from '@/components/PropertyStructuredData'
 
 const BUCKET = 'property-images'
 
@@ -110,6 +111,12 @@ interface PropertyDetailPageProps {
 
 export default async function PropertyDetailPage({ params }: PropertyDetailPageProps) {
   const { id } = await params
+  const property = await getProperty(id)
 
-  return <PropertyDetailClient id={id} />
+  return (
+    <>
+      {property && <PropertyStructuredData property={property} />}
+      <PropertyDetailClient id={id} />
+    </>
+  )
 }
