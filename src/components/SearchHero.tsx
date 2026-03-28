@@ -199,7 +199,7 @@ export default function SearchHero() {
   }
 
   return (
-    <section className="relative min-h-[65vh] sm:min-h-[75vh] flex items-center justify-center overflow-hidden pt-20 sm:pt-24">
+    <section className="relative min-h-[70vh] sm:min-h-[75vh] flex items-center justify-center overflow-hidden pt-24 sm:pt-24">
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-brand-dark via-brand-accent to-brand-primary" />
 

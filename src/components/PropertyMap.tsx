@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import Image from 'next/image'
 import GoogleMaps from './GoogleMaps'
 import { Property } from '@/data/properties'
 import { Card, CardContent } from '@/components/ui/card'
@@ -143,11 +144,21 @@ export default function PropertyMap({
               )}
               onClick={() => setSelectedProperty(marker.property)}
             >
-              {/* Property Image Placeholder */}
+              {/* Property Image */}
               <div className="relative h-24 bg-slate-100">
-                <div className="flex h-full items-center justify-center text-slate-400">
-                  {getPropertyIcon(marker.property.type)}
-                </div>
+                {marker.property.images?.[0] ? (
+                  <Image
+                    src={marker.property.images[0]}
+                    alt={marker.property.title}
+                    fill
+                    className="object-cover"
+                    sizes="320px"
+                  />
+                ) : (
+                  <div className="flex h-full items-center justify-center text-slate-400">
+                    {getPropertyIcon(marker.property.type)}
+                  </div>
+                )}
                 <div className="absolute left-2 top-2 rounded bg-black/60 px-2 py-1 text-xs text-white">
                   {getPropertyIcon(marker.property.type)}
                 </div>
@@ -216,10 +227,20 @@ export default function PropertyMap({
         {/* Modal Body */}
         <CardContent className="grid gap-6 p-6 md:grid-cols-2">
           {/* Property Image */}
-          <div className="h-[200px] overflow-hidden rounded-lg bg-slate-100">
-            <div className="flex h-full items-center justify-center text-slate-400">
-              {getPropertyIcon(selectedProperty.type)}
-            </div>
+          <div className="relative h-[200px] overflow-hidden rounded-lg bg-slate-100">
+            {selectedProperty.images?.[0] ? (
+              <Image
+                src={selectedProperty.images[0]}
+                alt={selectedProperty.title}
+                fill
+                className="object-cover"
+                sizes="300px"
+              />
+            ) : (
+              <div className="flex h-full items-center justify-center text-slate-400">
+                {getPropertyIcon(selectedProperty.type)}
+              </div>
+            )}
           </div>
 
           {/* Property Details */}
