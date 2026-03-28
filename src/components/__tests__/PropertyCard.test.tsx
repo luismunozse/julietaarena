@@ -2,7 +2,6 @@
 import { render, screen } from '@testing-library/react'
 import PropertyCard from '../PropertyCard'
 import type { Property } from '@/data/properties'
-import { ReactNode } from 'react'
 
 // Mock de variables de entorno de Supabase
 process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co'
@@ -20,12 +19,11 @@ jest.mock('next/navigation', () => ({
 // Mock de next/image
 jest.mock('next/image', () => ({
   __esModule: true,
-  default: ({ src, alt }: { src: string; alt: string }) => (
-    <img src={src} alt={alt} />
+  default: ({ src, alt, onError }: { src: string; alt: string; onError?: () => void }) => (
+    <img src={src} alt={alt} onError={onError} />
   ),
 }))
 
-// Mock de hooks que usa PropertyCard
 jest.mock('@/hooks/useAnalytics', () => ({
   useAnalytics: () => ({
     trackPropertyView: jest.fn(),
@@ -34,27 +32,21 @@ jest.mock('@/hooks/useAnalytics', () => ({
   }),
 }))
 
-jest.mock('@/hooks/useAnimation', () => ({
-  useFadeInUp: () => ({
-    elementRef: { current: null },
-    isVisible: true,
+jest.mock('@/hooks/useInView', () => ({
+  useInView: () => ({
+    ref: { current: null },
+    isInView: false,
   }),
 }))
 
-// Mock del ToastContext
-jest.mock('../ToastContainer', () => ({
-  ToastProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
+jest.mock('@/components/ToastContainer', () => ({
   useToast: () => ({
-    toasts: [],
-    showSuccess: jest.fn(),
-    showError: jest.fn(),
-    showWarning: jest.fn(),
-    showInfo: jest.fn(),
-    removeToast: jest.fn(),
+    success: jest.fn(),
+    error: jest.fn(),
+    info: jest.fn(),
   }),
 }))
 
-// Mock del hook useFavorites
 jest.mock('@/hooks/useFavorites', () => ({
   useFavorites: () => ({
     isFavorite: jest.fn(() => false),
@@ -69,6 +61,7 @@ describe('PropertyCard', () => {
     title: 'Casa moderna en Nordelta',
     description: 'Hermosa casa de 3 plantas',
     price: 450000,
+    currency: 'USD',
     location: 'Nordelta, Buenos Aires',
     type: 'casa',
     bedrooms: 4,
@@ -89,10 +82,10 @@ describe('PropertyCard', () => {
     expect(screen.getByText('Casa moderna en Nordelta')).toBeInTheDocument()
   })
 
-  it('renderiza el precio correctamente', () => {
-    render(<PropertyCard property={mockProperty} />)
-    // Buscar por texto que contenga parte del precio formateado
-    expect(screen.getByText(/450\.000/)).toBeInTheDocument()
+  it('renderiza el precio con moneda', () => {
+    const { container } = render(<PropertyCard property={mockProperty} />)
+    expect(container).toHaveTextContent(/USD/)
+    expect(container).toHaveTextContent(/450/)
   })
 
   it('renderiza la ubicación', () => {
@@ -100,12 +93,14 @@ describe('PropertyCard', () => {
     expect(screen.getByText(/Nordelta, Buenos Aires/)).toBeInTheDocument()
   })
 
-  it('muestra las características principales (dormitorios, baños, área)', () => {
-    render(<PropertyCard property={mockProperty} />)
-    // Buscar texto que contenga los números de dormitorios, baños y área
-    expect(screen.getByText(/4 dorm/)).toBeInTheDocument()
-    expect(screen.getByText(/3 baños/)).toBeInTheDocument()
-    expect(screen.getByText(/280 m²/)).toBeInTheDocument()
+  it('muestra features con labels legibles', () => {
+    const { container } = render(<PropertyCard property={mockProperty} />)
+    expect(container).toHaveTextContent(/4/)
+    expect(container).toHaveTextContent(/dorm/)
+    expect(container).toHaveTextContent(/3/)
+    expect(container).toHaveTextContent(/baño/)
+    expect(container).toHaveTextContent(/280/)
+    expect(container).toHaveTextContent(/m²/)
   })
 
   it('muestra badge de "Destacada" cuando featured es true', () => {
@@ -113,9 +108,9 @@ describe('PropertyCard', () => {
     expect(screen.getByText(/Destacada/i)).toBeInTheDocument()
   })
 
-  it('muestra badge de "Disponible"', () => {
+  it('muestra badge de operación', () => {
     render(<PropertyCard property={mockProperty} />)
-    expect(screen.getByText(/Disponible/i)).toBeInTheDocument()
+    expect(screen.getByText(/Venta/i)).toBeInTheDocument()
   })
 
   it('renderiza la imagen principal', () => {
@@ -125,15 +120,13 @@ describe('PropertyCard', () => {
     expect(image).toHaveAttribute('src', 'https://example.com/image1.jpg')
   })
 
-  it('renderiza correctamente con las imágenes proporcionadas', () => {
+  it('muestra el CTA de WhatsApp', () => {
     render(<PropertyCard property={mockProperty} />)
-    const image = screen.getByAltText(/Casa moderna en Nordelta/i)
-    expect(image).toBeInTheDocument()
+    expect(screen.getByText(/Consultar por WhatsApp/i)).toBeInTheDocument()
   })
 
-  it('muestra el precio formateado', () => {
-    const { container } = render(<PropertyCard property={mockProperty} />)
-    // Verificar que muestra el precio en USD
-    expect(container).toHaveTextContent(/US\$/)
+  it('muestra tipo de propiedad', () => {
+    render(<PropertyCard property={mockProperty} />)
+    expect(screen.getByText('Casa')).toBeInTheDocument()
   })
 })

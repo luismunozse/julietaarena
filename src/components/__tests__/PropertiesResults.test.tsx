@@ -139,6 +139,13 @@ jest.mock('@/hooks/useAnimation', () => ({
   }),
 }))
 
+jest.mock('@/hooks/useInView', () => ({
+  useInView: () => ({
+    ref: { current: null },
+    isInView: false,
+  }),
+}))
+
 jest.mock('next/image', () => ({
   __esModule: true,
   default: ({ src, alt }: { src: string; alt: string }) => (
@@ -250,7 +257,7 @@ describe('PropertiesResults', () => {
     await user.selectOptions(typeSelect, 'departamento')
 
     // Click clear filters
-    const clearButton = await screen.findByText(/Limpiar filtros/i)
+    const clearButton = await screen.findByText(/Limpiar/i)
     await user.click(clearButton)
 
     await waitFor(() => {

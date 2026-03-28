@@ -5,11 +5,10 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Property } from '@/data/properties'
 import FavoriteButton from './FavoriteButton'
+import { useAnalytics } from '@/hooks/useAnalytics'
+import { useInView } from '@/hooks/useInView'
 import { useSwipe } from '@/hooks/useSwipe'
-import { Card } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { MapPin, Maximize, BedDouble, Bath, Car, Phone, ChevronLeft, ChevronRight, Star } from 'lucide-react'
+import { MapPin, BedDouble, Bath, Maximize, Car, ChevronLeft, ChevronRight, Star, ImageOff } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
@@ -20,16 +19,13 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
 
 const WHATSAPP_NUMBER = '543513078376'
 
-const OPERATION_LABELS: Record<string, string> = {
-  venta: 'Venta',
-  alquiler: 'Alquiler',
-  alquiler_temporal: 'Temporal',
-}
-
-const STATUS_CONFIG = {
-  disponible: { label: 'Disponible', className: 'bg-emerald-600 text-white' },
-  reservado: { label: 'Reservada', className: 'bg-amber-500 text-white' },
-  vendido: { label: 'Vendida', className: 'bg-foreground/70 text-white' },
+const TYPE_LABELS: Record<string, string> = {
+  casa: 'Casa',
+  departamento: 'Depto',
+  terreno: 'Terreno',
+  local: 'Local',
+  oficina: 'Oficina',
+  cochera: 'Cochera',
 }
 
 interface PropertyCardListProps {
@@ -38,10 +34,20 @@ interface PropertyCardListProps {
 
 function PropertyCardList({ property }: PropertyCardListProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [imgError, setImgError] = useState(false)
+  const analytics = useAnalytics()
+
+  const { ref: viewRef, isInView } = useInView({ threshold: 0.3, triggerOnce: true })
+  const hasTracked = useState(false)
+  if (isInView && !hasTracked[0]) {
+    hasTracked[1](true)
+    analytics.trackPropertyView(property.id, property.title)
+  }
 
   const nextImage = useCallback((e?: React.MouseEvent) => {
     e?.preventDefault()
     e?.stopPropagation()
+    setImgError(false)
     setCurrentImageIndex((prev) =>
       prev === property.images.length - 1 ? 0 : prev + 1
     )
@@ -50,6 +56,7 @@ function PropertyCardList({ property }: PropertyCardListProps) {
   const prevImage = useCallback((e?: React.MouseEvent) => {
     e?.preventDefault()
     e?.stopPropagation()
+    setImgError(false)
     setCurrentImageIndex((prev) =>
       prev === 0 ? property.images.length - 1 : prev - 1
     )
@@ -62,171 +69,159 @@ function PropertyCardList({ property }: PropertyCardListProps) {
   })
 
   const formattedPrice = useMemo(() => {
-    return new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: property.currency || 'USD',
+    const prefix = property.currency === 'USD' ? 'USD' : 'ARS'
+    const formatted = new Intl.NumberFormat('es-AR', {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(property.price)
+    return `${prefix} ${formatted}`
   }, [property.price, property.currency])
 
   const handleWhatsApp = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
+    analytics.trackContact('whatsapp', `property_${property.id}`)
     const message = `Hola, me interesa la propiedad: ${property.title} - ${property.location}`
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank')
   }
 
-  const handlePhone = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    window.open(`tel:+${WHATSAPP_NUMBER}`, '_self')
-  }
-
-  const status = STATUS_CONFIG[property.status] || STATUS_CONFIG.disponible
+  const operationLabel = property.operation === 'alquiler' ? 'Alquiler' : property.operation === 'alquiler_temporal' ? 'Temporal' : 'Venta'
 
   return (
-    <Link href={`/propiedades/${property.id}`} className="block group">
-      <Card className="flex flex-col sm:flex-row overflow-hidden bg-white rounded-xl border border-border transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
-        {/* Image */}
-        <div className="relative w-full sm:w-[280px] lg:w-[320px] h-[220px] sm:h-auto sm:min-h-[220px] shrink-0 bg-surface" {...swipeHandlers}>
-          <Image
-            src={property.images[currentImageIndex]}
-            alt={property.title}
-            fill
-            sizes="(max-width: 640px) 100vw, 320px"
-            className="object-cover"
-          />
-
-          {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
-
-          {/* Favorite */}
-          <div className="absolute top-3 right-3 z-10">
-            <FavoriteButton propertyId={property.id} size="small" />
-          </div>
-
-          {/* Badges */}
-          <div className="absolute top-3 left-3 flex flex-col gap-1.5">
-            {property.featured && (
-              <Badge className="bg-brand-secondary text-brand-dark hover:bg-brand-secondary text-[10px] font-semibold uppercase tracking-wider shadow-sm">
-                <Star className="w-3 h-3 mr-1 fill-current" />
-                Destacada
-              </Badge>
-            )}
-            <Badge className={cn("hover:opacity-100 text-[10px] font-semibold uppercase tracking-wider shadow-sm", status.className)}>
-              {status.label}
-            </Badge>
-            {property.aptCredit && (
-              <Badge className="bg-brand-primary text-white hover:bg-brand-primary text-[10px] font-semibold shadow-sm">
-                Apto crédito
-              </Badge>
-            )}
-          </div>
-
-          {/* Image nav */}
-          {property.images.length > 1 && (
-            <>
-              <button
-                className="absolute left-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm text-foreground shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
-                onClick={(e) => prevImage(e)}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </button>
-              <button
-                className="absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm text-foreground shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
-                onClick={(e) => nextImage(e)}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </button>
-              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1">
-                {property.images.slice(0, 5).map((_, i) => (
-                  <div
-                    key={i}
-                    className={cn(
-                      "h-1.5 rounded-full transition-all",
-                      i === currentImageIndex ? "w-4 bg-white" : "w-1.5 bg-white/50"
-                    )}
-                  />
-                ))}
+    <div ref={viewRef}>
+      <Link href={`/propiedades/${property.id}`} className="block group">
+        <article className="flex flex-col sm:flex-row bg-white rounded-xl border border-border overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
+          {/* ── Image ── */}
+          <div className="relative w-full sm:w-[280px] lg:w-[320px] h-[220px] sm:h-auto sm:min-h-[200px] shrink-0 bg-surface" {...swipeHandlers}>
+            {imgError ? (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-surface text-muted">
+                <ImageOff className="w-8 h-8 mb-2 opacity-40" />
+                <span className="text-xs opacity-60">Imagen no disponible</span>
               </div>
-            </>
-          )}
-        </div>
+            ) : (
+              <Image
+                src={property.images[currentImageIndex]}
+                alt={property.title}
+                fill
+                sizes="(max-width: 640px) 100vw, 320px"
+                className="object-cover"
+                placeholder="blur"
+                blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjI1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjFmNWY5Ii8+PC9zdmc+"
+                onError={() => setImgError(true)}
+              />
+            )}
 
-        {/* Content */}
-        <div className="flex-1 p-4 sm:p-5 flex flex-col gap-3 min-w-0">
-          {/* Header */}
-          <div className="flex justify-between items-start gap-3">
-            <div className="min-w-0">
-              <h3 className="text-base sm:text-lg font-semibold text-foreground truncate group-hover:text-brand-primary transition-colors">
+            {/* Badges */}
+            <div className="absolute top-3 left-3 flex gap-1.5">
+              {property.featured && (
+                <span className="bg-brand-secondary text-brand-dark text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md shadow-sm">
+                  Destacada
+                </span>
+              )}
+              <span className="bg-white/90 backdrop-blur-sm text-foreground text-[10px] font-semibold px-2 py-1 rounded-md shadow-sm">
+                {operationLabel}
+              </span>
+            </div>
+
+            {/* Favorito */}
+            <div className="absolute top-3 right-3 z-10">
+              <FavoriteButton propertyId={property.id} size="small" />
+            </div>
+
+            {/* Image nav */}
+            {property.images.length > 1 && !imgError && (
+              <>
+                <button
+                  className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm shadow opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
+                  onClick={(e) => prevImage(e)}
+                >
+                  <ChevronLeft className="h-4 w-4 text-foreground" />
+                </button>
+                <button
+                  className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm shadow opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
+                  onClick={(e) => nextImage(e)}
+                >
+                  <ChevronRight className="h-4 w-4 text-foreground" />
+                </button>
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1">
+                  {property.images.slice(0, 5).map((_, i) => (
+                    <div
+                      key={i}
+                      className={cn(
+                        "h-1.5 rounded-full transition-all",
+                        i === currentImageIndex ? "w-4 bg-white" : "w-1.5 bg-white/50"
+                      )}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* ── Content ── */}
+          <div className="flex-1 p-4 sm:p-5 flex flex-col min-w-0">
+            {/* Row 1: Título + Precio */}
+            <div className="flex justify-between items-start gap-3 mb-1.5">
+              <h3 className="text-base font-semibold text-foreground truncate group-hover:text-brand-primary transition-colors">
                 {property.title}
               </h3>
-              <p className="text-sm text-muted flex items-center gap-1.5 mt-0.5">
+              <span className="text-lg font-bold text-foreground shrink-0">{formattedPrice}</span>
+            </div>
+
+            {/* Row 2: Ubicación + expenses */}
+            <div className="flex justify-between items-center gap-3 mb-3">
+              <p className="text-sm text-muted flex items-center gap-1 truncate">
                 <MapPin className="h-3.5 w-3.5 shrink-0" />
                 <span className="truncate">{property.location}</span>
               </p>
+              {property.expenses && (
+                <span className="text-[11px] text-muted shrink-0">+ ${new Intl.NumberFormat('es-AR').format(property.expenses)} exp.</span>
+              )}
             </div>
-            <div className="text-right shrink-0">
-              <span className="text-lg font-bold text-brand-primary block">{formattedPrice}</span>
-              <Badge variant="outline" className="text-[10px] mt-1 border-border text-muted">
-                {OPERATION_LABELS[property.operation] || property.operation}
-              </Badge>
+
+            {/* Row 3: Features inline */}
+            <div className="flex items-center gap-4 text-sm text-muted mb-4">
+              <span className="text-xs font-medium text-brand-primary uppercase tracking-wide">
+                {TYPE_LABELS[property.type] || property.type}
+              </span>
+              {property.bedrooms != null && property.bedrooms > 0 && (
+                <span className="flex items-center gap-1">
+                  <BedDouble className="h-3.5 w-3.5 text-muted/60" />
+                  <span className="text-xs text-foreground">{property.bedrooms} dorm</span>
+                </span>
+              )}
+              {property.bathrooms != null && property.bathrooms > 0 && (
+                <span className="flex items-center gap-1">
+                  <Bath className="h-3.5 w-3.5 text-muted/60" />
+                  <span className="text-xs text-foreground">{property.bathrooms} {property.bathrooms > 1 ? 'baños' : 'baño'}</span>
+                </span>
+              )}
+              <span className="flex items-center gap-1">
+                <Maximize className="h-3.5 w-3.5 text-muted/60" />
+                <span className="text-xs text-foreground">{property.area} m²</span>
+              </span>
+              {property.parking != null && property.parking > 0 && (
+                <span className="flex items-center gap-1">
+                  <Car className="h-3.5 w-3.5 text-muted/60" />
+                  <span className="text-xs text-foreground">{property.parking} coch</span>
+                </span>
+              )}
+            </div>
+
+            {/* CTA — pegado abajo */}
+            <div className="mt-auto">
+              <button
+                className="inline-flex items-center gap-2 h-9 px-4 bg-[#25D366] hover:bg-[#20BD5A] text-white text-xs font-semibold rounded-lg transition-colors"
+                onClick={handleWhatsApp}
+              >
+                <WhatsAppIcon className="h-3.5 w-3.5" />
+                Consultar
+              </button>
             </div>
           </div>
-
-          {/* Description */}
-          <p className="text-sm text-muted leading-relaxed line-clamp-2">{property.description}</p>
-
-          {/* Features */}
-          <div className="flex flex-wrap gap-2">
-            <div className="flex items-center gap-1.5 bg-surface border border-border rounded-lg px-2.5 py-1.5">
-              <Maximize className="h-3.5 w-3.5 text-brand-primary/60" />
-              <span className="text-xs font-medium text-foreground">{property.area} m²</span>
-            </div>
-            {property.bedrooms && (
-              <div className="flex items-center gap-1.5 bg-surface border border-border rounded-lg px-2.5 py-1.5">
-                <BedDouble className="h-3.5 w-3.5 text-brand-primary/60" />
-                <span className="text-xs font-medium text-foreground">{property.bedrooms} dorm.</span>
-              </div>
-            )}
-            {property.bathrooms && (
-              <div className="flex items-center gap-1.5 bg-surface border border-border rounded-lg px-2.5 py-1.5">
-                <Bath className="h-3.5 w-3.5 text-brand-primary/60" />
-                <span className="text-xs font-medium text-foreground">{property.bathrooms} baño{property.bathrooms > 1 ? 's' : ''}</span>
-              </div>
-            )}
-            {property.parking && property.parking > 0 && (
-              <div className="flex items-center gap-1.5 bg-surface border border-border rounded-lg px-2.5 py-1.5">
-                <Car className="h-3.5 w-3.5 text-brand-primary/60" />
-                <span className="text-xs font-medium text-foreground">{property.parking} coch.</span>
-              </div>
-            )}
-          </div>
-
-          {/* Actions */}
-          <div className="flex gap-2 mt-auto pt-3 border-t border-border">
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-xs border-border text-muted hover:text-foreground hover:bg-surface"
-              onClick={handlePhone}
-            >
-              <Phone className="h-3.5 w-3.5" />
-              Llamar
-            </Button>
-            <Button
-              size="sm"
-              className="text-xs bg-[#25D366] hover:bg-[#20BD5A] text-white"
-              onClick={handleWhatsApp}
-            >
-              <WhatsAppIcon className="h-3.5 w-3.5" />
-              WhatsApp
-            </Button>
-          </div>
-        </div>
-      </Card>
-    </Link>
+        </article>
+      </Link>
+    </div>
   )
 }
 

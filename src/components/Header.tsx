@@ -96,9 +96,11 @@ export default function Header() {
   const headerClasses = `
     fixed inset-x-0 top-0 z-[9999]
     transition-all duration-300 ease-out
-    ${isScrolled || needsSolidHeader || isMobileMenuOpen
-      ? 'bg-white/95 backdrop-blur-md shadow-md py-3'
-      : 'bg-transparent py-5'
+    ${isMobileMenuOpen
+      ? 'bg-white shadow-md py-3'
+      : isScrolled || needsSolidHeader
+        ? 'bg-white/95 backdrop-blur-md shadow-md py-3'
+        : 'bg-transparent py-5'
     }
   `
 
