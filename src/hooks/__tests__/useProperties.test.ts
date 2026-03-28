@@ -49,7 +49,6 @@ jest.mock('@/components/ToastContainer', () => ({
   }),
 }))
 
-// Mock de las propiedades iniciales
 jest.mock('@/data/properties', () => ({
   properties: [],
   Property: {},
@@ -58,8 +57,6 @@ jest.mock('@/data/properties', () => ({
 describe('useProperties Hook', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    // Limpiar localStorage
-    localStorage.clear()
   })
 
   it('inicializa con estado de carga', () => {
@@ -71,12 +68,10 @@ describe('useProperties Hook', () => {
   it('tiene las funciones básicas disponibles', async () => {
     const { result } = renderHook(() => useProperties())
 
-    // Esperar a que termine la carga inicial
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false)
     }, { timeout: 3000 })
 
-    // Verificar que las funciones básicas existen
     expect(typeof result.current.getPropertyById).toBe('function')
     expect(typeof result.current.refreshProperties).toBe('function')
     expect(Array.isArray(result.current.properties)).toBe(true)
@@ -100,8 +95,8 @@ describe('useProperties Hook', () => {
       expect(result.current.isLoading).toBe(false)
     }, { timeout: 3000 })
 
-    // Debe hacer fallback a localStorage
-    expect(result.current.useSupabase).toBe(false)
+    expect(result.current.properties).toEqual([])
+    expect(result.current.error).toBeTruthy()
   })
 
   it('retorna undefined para ID inexistente', async () => {

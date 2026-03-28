@@ -9,12 +9,8 @@ import { useSwipe } from '@/hooks/useSwipe'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { MapPin, Ruler, BedDouble, Bath, Car, MessageCircle, ChevronLeft, ChevronRight } from 'lucide-react'
+import { MapPin, Maximize, BedDouble, Bath, Car, Phone, ChevronLeft, ChevronRight, Star } from 'lucide-react'
 import { cn } from '@/lib/utils'
-
-interface PropertyCardListProps {
-  property: Property
-}
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
@@ -22,10 +18,22 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
   </svg>
 )
 
-const operationLabels: Record<string, string> = {
+const WHATSAPP_NUMBER = '543513078376'
+
+const OPERATION_LABELS: Record<string, string> = {
   venta: 'Venta',
   alquiler: 'Alquiler',
   alquiler_temporal: 'Temporal',
+}
+
+const STATUS_CONFIG = {
+  disponible: { label: 'Disponible', className: 'bg-emerald-600 text-white' },
+  reservado: { label: 'Reservada', className: 'bg-amber-500 text-white' },
+  vendido: { label: 'Vendida', className: 'bg-foreground/70 text-white' },
+}
+
+interface PropertyCardListProps {
+  property: Property
 }
 
 function PropertyCardList({ property }: PropertyCardListProps) {
@@ -65,15 +73,23 @@ function PropertyCardList({ property }: PropertyCardListProps) {
   const handleWhatsApp = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    const message = `Hola, estoy interesado/a en ${property.title} - ${property.location}`
-    window.open(`https://wa.me/5493517410580?text=${encodeURIComponent(message)}`, '_blank')
+    const message = `Hola, me interesa la propiedad: ${property.title} - ${property.location}`
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank')
   }
+
+  const handlePhone = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    window.open(`tel:+${WHATSAPP_NUMBER}`, '_self')
+  }
+
+  const status = STATUS_CONFIG[property.status] || STATUS_CONFIG.disponible
 
   return (
     <Link href={`/propiedades/${property.id}`} className="block group">
-      <Card className="flex flex-col sm:flex-row overflow-hidden bg-white transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5">
+      <Card className="flex flex-col sm:flex-row overflow-hidden bg-white rounded-xl border border-border transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
         {/* Image */}
-        <div className="relative w-full sm:w-[280px] lg:w-[320px] h-[220px] sm:h-auto sm:min-h-[200px] shrink-0 bg-slate-100" {...swipeHandlers}>
+        <div className="relative w-full sm:w-[280px] lg:w-[320px] h-[220px] sm:h-auto sm:min-h-[220px] shrink-0 bg-surface" {...swipeHandlers}>
           <Image
             src={property.images[currentImageIndex]}
             alt={property.title}
@@ -81,6 +97,9 @@ function PropertyCardList({ property }: PropertyCardListProps) {
             sizes="(max-width: 640px) 100vw, 320px"
             className="object-cover"
           />
+
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
 
           {/* Favorite */}
           <div className="absolute top-3 right-3 z-10">
@@ -90,12 +109,16 @@ function PropertyCardList({ property }: PropertyCardListProps) {
           {/* Badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-1.5">
             {property.featured && (
-              <Badge className="bg-amber-400 text-slate-900 hover:bg-amber-400 text-xs font-semibold shadow-sm">
+              <Badge className="bg-brand-secondary text-brand-dark hover:bg-brand-secondary text-[10px] font-semibold uppercase tracking-wider shadow-sm">
+                <Star className="w-3 h-3 mr-1 fill-current" />
                 Destacada
               </Badge>
             )}
+            <Badge className={cn("hover:opacity-100 text-[10px] font-semibold uppercase tracking-wider shadow-sm", status.className)}>
+              {status.label}
+            </Badge>
             {property.aptCredit && (
-              <Badge className="bg-emerald-500 text-white hover:bg-emerald-500 text-xs font-semibold shadow-sm">
+              <Badge className="bg-brand-primary text-white hover:bg-brand-primary text-[10px] font-semibold shadow-sm">
                 Apto crédito
               </Badge>
             )}
@@ -105,13 +128,13 @@ function PropertyCardList({ property }: PropertyCardListProps) {
           {property.images.length > 1 && (
             <>
               <button
-                className="absolute left-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute left-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm text-foreground shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
                 onClick={(e) => prevImage(e)}
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
               <button
-                className="absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm text-foreground shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
                 onClick={(e) => nextImage(e)}
               >
                 <ChevronRight className="h-4 w-4" />
@@ -122,7 +145,7 @@ function PropertyCardList({ property }: PropertyCardListProps) {
                     key={i}
                     className={cn(
                       "h-1.5 rounded-full transition-all",
-                      i === currentImageIndex ? "w-4 bg-white" : "w-1.5 bg-white/60"
+                      i === currentImageIndex ? "w-4 bg-white" : "w-1.5 bg-white/50"
                     )}
                   />
                 ))}
@@ -136,65 +159,65 @@ function PropertyCardList({ property }: PropertyCardListProps) {
           {/* Header */}
           <div className="flex justify-between items-start gap-3">
             <div className="min-w-0">
-              <h3 className="text-lg font-semibold text-slate-900 truncate group-hover:text-[#2c5f7d] transition-colors">
+              <h3 className="text-base sm:text-lg font-semibold text-foreground truncate group-hover:text-brand-primary transition-colors">
                 {property.title}
               </h3>
-              <p className="text-sm text-slate-500 flex items-center gap-1 mt-0.5">
+              <p className="text-sm text-muted flex items-center gap-1.5 mt-0.5">
                 <MapPin className="h-3.5 w-3.5 shrink-0" />
                 <span className="truncate">{property.location}</span>
               </p>
             </div>
             <div className="text-right shrink-0">
-              <span className="text-lg font-bold text-[#2c5f7d] block">{formattedPrice}</span>
-              <Badge variant="outline" className="text-xs mt-1">
-                {operationLabels[property.operation] || property.operation}
+              <span className="text-lg font-bold text-brand-primary block">{formattedPrice}</span>
+              <Badge variant="outline" className="text-[10px] mt-1 border-border text-muted">
+                {OPERATION_LABELS[property.operation] || property.operation}
               </Badge>
             </div>
           </div>
 
           {/* Description */}
-          <p className="text-sm text-slate-500 leading-relaxed line-clamp-2">{property.description}</p>
+          <p className="text-sm text-muted leading-relaxed line-clamp-2">{property.description}</p>
 
           {/* Features */}
           <div className="flex flex-wrap gap-2">
-            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-100 rounded-lg px-2.5 py-1.5">
-              <Ruler className="h-3.5 w-3.5 text-slate-400" />
-              <span className="text-xs font-medium text-slate-700">{property.area} m²</span>
+            <div className="flex items-center gap-1.5 bg-surface border border-border rounded-lg px-2.5 py-1.5">
+              <Maximize className="h-3.5 w-3.5 text-brand-primary/60" />
+              <span className="text-xs font-medium text-foreground">{property.area} m²</span>
             </div>
             {property.bedrooms && (
-              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-100 rounded-lg px-2.5 py-1.5">
-                <BedDouble className="h-3.5 w-3.5 text-slate-400" />
-                <span className="text-xs font-medium text-slate-700">{property.bedrooms} dorm.</span>
+              <div className="flex items-center gap-1.5 bg-surface border border-border rounded-lg px-2.5 py-1.5">
+                <BedDouble className="h-3.5 w-3.5 text-brand-primary/60" />
+                <span className="text-xs font-medium text-foreground">{property.bedrooms} dorm.</span>
               </div>
             )}
             {property.bathrooms && (
-              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-100 rounded-lg px-2.5 py-1.5">
-                <Bath className="h-3.5 w-3.5 text-slate-400" />
-                <span className="text-xs font-medium text-slate-700">{property.bathrooms} baños</span>
+              <div className="flex items-center gap-1.5 bg-surface border border-border rounded-lg px-2.5 py-1.5">
+                <Bath className="h-3.5 w-3.5 text-brand-primary/60" />
+                <span className="text-xs font-medium text-foreground">{property.bathrooms} baño{property.bathrooms > 1 ? 's' : ''}</span>
               </div>
             )}
             {property.parking && property.parking > 0 && (
-              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-100 rounded-lg px-2.5 py-1.5">
-                <Car className="h-3.5 w-3.5 text-slate-400" />
-                <span className="text-xs font-medium text-slate-700">{property.parking} coch.</span>
+              <div className="flex items-center gap-1.5 bg-surface border border-border rounded-lg px-2.5 py-1.5">
+                <Car className="h-3.5 w-3.5 text-brand-primary/60" />
+                <span className="text-xs font-medium text-foreground">{property.parking} coch.</span>
               </div>
             )}
           </div>
 
           {/* Actions */}
-          <div className="flex gap-2 mt-auto pt-3 border-t border-slate-100">
+          <div className="flex gap-2 mt-auto pt-3 border-t border-border">
             <Button
               variant="outline"
               size="sm"
-              className="text-xs"
-              onClick={(e) => { e.preventDefault(); e.stopPropagation() }}
+              className="text-xs border-border text-muted hover:text-foreground hover:bg-surface"
+              onClick={handlePhone}
             >
-              <MessageCircle className="h-3.5 w-3.5" />
-              Contactar
+              <Phone className="h-3.5 w-3.5" />
+              Llamar
             </Button>
             <Button
               size="sm"
-              className="text-xs bg-[#25D366] hover:bg-[#20bd5a] text-white"
+              className="text-xs bg-[#25D366] hover:bg-[#20BD5A] text-white"
               onClick={handleWhatsApp}
             >
               <WhatsAppIcon className="h-3.5 w-3.5" />

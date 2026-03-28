@@ -12,16 +12,26 @@ import { ArrowRight, Sparkles } from 'lucide-react'
 
 function PropertyCardSkeleton() {
   return (
-    <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-border">
-      <div className="aspect-[16/10] bg-gradient-to-r from-surface via-muted to-surface animate-pulse" />
+    <div className="bg-white rounded-xl overflow-hidden border border-border">
+      <div className="aspect-[16/10] bg-gradient-to-r from-surface via-border/30 to-surface animate-pulse" />
       <div className="p-4 space-y-3">
-        <div className="h-4 bg-surface rounded w-20 animate-pulse" />
-        <div className="h-5 bg-surface rounded w-3/4 animate-pulse" />
-        <div className="h-4 bg-surface rounded w-1/2 animate-pulse" />
+        <div className="flex gap-2">
+          <div className="h-3 bg-surface rounded w-16 animate-pulse" />
+          <div className="h-3 bg-surface rounded w-12 animate-pulse" />
+        </div>
+        <div className="h-4 bg-surface rounded w-3/4 animate-pulse" />
+        <div className="h-3 bg-surface rounded w-1/2 animate-pulse" />
         <div className="flex gap-4 pt-2">
-          <div className="h-4 bg-surface rounded w-12 animate-pulse" />
-          <div className="h-4 bg-surface rounded w-12 animate-pulse" />
-          <div className="h-4 bg-surface rounded w-16 animate-pulse" />
+          <div className="h-3 bg-surface rounded w-10 animate-pulse" />
+          <div className="h-3 bg-surface rounded w-10 animate-pulse" />
+          <div className="h-3 bg-surface rounded w-14 animate-pulse" />
+        </div>
+        <div className="border-t border-border pt-3 mt-3">
+          <div className="flex gap-2">
+            <div className="h-9 bg-surface rounded-lg flex-1 animate-pulse" />
+            <div className="h-9 bg-surface rounded-lg flex-1 animate-pulse" />
+            <div className="h-9 w-9 bg-surface rounded-lg animate-pulse" />
+          </div>
         </div>
       </div>
     </div>

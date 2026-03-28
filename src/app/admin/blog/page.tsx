@@ -217,19 +217,12 @@ export default function AdminBlogPage() {
         <Modal
           isOpen={deleteModal.isOpen}
           onClose={() => setDeleteModal({ isOpen: false, id: '', title: '' })}
+          onConfirm={handleDelete}
           title="Eliminar Articulo"
           message={`¿Estas seguro de eliminar "${deleteModal.title}"? Esta accion no se puede deshacer.`}
-          type="alert"
-          actions={
-            <div className="flex gap-2 justify-end">
-              <Button variant="outline" onClick={() => setDeleteModal({ isOpen: false, id: '', title: '' })}>
-                Cancelar
-              </Button>
-              <Button variant="destructive" onClick={handleDelete}>
-                Eliminar
-              </Button>
-            </div>
-          }
+          type="confirm"
+          confirmText="Eliminar"
+          cancelText="Cancelar"
         />
       )}
 

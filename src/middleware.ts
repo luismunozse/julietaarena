@@ -11,9 +11,11 @@ export async function middleware(request: NextRequest) {
     request: { headers: request.headers },
   })
 
-  // Only protect admin routes
   const isProtected = PROTECTED_PATHS.some((path) => pathname.startsWith(path))
-  if (!isProtected) {
+  const isLoginRoute = pathname.startsWith(LOGIN_PATH)
+
+  // Only run auth logic for admin and login routes
+  if (!isProtected && !isLoginRoute) {
     return response
   }
 
@@ -21,9 +23,12 @@ export async function middleware(request: NextRequest) {
 
   // If Supabase is not configured, block admin access entirely
   if (!supabase) {
-    const loginUrl = new URL(LOGIN_PATH, request.url)
-    loginUrl.searchParams.set('error', 'config')
-    return NextResponse.redirect(loginUrl)
+    if (isProtected) {
+      const loginUrl = new URL(LOGIN_PATH, request.url)
+      loginUrl.searchParams.set('error', 'config')
+      return NextResponse.redirect(loginUrl)
+    }
+    return response
   }
 
   const {
@@ -31,16 +36,22 @@ export async function middleware(request: NextRequest) {
     error,
   } = await supabase.auth.getUser()
 
-  if (error || !user) {
+  // Redirect unauthenticated users away from admin
+  if (isProtected && (error || !user)) {
     const loginUrl = new URL(LOGIN_PATH, request.url)
     loginUrl.searchParams.set('redirect', pathname)
     return NextResponse.redirect(loginUrl)
   }
 
-  // User is authenticated — allow access
+  // Redirect authenticated users away from login to admin
+  if (isLoginRoute && user && !error) {
+    const redirect = request.nextUrl.searchParams.get('redirect') || '/admin'
+    return NextResponse.redirect(new URL(redirect, request.url))
+  }
+
   return response
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: ['/admin/:path*', '/login/:path*'],
 }

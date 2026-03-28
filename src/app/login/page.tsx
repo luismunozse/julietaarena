@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Lock, Mail, Loader2, ShieldAlert, AlertCircle, Building2 } from 'lucide-react'
+import { Lock, Mail, Loader2, ShieldAlert, AlertCircle } from 'lucide-react'
 
 function LoginForm() {
   const router = useRouter()
@@ -63,9 +63,7 @@ function LoginForm() {
     <div className="w-full max-w-md mx-4">
       <Card className="border-0 shadow-2xl bg-white/95 backdrop-blur-sm">
         <CardHeader className="space-y-1 text-center pb-2">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-brand-primary to-brand-accent">
-            <Building2 className="h-7 w-7 text-white" />
-          </div>
+          <img src="/logo.png" alt="Julieta Arena" className="mx-auto mb-4 h-20 w-20 rounded-full object-contain" />
           <CardTitle className="text-2xl font-bold text-brand-accent">
             Panel de Administración
           </CardTitle>

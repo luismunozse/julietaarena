@@ -45,30 +45,6 @@ export interface Property {
   updatedAt?: string
 }
 
-// Array de propiedades - Las propiedades se gestionan desde el panel de administración
-// y se almacenan en localStorage o Supabase. Inicia vacío sin datos de ejemplo.
+// Las propiedades se gestionan desde el panel de administración
+// y se almacenan en Supabase. Este array vacío es el fallback inicial.
 export const properties: Property[] = []
-
-export const getFeaturedProperties = (): Property[] => {
-  return properties.filter(prop => prop.featured && prop.status === 'disponible')
-}
-
-export const getPropertiesByType = (type: string): Property[] => {
-  return properties.filter(prop => prop.type === type && prop.status === 'disponible')
-}
-
-export const getPropertyById = (id: string): Property | undefined => {
-  return properties.find(prop => prop.id === id)
-}
-
-export const getPropertiesByOperation = (operation: 'venta' | 'alquiler' | 'alquiler_temporal'): Property[] => {
-  return properties.filter(prop => prop.operation === operation && prop.status === 'disponible')
-}
-
-export const getPropertiesForSale = (): Property[] => {
-  return getPropertiesByOperation('venta')
-}
-
-export const getPropertiesForRent = (): Property[] => {
-  return getPropertiesByOperation('alquiler')
-}

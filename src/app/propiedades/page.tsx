@@ -1,6 +1,8 @@
 import SearchHero from '@/components/SearchHero'
 import FeaturedProperties from '@/components/FeaturedProperties'
 
+export const revalidate = 120
+
 export const metadata = {
   title: 'Buscar Propiedades | Julieta Arena - Martillera Pública',
   description: 'Busca tu propiedad ideal en Córdoba. Casas, departamentos, terrenos, locales y oficinas en venta y alquiler.',

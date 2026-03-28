@@ -23,7 +23,6 @@ import {
   Settings,
   Globe,
   LogOut,
-  Building2,
   BookOpen,
 } from 'lucide-react'
 import {
@@ -173,9 +172,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         {/* Header - debe coincidir con la altura del header principal (h-14) */}
         <SidebarHeader className="h-12 border-b border-slate-100 px-3 flex items-center">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-slate-800 to-slate-700 text-white shadow-sm">
-              <Building2 className="h-4 w-4" />
-            </div>
+            <img src="/logo.png" alt="Julieta Arena" className="h-9 w-9 shrink-0 rounded-lg object-contain" />
             <div className="flex flex-col group-data-[collapsible=icon]:hidden">
               <span className="font-semibold text-sm text-slate-800">Julieta Arena</span>
               <span className="text-xs text-slate-500">Admin Panel</span>

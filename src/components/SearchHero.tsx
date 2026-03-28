@@ -199,7 +199,7 @@ export default function SearchHero() {
   }
 
   return (
-    <section className="relative min-h-[60vh] sm:min-h-[70vh] flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-[65vh] sm:min-h-[75vh] flex items-center justify-center overflow-hidden pt-20 sm:pt-24">
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-brand-dark via-brand-accent to-brand-primary" />
 
@@ -210,7 +210,7 @@ export default function SearchHero() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 w-full max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
+      <div className="relative z-10 w-full max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="text-center">
           {/* Title */}
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3 sm:mb-4 leading-tight">
@@ -246,10 +246,11 @@ export default function SearchHero() {
           </div>
 
           {/* Search Box */}
-          <div className="bg-white rounded-xl sm:rounded-2xl p-2 sm:p-3 shadow-2xl shadow-black/20 mx-2 sm:mx-0">
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+          <div className="bg-white rounded-2xl p-2.5 sm:p-3 shadow-2xl shadow-black/15 mx-2 sm:mx-0">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-2.5">
               {/* Location Input */}
               <div className="flex-1 relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none" />
                 <input
                   ref={inputRef}
                   type="text"
@@ -258,7 +259,7 @@ export default function SearchHero() {
                   onChange={(e) => setSearchLocation(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                   disabled={isLoadingMaps}
-                  className="w-full h-12 sm:h-14 px-4 sm:px-5 text-sm sm:text-base bg-surface border-2 border-border rounded-xl outline-none transition-all duration-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 disabled:opacity-60"
+                  className="w-full h-12 sm:h-14 pl-11 pr-4 text-sm sm:text-base bg-surface border border-border rounded-xl outline-none transition-all duration-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 focus:bg-white disabled:opacity-60"
                 />
                 {mapsError && (
                   <span
@@ -274,7 +275,7 @@ export default function SearchHero() {
               <select
                 value={propertyType}
                 onChange={(e) => setPropertyType(e.target.value)}
-                className="h-12 sm:h-14 px-3 sm:px-4 text-sm sm:text-base bg-surface border-2 border-border rounded-xl outline-none cursor-pointer transition-all duration-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 sm:w-48"
+                className="h-12 sm:h-14 px-3 sm:px-4 text-sm sm:text-base bg-surface border border-border rounded-xl outline-none cursor-pointer transition-all duration-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 focus:bg-white sm:w-48"
               >
                 {PROPERTY_TYPES.map(type => (
                   <option key={type.value} value={type.value}>
@@ -287,7 +288,7 @@ export default function SearchHero() {
               <button
                 onClick={handleSearch}
                 aria-label="Buscar propiedades"
-                className="h-12 sm:h-14 px-4 sm:px-6 bg-gradient-to-r from-brand-secondary to-yellow-500 rounded-xl flex items-center justify-center gap-2 font-semibold text-sm sm:text-base text-brand-dark hover:shadow-lg hover:shadow-brand-secondary/30 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
+                className="h-12 sm:h-14 px-5 sm:px-7 bg-gradient-to-r from-brand-secondary to-yellow-500 rounded-xl flex items-center justify-center gap-2.5 font-semibold text-sm sm:text-base text-brand-dark hover:shadow-lg hover:shadow-brand-secondary/30 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
               >
                 <Search className="w-5 h-5" />
                 <span>Buscar</span>

@@ -1,35 +1,12 @@
 import type { Metadata } from 'next'
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+import { getPropertyServer, getAllPropertyIds } from '@/lib/supabaseQueries'
 import PropertyDetailClient from './PropertyDetailClient'
 import PropertyStructuredData from '@/components/PropertyStructuredData'
 
+// ISR: revalidate every 120 seconds
+export const revalidate = 120
+
 const BUCKET = 'property-images'
-
-async function getProperty(id: string) {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-  if (!supabaseUrl || !supabaseAnonKey) return null
-
-  const cookieStore = await cookies()
-  const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
-    cookies: {
-      getAll() {
-        return cookieStore.getAll()
-      },
-      setAll() {},
-    },
-  })
-
-  const { data } = await supabase
-    .from('properties')
-    .select('id, title, description, price, currency, location, type, operation, images, area, bedrooms, bathrooms')
-    .eq('id', id)
-    .single()
-
-  return data
-}
 
 function getImageUrl(urlOrPath: string): string {
   if (urlOrPath.startsWith('http')) return urlOrPath
@@ -57,9 +34,14 @@ const operationLabels: Record<string, string> = {
   alquiler: 'en Alquiler',
 }
 
+export async function generateStaticParams() {
+  const ids = await getAllPropertyIds()
+  return ids.map(id => ({ id }))
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
-  const property = await getProperty(id)
+  const property = await getPropertyServer(id)
 
   if (!property) {
     return {
@@ -111,7 +93,7 @@ interface PropertyDetailPageProps {
 
 export default async function PropertyDetailPage({ params }: PropertyDetailPageProps) {
   const { id } = await params
-  const property = await getProperty(id)
+  const property = await getPropertyServer(id)
 
   return (
     <>

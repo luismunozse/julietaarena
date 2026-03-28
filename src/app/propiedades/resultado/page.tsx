@@ -9,11 +9,10 @@ export const metadata = {
 
 export default function ResultadoPage() {
   return (
-    <main className="pt-20">
+    <main>
       <Suspense fallback={<SkeletonLoader type="card" count={6} />}>
         <PropertiesResults />
       </Suspense>
     </main>
   )
 }
-

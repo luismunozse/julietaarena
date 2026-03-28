@@ -35,6 +35,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10 pb-10">
           {/* Brand */}
           <div className="text-center md:text-left">
+            <img src="/logo.png" alt="Julieta Arena" className="h-16 w-16 rounded-full object-contain mx-auto md:mx-0 mb-3 bg-white p-1" />
             <h3 className="text-2xl font-bold mb-2">Julieta Arena</h3>
             <p className="text-white/90 text-sm">Martillera Pública · Perito Tasador</p>
             <p className="text-white/60 text-xs mt-0.5">MP: 06-1216 · CPCPI Córdoba</p>

@@ -1,32 +1,13 @@
 import { MetadataRoute } from 'next'
 import { blogPosts } from '@/data/blogPosts'
-import { createClient } from '@supabase/supabase-js'
+import { getPropertiesServer } from '@/lib/supabaseQueries'
 
-async function getPropertyIds(): Promise<{ id: string; updated_at: string }[]> {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-  if (!supabaseUrl || !supabaseAnonKey) return []
-
-  try {
-    const supabase = createClient(supabaseUrl, supabaseAnonKey)
-    const { data } = await supabase
-      .from('properties')
-      .select('id, updated_at')
-      .eq('status', 'active')
-      .order('updated_at', { ascending: false })
-
-    return data || []
-  } catch {
-    return []
-  }
-}
+export const revalidate = 3600
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://julietaarena.com.ar'
   const currentDate = new Date()
 
-  // Páginas principales
   const mainPages: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
@@ -66,7 +47,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ]
 
-  // Blog posts dinámicos
   const blogPages: MetadataRoute.Sitemap = blogPosts.map((post) => ({
     url: `${baseUrl}/blog/${post.slug}`,
     lastModified: new Date(post.date),
@@ -74,11 +54,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }))
 
-  // Propiedades dinámicas desde Supabase
-  const properties = await getPropertyIds()
+  const properties = await getPropertiesServer()
   const propertyPages: MetadataRoute.Sitemap = properties.map((prop) => ({
     url: `${baseUrl}/propiedades/${prop.id}`,
-    lastModified: new Date(prop.updated_at),
+    lastModified: prop.updated_at ? new Date(prop.updated_at) : currentDate,
     changeFrequency: 'weekly' as const,
     priority: 0.8,
   }))

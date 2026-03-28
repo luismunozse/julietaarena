@@ -107,31 +107,47 @@ export default function PropertiesResults() {
   const router = useRouter()
   const { properties, isLoading: propertiesLoading } = useProperties()
 
-  const [activeTab, setActiveTab] = useState<OperationTab>('venta')
-  const [selectedType, setSelectedType] = useState<string>('all')
-  const [selectedLocation, setSelectedLocation] = useState<string>('all')
-  const [sortBy, setSortBy] = useState<string>('recent')
-  const [searchTerm, setSearchTerm] = useState('')
-  const [debouncedSearch, setDebouncedSearch] = useState('')
+  // Read all filters from URL search params
+  const readParam = useCallback((key: string, fallback: string = '') => {
+    return searchParams?.get(key) ?? fallback
+  }, [searchParams])
+
+  const [activeTab, setActiveTab] = useState<OperationTab>(
+    (readParam('operation') === 'alquiler' ? 'alquiler' : 'venta')
+  )
+  const [selectedType, setSelectedType] = useState<string>(readParam('type', 'all'))
+  const [searchTerm, setSearchTerm] = useState(readParam('location'))
+  const [debouncedSearch, setDebouncedSearch] = useState(readParam('location'))
+  const [sortBy, setSortBy] = useState<string>(readParam('sort', 'recent'))
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
 
-  // Advanced filters
-  const [minPrice, setMinPrice] = useState<string>('')
-  const [maxPrice, setMaxPrice] = useState<string>('')
-  const [bedrooms, setBedrooms] = useState<string>('all')
-  const [bathrooms, setBathrooms] = useState<string>('all')
-  const [minArea, setMinArea] = useState<string>('')
-  const [maxArea, setMaxArea] = useState<string>('')
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
+  // Advanced filters — synced from URL
+  const [minPrice, setMinPrice] = useState<string>(readParam('minPrice'))
+  const [maxPrice, setMaxPrice] = useState<string>(readParam('maxPrice'))
+  const [bedrooms, setBedrooms] = useState<string>(readParam('bedrooms', 'all'))
+  const [bathrooms, setBathrooms] = useState<string>(readParam('bathrooms', 'all'))
+  const [minArea, setMinArea] = useState<string>(readParam('minArea'))
+  const [maxArea, setMaxArea] = useState<string>(readParam('maxArea'))
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(() => {
+    return !!(readParam('minPrice') || readParam('maxPrice') || readParam('bedrooms') || readParam('bathrooms') || readParam('minArea') || readParam('maxArea'))
+  })
 
   const analytics = useAnalytics()
   const hasTrackedResults = useRef(false)
   const emptySearchTracked = useRef<string | null>(null)
 
-  // Debounce del término de búsqueda (300ms)
+  // Debounce del término de búsqueda (300ms) y sync a URL
   useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearch(searchTerm), 300)
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm)
+      // Sync search to URL
+      const currentLocation = searchParams?.get('location') ?? ''
+      if (searchTerm !== currentLocation) {
+        pushParams({ location: searchTerm || null })
+      }
+    }, 300)
     return () => clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerm])
 
   const { trackCustomMetric, trackEmptyState } = useUXMetrics({
@@ -140,19 +156,20 @@ export default function PropertiesResults() {
     trackScrollDepth: true
   })
 
-  const pushParams = (updates: Record<string, string | null>) => {
+  const pushParams = useCallback((updates: Record<string, string | null>) => {
     const params = new URLSearchParams(searchParams?.toString())
     Object.entries(updates).forEach(([key, value]) => {
-      if (value === null || value === '') {
+      if (value === null || value === '' || value === 'all') {
         params.delete(key)
       } else {
         params.set(key, value)
       }
     })
     const query = params.toString()
-    router.push(`/propiedades/resultado${query ? `?${query}` : ''}`)
-  }
+    router.push(`/propiedades/resultado${query ? `?${query}` : ''}`, { scroll: false })
+  }, [searchParams, router])
 
+  // Sync URL -> state when params change externally
   useEffect(() => {
     const operation = searchParams?.get('operation')
     const type = searchParams?.get('type')
@@ -163,12 +180,16 @@ export default function PropertiesResults() {
     }
     setSelectedType(type && type !== 'all' ? type : 'all')
     if (location) {
-      setSelectedLocation(location)
       setSearchTerm(location)
     } else {
-      setSelectedLocation('all')
       setSearchTerm('')
     }
+    setMinPrice(searchParams?.get('minPrice') ?? '')
+    setMaxPrice(searchParams?.get('maxPrice') ?? '')
+    setBedrooms(searchParams?.get('bedrooms') ?? 'all')
+    setBathrooms(searchParams?.get('bathrooms') ?? 'all')
+    setMinArea(searchParams?.get('minArea') ?? '')
+    setMaxArea(searchParams?.get('maxArea') ?? '')
   }, [searchParams])
 
   useEffect(() => {
@@ -206,9 +227,6 @@ export default function PropertiesResults() {
           ].join(' ')
 
           if (!matchesSearch(debouncedSearch, searchable)) return false
-        } else if (selectedLocation !== 'all' && selectedLocation) {
-          // Búsqueda solo por ubicación
-          if (!matchesSearch(selectedLocation, property.location)) return false
         }
 
         if (minPrice && property.price < parseFloat(minPrice)) return false
@@ -240,7 +258,7 @@ export default function PropertiesResults() {
     } catch (error) {
       return currentProperties.filter(p => p.status === 'disponible')
     }
-  }, [currentProperties, selectedType, selectedLocation, debouncedSearch, searchParams, propertiesLoading, minPrice, maxPrice, bedrooms, bathrooms, minArea, maxArea])
+  }, [currentProperties, selectedType, debouncedSearch, searchParams, propertiesLoading, minPrice, maxPrice, bedrooms, bathrooms, minArea, maxArea])
 
   // Tracking de búsquedas sin resultados (para el dueño del negocio)
   useEffect(() => {
@@ -287,8 +305,18 @@ export default function PropertiesResults() {
   const handleTabChange = (tab: OperationTab) => {
     if (tab === activeTab) return
     setActiveTab(tab)
-    // Preservar búsqueda y filtros al cambiar de tab
-    pushParams({ operation: tab, location: searchTerm || null, type: selectedType !== 'all' ? selectedType : null })
+    pushParams({
+      operation: tab,
+      location: searchTerm || null,
+      type: selectedType !== 'all' ? selectedType : null,
+      minPrice: minPrice || null,
+      maxPrice: maxPrice || null,
+      bedrooms: bedrooms !== 'all' ? bedrooms : null,
+      bathrooms: bathrooms !== 'all' ? bathrooms : null,
+      minArea: minArea || null,
+      maxArea: maxArea || null,
+      sort: sortBy !== 'recent' ? sortBy : null,
+    })
     analytics.trackEvent({ event: 'properties_tab_change', category: 'properties', action: 'switch_operation', label: tab })
   }
 
@@ -296,61 +324,75 @@ export default function PropertiesResults() {
     setSelectedType('all')
     setSortBy('recent')
     setSearchTerm('')
-    setSelectedLocation('all')
     setMinPrice('')
     setMaxPrice('')
     setBedrooms('all')
     setBathrooms('all')
     setMinArea('')
     setMaxArea('')
-    pushParams({ type: null, location: null, featured: null })
+    pushParams({
+      type: null, location: null, featured: null,
+      minPrice: null, maxPrice: null, bedrooms: null, bathrooms: null,
+      minArea: null, maxArea: null, sort: null,
+    })
   }
 
   const hasActiveFilters = selectedType !== 'all' || debouncedSearch || minPrice || maxPrice || bedrooms !== 'all' || bathrooms !== 'all' || minArea || maxArea
 
-  const inputClasses = "w-full h-11 px-4 text-sm bg-white border border-border rounded-lg outline-none transition-all duration-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20"
-  const selectClasses = "h-11 px-3 text-sm bg-white border border-border rounded-lg outline-none cursor-pointer transition-all duration-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20"
+  const inputClasses = "w-full h-11 px-4 text-sm bg-white border border-border rounded-xl outline-none transition-all duration-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20"
+  const selectClasses = "h-11 px-3 text-sm bg-white border border-border rounded-xl outline-none cursor-pointer transition-all duration-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20"
+
+  const activeFilterCount = [
+    selectedType !== 'all',
+    debouncedSearch,
+    minPrice,
+    maxPrice,
+    bedrooms !== 'all',
+    bathrooms !== 'all',
+    minArea,
+    maxArea,
+  ].filter(Boolean).length
 
   return (
     <div className="min-h-screen bg-surface">
       {/* Header */}
-      <div className="bg-gradient-to-br from-brand-dark via-brand-accent to-brand-primary py-8">
-        <div className="max-w-7xl mx-auto px-6">
+      <div className="bg-gradient-to-br from-brand-dark via-brand-accent to-brand-primary py-8 sm:py-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           {/* Breadcrumbs */}
-          <nav className="flex items-center gap-2 text-sm text-white/60 mb-4">
-            <button onClick={() => router.push('/')} className="hover:text-white transition-colors">
+          <nav className="flex items-center gap-1.5 text-sm text-white/50 mb-4">
+            <button onClick={() => router.push('/')} className="hover:text-white/90 transition-colors">
               Inicio
             </button>
-            <span>/</span>
-            <button onClick={() => router.push('/propiedades')} className="hover:text-white transition-colors">
+            <span className="text-white/30">/</span>
+            <button onClick={() => router.push('/propiedades')} className="hover:text-white/90 transition-colors">
               Propiedades
             </button>
-            <span>/</span>
-            <span className="text-white">{activeTab === 'venta' ? 'En Venta' : 'En Alquiler'}</span>
+            <span className="text-white/30">/</span>
+            <span className="text-white font-medium">{activeTab === 'venta' ? 'En Venta' : 'En Alquiler'}</span>
           </nav>
 
-          <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-3">
-            {activeTab === 'venta' ? <Home className="w-7 h-7" /> : <Key className="w-7 h-7" />}
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white flex items-center gap-3">
+            {activeTab === 'venta' ? <Home className="w-6 h-6 sm:w-7 sm:h-7" /> : <Key className="w-6 h-6 sm:w-7 sm:h-7" />}
             Propiedades en {activeTab === 'venta' ? 'Venta' : 'Alquiler'}
           </h1>
           {searchTerm && (
-            <p className="text-white/70 mt-2">
-              Resultados para: <strong className="text-white">{searchTerm}</strong>
+            <p className="text-white/60 mt-2 text-sm sm:text-base">
+              Resultados para: <strong className="text-white">&ldquo;{searchTerm}&rdquo;</strong>
             </p>
           )}
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="bg-white border-b border-border sticky top-0 z-20">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex gap-1">
+      <div className="bg-white border-b border-border sticky top-0 z-20 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="flex">
             <button
               onClick={() => handleTabChange('venta')}
-              className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
+              className={`flex items-center gap-2 px-5 sm:px-6 py-3.5 text-sm font-medium border-b-2 transition-all ${
                 activeTab === 'venta'
                   ? 'border-brand-primary text-brand-primary'
-                  : 'border-transparent text-muted hover:text-foreground'
+                  : 'border-transparent text-muted hover:text-foreground hover:border-border'
               }`}
             >
               <Home className="w-4 h-4" />
@@ -358,10 +400,10 @@ export default function PropertiesResults() {
             </button>
             <button
               onClick={() => handleTabChange('alquiler')}
-              className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
+              className={`flex items-center gap-2 px-5 sm:px-6 py-3.5 text-sm font-medium border-b-2 transition-all ${
                 activeTab === 'alquiler'
                   ? 'border-brand-primary text-brand-primary'
-                  : 'border-transparent text-muted hover:text-foreground'
+                  : 'border-transparent text-muted hover:text-foreground hover:border-border'
               }`}
             >
               <Key className="w-4 h-4" />
@@ -372,9 +414,9 @@ export default function PropertiesResults() {
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-6 py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         {/* Filters */}
-        <div className="bg-white rounded-xl border border-border p-4 mb-6">
+        <div className="bg-white rounded-2xl border border-border p-4 sm:p-5 mb-6 shadow-sm">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Search */}
             <div className="relative sm:col-span-2 lg:col-span-1">
@@ -399,7 +441,10 @@ export default function PropertiesResults() {
             {/* Type */}
             <select
               value={selectedType}
-              onChange={(e) => setSelectedType(e.target.value)}
+              onChange={(e) => {
+                setSelectedType(e.target.value)
+                pushParams({ type: e.target.value !== 'all' ? e.target.value : null })
+              }}
               className={selectClasses}
             >
               {PROPERTY_TYPES.map(type => (
@@ -410,7 +455,10 @@ export default function PropertiesResults() {
             {/* Sort */}
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
+              onChange={(e) => {
+                setSortBy(e.target.value)
+                pushParams({ sort: e.target.value !== 'recent' ? e.target.value : null })
+              }}
               className={selectClasses}
             >
               {SORT_OPTIONS.map(option => (
@@ -421,17 +469,22 @@ export default function PropertiesResults() {
             {/* Advanced Filters Toggle */}
             <button
               onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-              className="flex items-center justify-center gap-2 h-11 px-4 text-sm font-medium text-brand-primary bg-brand-primary/10 rounded-lg hover:bg-brand-primary/20 transition-colors"
+              className="flex items-center justify-center gap-2 h-11 px-4 text-sm font-medium text-brand-primary bg-brand-primary/8 rounded-xl hover:bg-brand-primary/15 transition-colors relative"
             >
               <SlidersHorizontal className="w-4 h-4" />
-              Filtros
+              <span>Filtros</span>
+              {activeFilterCount > 0 && (
+                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-brand-primary text-white text-[10px] font-bold">
+                  {activeFilterCount}
+                </span>
+              )}
               {showAdvancedFilters ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </button>
           </div>
 
           {/* Advanced Filters Panel */}
           {showAdvancedFilters && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 mt-4 border-t border-border">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 mt-4 border-t border-border/50">
               {/* Price Range */}
               <div>
                 <label className="block text-xs font-medium text-muted mb-1.5">Precio</label>
@@ -481,45 +534,46 @@ export default function PropertiesResults() {
         {/* Toolbar */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
           <p className="text-sm text-muted">
-            <span className="font-semibold text-foreground">{sortedProperties.length}</span> propiedad{sortedProperties.length !== 1 ? 'es' : ''} encontrada{sortedProperties.length !== 1 ? 's' : ''}
+            <span className="text-lg font-bold text-foreground">{sortedProperties.length}</span>{' '}
+            propiedad{sortedProperties.length !== 1 ? 'es' : ''} encontrada{sortedProperties.length !== 1 ? 's' : ''}
           </p>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            {/* Reset Filters */}
+            {hasActiveFilters && (
+              <button
+                onClick={handleClearFilters}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-brand-primary bg-brand-primary/8 rounded-lg hover:bg-brand-primary/15 transition-colors"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                Limpiar
+              </button>
+            )}
+
             {/* View Mode Buttons */}
-            <div className="flex bg-white rounded-lg border border-border p-1">
+            <div className="flex bg-white rounded-xl border border-border p-1 shadow-sm">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-brand-primary text-white' : 'text-muted hover:text-foreground'}`}
+                className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-brand-primary text-white shadow-sm' : 'text-muted hover:text-foreground'}`}
                 title="Vista grilla"
               >
                 <Grid3X3 className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`p-2 rounded-md transition-colors ${viewMode === 'list' ? 'bg-brand-primary text-white' : 'text-muted hover:text-foreground'}`}
+                className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-brand-primary text-white shadow-sm' : 'text-muted hover:text-foreground'}`}
                 title="Vista lista"
               >
                 <List className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode('map')}
-                className={`p-2 rounded-md transition-colors ${viewMode === 'map' ? 'bg-brand-primary text-white' : 'text-muted hover:text-foreground'}`}
+                className={`p-2 rounded-lg transition-all ${viewMode === 'map' ? 'bg-brand-primary text-white shadow-sm' : 'text-muted hover:text-foreground'}`}
                 title="Vista mapa"
               >
                 <MapPin className="w-4 h-4" />
               </button>
             </div>
-
-            {/* Reset Filters */}
-            {hasActiveFilters && (
-              <button
-                onClick={handleClearFilters}
-                className="flex items-center gap-2 px-4 py-2 text-sm text-muted hover:text-foreground transition-colors"
-              >
-                <RotateCcw className="w-4 h-4" />
-                Limpiar filtros
-              </button>
-            )}
           </div>
         </div>
 
@@ -545,7 +599,7 @@ export default function PropertiesResults() {
             )}
 
             {viewMode === 'map' && (
-              <div className="bg-white rounded-xl border border-border overflow-hidden" style={{ height: 'calc(100vh - 350px)', minHeight: '400px' }}>
+              <div className="bg-white rounded-2xl border border-border overflow-hidden shadow-sm" style={{ height: 'calc(100vh - 350px)', minHeight: '400px' }}>
                 <PropertyMap properties={sortedProperties} height="100%" />
               </div>
             )}
@@ -570,10 +624,11 @@ export default function PropertiesResults() {
 
             {/* Sugerencias de propiedades */}
             {suggestions.length > 0 && (
-              <div className="mt-8">
-                <h3 className="text-lg font-semibold text-brand-accent mb-4">
+              <div className="mt-10">
+                <h3 className="text-lg font-semibold text-foreground mb-1">
                   Te puede interesar
                 </h3>
+                <p className="text-sm text-muted mb-5">Otras propiedades disponibles que podrían gustarte</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {suggestions.map(property => (
                     <PropertyCard key={property.id} property={property} />

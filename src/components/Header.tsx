@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { ChevronDown, Menu, X } from 'lucide-react'
 
@@ -116,24 +117,33 @@ export default function Header() {
           {/* Logo */}
           <Link
             href="/"
-            className="group relative z-10"
+            className="group relative z-10 flex items-center gap-2"
             aria-label="Julieta Arena - Inicio"
           >
-            <span className={`
-              block text-xl font-bold transition-colors duration-200
-              ${isScrolled || needsSolidHeader || isMobileMenuOpen
-                ? 'text-brand-primary group-hover:text-brand-secondary'
-                : 'text-white group-hover:text-brand-secondary'
-              }
-            `}>
-              Julieta Arena
-            </span>
-            <span className={`
-              block text-xs transition-colors duration-200 -mt-0.5
-              ${isScrolled || needsSolidHeader || isMobileMenuOpen ? 'text-muted' : 'text-white/70'}
-            `}>
-              Martillera Pública
-            </span>
+            <Image
+              src="/logo.png"
+              alt="Julieta Arena"
+              width={120}
+              height={120}
+              className="h-[120px] w-[120px] object-contain drop-shadow-[0_2px_4px_rgba(255,255,255,0.3)]"
+            />
+            <div>
+              <span className={`
+                block text-xl font-bold transition-colors duration-200
+                ${isScrolled || needsSolidHeader || isMobileMenuOpen
+                  ? 'text-brand-primary group-hover:text-brand-secondary'
+                  : 'text-white group-hover:text-brand-secondary'
+                }
+              `}>
+                Julieta Arena
+              </span>
+              <span className={`
+                block text-xs transition-colors duration-200 -mt-0.5
+                ${isScrolled || needsSolidHeader || isMobileMenuOpen ? 'text-muted' : 'text-white/70'}
+              `}>
+                Martillera Pública
+              </span>
+            </div>
           </Link>
 
           {/* Desktop Navigation */}

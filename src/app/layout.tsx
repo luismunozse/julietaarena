@@ -4,13 +4,9 @@ import './globals.css'
 import '../styles/accessibility.css'
 import '../styles/microinteractions.css'
 import StructuredData from '@/components/StructuredData'
-import { AuthProvider } from '@/components/AuthProvider'
-import { ToastProvider } from '@/components/ToastContainer'
-import ConditionalLayout from '@/components/ConditionalLayout'
+import ClientProviders from '@/components/ClientProviders'
 import GoogleAnalytics from '@/components/GoogleAnalytics'
 import FacebookPixel from '@/components/FacebookPixel'
-import AnalyticsProvider from '@/components/AnalyticsProvider'
-import ErrorBoundary from '@/components/ErrorBoundary'
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -94,7 +90,6 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              // Desregistrar service workers problemáticos
               if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.getRegistrations().then(function(registrations) {
                   for(let registration of registrations) {
@@ -115,17 +110,9 @@ export default function RootLayout({
         {process.env.NEXT_PUBLIC_FB_PIXEL_ID && (
           <FacebookPixel pixelId={process.env.NEXT_PUBLIC_FB_PIXEL_ID} />
         )}
-        <ErrorBoundary>
-          <ToastProvider>
-            <AnalyticsProvider>
-              <AuthProvider>
-                <ConditionalLayout>
-                  {children}
-                </ConditionalLayout>
-              </AuthProvider>
-            </AnalyticsProvider>
-          </ToastProvider>
-        </ErrorBoundary>
+        <ClientProviders>
+          {children}
+        </ClientProviders>
       </body>
     </html>
   )
