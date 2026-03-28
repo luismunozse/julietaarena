@@ -30,6 +30,8 @@ import {
 interface PropertyMapProps {
   properties?: Property[]
   height?: string
+  /** When true, hides the section wrapper, title, and built-in filters (used when embedded in PropertiesResults) */
+  embedded?: boolean
 }
 
 interface MapMarker {
@@ -68,6 +70,7 @@ const propertyTypeIcons: Record<string, React.ReactNode> = {
 export default function PropertyMap({
   properties = [],
   height = '600px',
+  embedded = false,
 }: PropertyMapProps) {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null)
   const [mapMarkers, setMapMarkers] = useState<MapMarker[]>([])
@@ -114,6 +117,171 @@ export default function PropertyMap({
     return propertyTypeIcons[type] || <Home className="h-5 w-5" />
   }
 
+  const mapAndSidebar = (
+    <div className="grid lg:grid-cols-[1fr_320px]" style={{ height }}>
+      <GoogleMaps
+        properties={filteredMarkers.map((marker) => marker.property)}
+        selectedProperty={selectedProperty}
+        onPropertySelect={setSelectedProperty}
+        height={height}
+      />
+
+      {/* Property List Sidebar */}
+      <div className="max-h-[600px] overflow-y-auto border-l border-slate-200 bg-slate-50 p-4">
+        <h4 className="mb-4 font-semibold text-[#1a4158]">
+          Propiedades ({filteredMarkers.length})
+        </h4>
+        <div className="flex flex-col gap-4">
+          {filteredMarkers.map((marker) => (
+            <div
+              key={marker.id}
+              className={cn(
+                'cursor-pointer overflow-hidden rounded-xl border bg-white transition-all hover:shadow-md',
+                selectedProperty?.id === marker.property.id
+                  ? 'border-2 border-[#2c5f7d]'
+                  : 'border-slate-200'
+              )}
+              onClick={() => setSelectedProperty(marker.property)}
+            >
+              {/* Property Image Placeholder */}
+              <div className="relative h-24 bg-slate-100">
+                <div className="flex h-full items-center justify-center text-slate-400">
+                  {getPropertyIcon(marker.property.type)}
+                </div>
+                <div className="absolute left-2 top-2 rounded bg-black/60 px-2 py-1 text-xs text-white">
+                  {getPropertyIcon(marker.property.type)}
+                </div>
+              </div>
+
+              {/* Property Info */}
+              <div className="p-3">
+                <h5 className="mb-1 truncate text-sm font-semibold text-[#1a4158]">
+                  {marker.property.title}
+                </h5>
+                <p className="mb-2 text-xs text-slate-500">
+                  {marker.property.location}
+                </p>
+                <p className="mb-2 text-base font-bold text-[#2c5f7d]">
+                  {formatPrice(marker.property.price)}
+                  {marker.property.operation === 'alquiler' && '/mes'}
+                </p>
+                <div className="flex gap-3 text-xs text-slate-500">
+                  {marker.property.bedrooms && (
+                    <span className="flex items-center gap-1">
+                      <Bed className="h-3 w-3" />
+                      {marker.property.bedrooms}
+                    </span>
+                  )}
+                  {marker.property.bathrooms && (
+                    <span className="flex items-center gap-1">
+                      <Bath className="h-3 w-3" />
+                      {marker.property.bathrooms}
+                    </span>
+                  )}
+                  <span className="flex items-center gap-1">
+                    <Ruler className="h-3 w-3" />
+                    {marker.property.area}m²
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+
+  const propertyModal = selectedProperty && (
+    <div
+      className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50 p-4"
+      onClick={() => setSelectedProperty(null)}
+    >
+      <Card
+        className="max-h-[90vh] w-full max-w-[600px] overflow-auto bg-white"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Modal Header */}
+        <div className="flex items-center justify-between border-b border-slate-200 p-4">
+          <h3 className="font-semibold text-[#1a4158]">
+            {selectedProperty.title}
+          </h3>
+          <button
+            className="p-1 text-slate-500 transition-colors hover:text-slate-700"
+            onClick={() => setSelectedProperty(null)}
+          >
+            <X className="h-6 w-6" />
+          </button>
+        </div>
+
+        {/* Modal Body */}
+        <CardContent className="grid gap-6 p-6 md:grid-cols-2">
+          {/* Property Image */}
+          <div className="h-[200px] overflow-hidden rounded-lg bg-slate-100">
+            <div className="flex h-full items-center justify-center text-slate-400">
+              {getPropertyIcon(selectedProperty.type)}
+            </div>
+          </div>
+
+          {/* Property Details */}
+          <div className="flex flex-col gap-4">
+            <div className="text-2xl font-bold text-[#2c5f7d]">
+              {formatPrice(selectedProperty.price)}
+              {selectedProperty.operation === 'alquiler' && '/mes'}
+            </div>
+
+            <div className="space-y-1 text-sm text-[#1a4158]">
+              <p>
+                <strong>Ubicación:</strong> {selectedProperty.location}
+              </p>
+              <p>
+                <strong>Tipo:</strong> {selectedProperty.type}
+              </p>
+              <p>
+                <strong>Área:</strong> {selectedProperty.area}m²
+              </p>
+              {selectedProperty.bedrooms && (
+                <p>
+                  <strong>Dormitorios:</strong> {selectedProperty.bedrooms}
+                </p>
+              )}
+              {selectedProperty.bathrooms && (
+                <p>
+                  <strong>Baños:</strong> {selectedProperty.bathrooms}
+                </p>
+              )}
+            </div>
+
+            <p className="text-sm leading-relaxed text-slate-600">
+              {selectedProperty.description}
+            </p>
+
+            <div className="mt-4 flex gap-4">
+              <Button asChild>
+                <a href="#contacto">Consultar</a>
+              </Button>
+              <Button variant="outline" asChild>
+                <a href={`/propiedades/${selectedProperty.id}`}>
+                  Ver Detalles
+                </a>
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+
+  // When embedded (e.g. inside PropertiesResults), render just the map + sidebar without wrapper/title/filters
+  if (embedded) {
+    return (
+      <>
+        {mapAndSidebar}
+        {propertyModal}
+      </>
+    )
+  }
+
+  // Standalone version with section wrapper, title, and filters
   return (
     <section className="py-16" id="mapa">
       <div className="container mx-auto px-4">
@@ -166,160 +334,10 @@ export default function PropertyMap({
             </div>
           </div>
 
-          {/* Map + Property List */}
-          <div className="grid lg:grid-cols-[1fr_320px]" style={{ height }}>
-            <GoogleMaps
-              properties={filteredMarkers.map((marker) => marker.property)}
-              selectedProperty={selectedProperty}
-              onPropertySelect={setSelectedProperty}
-              height={height}
-            />
-
-            {/* Property List Sidebar */}
-            <div className="max-h-[600px] overflow-y-auto border-l border-slate-200 bg-slate-50 p-4">
-              <h4 className="mb-4 font-semibold text-[#1a4158]">
-                Propiedades ({filteredMarkers.length})
-              </h4>
-              <div className="flex flex-col gap-4">
-                {filteredMarkers.map((marker) => (
-                  <div
-                    key={marker.id}
-                    className={cn(
-                      'cursor-pointer overflow-hidden rounded-xl border bg-white transition-all hover:shadow-md',
-                      selectedProperty?.id === marker.property.id
-                        ? 'border-2 border-[#2c5f7d]'
-                        : 'border-slate-200'
-                    )}
-                    onClick={() => setSelectedProperty(marker.property)}
-                  >
-                    {/* Property Image Placeholder */}
-                    <div className="relative h-24 bg-slate-100">
-                      <div className="flex h-full items-center justify-center text-slate-400">
-                        {getPropertyIcon(marker.property.type)}
-                      </div>
-                      <div className="absolute left-2 top-2 rounded bg-black/60 px-2 py-1 text-xs text-white">
-                        {getPropertyIcon(marker.property.type)}
-                      </div>
-                    </div>
-
-                    {/* Property Info */}
-                    <div className="p-3">
-                      <h5 className="mb-1 truncate text-sm font-semibold text-[#1a4158]">
-                        {marker.property.title}
-                      </h5>
-                      <p className="mb-2 text-xs text-slate-500">
-                        {marker.property.location}
-                      </p>
-                      <p className="mb-2 text-base font-bold text-[#2c5f7d]">
-                        {formatPrice(marker.property.price)}
-                        {marker.property.operation === 'alquiler' && '/mes'}
-                      </p>
-                      <div className="flex gap-3 text-xs text-slate-500">
-                        {marker.property.bedrooms && (
-                          <span className="flex items-center gap-1">
-                            <Bed className="h-3 w-3" />
-                            {marker.property.bedrooms}
-                          </span>
-                        )}
-                        {marker.property.bathrooms && (
-                          <span className="flex items-center gap-1">
-                            <Bath className="h-3 w-3" />
-                            {marker.property.bathrooms}
-                          </span>
-                        )}
-                        <span className="flex items-center gap-1">
-                          <Ruler className="h-3 w-3" />
-                          {marker.property.area}m²
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          {mapAndSidebar}
         </Card>
 
-        {/* Property Detail Modal */}
-        {selectedProperty && (
-          <div
-            className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50 p-4"
-            onClick={() => setSelectedProperty(null)}
-          >
-            <Card
-              className="max-h-[90vh] w-full max-w-[600px] overflow-auto bg-white"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Modal Header */}
-              <div className="flex items-center justify-between border-b border-slate-200 p-4">
-                <h3 className="font-semibold text-[#1a4158]">
-                  {selectedProperty.title}
-                </h3>
-                <button
-                  className="p-1 text-slate-500 transition-colors hover:text-slate-700"
-                  onClick={() => setSelectedProperty(null)}
-                >
-                  <X className="h-6 w-6" />
-                </button>
-              </div>
-
-              {/* Modal Body */}
-              <CardContent className="grid gap-6 p-6 md:grid-cols-2">
-                {/* Property Image */}
-                <div className="h-[200px] overflow-hidden rounded-lg bg-slate-100">
-                  <div className="flex h-full items-center justify-center text-slate-400">
-                    {getPropertyIcon(selectedProperty.type)}
-                  </div>
-                </div>
-
-                {/* Property Details */}
-                <div className="flex flex-col gap-4">
-                  <div className="text-2xl font-bold text-[#2c5f7d]">
-                    {formatPrice(selectedProperty.price)}
-                    {selectedProperty.operation === 'alquiler' && '/mes'}
-                  </div>
-
-                  <div className="space-y-1 text-sm text-[#1a4158]">
-                    <p>
-                      <strong>Ubicación:</strong> {selectedProperty.location}
-                    </p>
-                    <p>
-                      <strong>Tipo:</strong> {selectedProperty.type}
-                    </p>
-                    <p>
-                      <strong>Área:</strong> {selectedProperty.area}m²
-                    </p>
-                    {selectedProperty.bedrooms && (
-                      <p>
-                        <strong>Dormitorios:</strong> {selectedProperty.bedrooms}
-                      </p>
-                    )}
-                    {selectedProperty.bathrooms && (
-                      <p>
-                        <strong>Baños:</strong> {selectedProperty.bathrooms}
-                      </p>
-                    )}
-                  </div>
-
-                  <p className="text-sm leading-relaxed text-slate-600">
-                    {selectedProperty.description}
-                  </p>
-
-                  <div className="mt-4 flex gap-4">
-                    <Button asChild>
-                      <a href="#contacto">Consultar</a>
-                    </Button>
-                    <Button variant="outline" asChild>
-                      <a href={`/propiedades/${selectedProperty.id}`}>
-                        Ver Detalles
-                      </a>
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
+        {propertyModal}
       </div>
     </section>
   )

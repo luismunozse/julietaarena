@@ -15,9 +15,7 @@ export default function PropertyImageGallery({ images, title }: PropertyImageGal
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const thumbnailsRef = useRef<HTMLDivElement>(null)
-  const galleryRef = useRef<HTMLDivElement>(null)
 
-  // Auto-scroll thumbnails to keep active one visible
   useEffect(() => {
     if (!thumbnailsRef.current) return
     const container = thumbnailsRef.current
@@ -43,7 +41,6 @@ export default function PropertyImageGallery({ images, title }: PropertyImageGal
     setCurrentIndex((prev) => (prev - 1 + totalImages) % totalImages)
   }, [totalImages])
 
-  // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isFullscreen) {
@@ -66,9 +63,9 @@ export default function PropertyImageGallery({ images, title }: PropertyImageGal
 
   if (!images || images.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-[350px] sm:h-[450px] bg-slate-50">
-        <ImageOff className="h-12 w-12 text-slate-300 mb-3" />
-        <p className="text-sm text-slate-500">Sin imágenes disponibles</p>
+      <div className="flex flex-col items-center justify-center h-[350px] sm:h-[450px] bg-surface">
+        <ImageOff className="h-12 w-12 text-muted/40 mb-3" />
+        <p className="text-sm text-muted">Sin imágenes disponibles</p>
       </div>
     )
   }
@@ -77,7 +74,7 @@ export default function PropertyImageGallery({ images, title }: PropertyImageGal
     <>
       <div className="w-full">
         {/* Main image */}
-        <div className="relative w-full h-[350px] sm:h-[450px] bg-slate-100 overflow-hidden" {...swipeHandlers}>
+        <div className="relative w-full h-[350px] sm:h-[450px] bg-surface overflow-hidden" {...swipeHandlers}>
           <Image
             src={currentImage}
             alt={`${title} - Imagen ${currentIndex + 1}`}
@@ -87,25 +84,23 @@ export default function PropertyImageGallery({ images, title }: PropertyImageGal
             priority
           />
 
-          {/* Counter pill */}
           {totalImages > 1 && (
             <div className="absolute bottom-4 left-4 bg-black/60 text-white px-3 py-1.5 rounded-full text-sm font-medium backdrop-blur-sm">
               {currentIndex + 1} / {totalImages}
             </div>
           )}
 
-          {/* Nav buttons */}
           {totalImages > 1 && (
             <>
               <button
-                className="absolute left-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-lg backdrop-blur-sm transition-all hover:bg-white hover:scale-105"
+                className="absolute left-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-foreground shadow-lg backdrop-blur-sm transition-all hover:bg-white hover:scale-105"
                 onClick={goToPrevious}
                 aria-label="Imagen anterior"
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
               <button
-                className="absolute right-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-lg backdrop-blur-sm transition-all hover:bg-white hover:scale-105"
+                className="absolute right-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-foreground shadow-lg backdrop-blur-sm transition-all hover:bg-white hover:scale-105"
                 onClick={goToNext}
                 aria-label="Imagen siguiente"
               >
@@ -114,7 +109,6 @@ export default function PropertyImageGallery({ images, title }: PropertyImageGal
             </>
           )}
 
-          {/* Fullscreen button */}
           <button
             className="absolute top-4 right-4 flex h-9 w-9 items-center justify-center rounded-lg bg-black/50 text-white backdrop-blur-sm transition-all hover:bg-black/70"
             onClick={() => setIsFullscreen(true)}
@@ -126,7 +120,7 @@ export default function PropertyImageGallery({ images, title }: PropertyImageGal
 
         {/* Thumbnails */}
         {totalImages > 1 && (
-          <div className="relative bg-slate-50 border-t border-slate-100">
+          <div className="relative bg-surface border-t border-border">
             <div
               ref={thumbnailsRef}
               className="flex gap-1.5 px-3 py-2.5 overflow-x-auto scrollbar-none"
@@ -138,7 +132,7 @@ export default function PropertyImageGallery({ images, title }: PropertyImageGal
                   className={cn(
                     "relative w-[64px] h-[48px] sm:w-[80px] sm:h-[56px] shrink-0 rounded-md overflow-hidden border-2 transition-all duration-200",
                     index === currentIndex
-                      ? "border-[#2c5f7d] ring-1 ring-[#2c5f7d]/20 opacity-100 scale-105"
+                      ? "border-brand-primary ring-1 ring-brand-primary/20 opacity-100 scale-105"
                       : "border-transparent opacity-60 hover:opacity-90"
                   )}
                   onClick={() => setCurrentIndex(index)}
@@ -165,7 +159,6 @@ export default function PropertyImageGallery({ images, title }: PropertyImageGal
           onClick={() => setIsFullscreen(false)}
         >
           <div className="relative max-w-[90vw] max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
-            {/* Close */}
             <button
               className="absolute -top-12 right-0 flex h-9 w-9 items-center justify-center rounded-full bg-white/20 text-white transition-colors hover:bg-white/30"
               onClick={() => setIsFullscreen(false)}

@@ -23,12 +23,12 @@ interface PropertySidebarProps {
 }
 
 const formatPrice = (price: number, currency: 'ARS' | 'USD' = 'USD'): string => {
-  return new Intl.NumberFormat('es-AR', {
-    style: 'currency',
-    currency: currency,
+  const prefix = currency === 'USD' ? 'USD' : 'ARS'
+  const formatted = new Intl.NumberFormat('es-AR', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(price)
+  return `${prefix} ${formatted}`
 }
 
 export default function PropertySidebar({ property }: PropertySidebarProps) {

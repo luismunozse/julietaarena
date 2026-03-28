@@ -600,7 +600,7 @@ export default function PropertiesResults() {
 
             {viewMode === 'map' && (
               <div className="bg-white rounded-2xl border border-border overflow-hidden shadow-sm" style={{ height: 'calc(100vh - 350px)', minHeight: '400px' }}>
-                <PropertyMap properties={sortedProperties} height="100%" />
+                <PropertyMap properties={sortedProperties} height="100%" embedded />
               </div>
             )}
           </>

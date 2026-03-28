@@ -1,12 +1,19 @@
 'use client'
 
 import { Property } from '@/data/properties'
-import { Card, CardContent } from '@/components/ui/card'
-import { Ruler, Home, BedDouble, Bath, Car, CalendarDays, DoorOpen } from 'lucide-react'
+import { Ruler, Home, BedDouble, Bath, Car, CalendarDays, DoorOpen, Compass, Layers, ArrowUpDown, Receipt } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface PropertyMetricsProps {
   property: Property
+}
+
+const conditionLabels: Record<string, string> = {
+  a_estrenar: 'A estrenar',
+  muy_bueno: 'Muy bueno',
+  bueno: 'Bueno',
+  regular: 'Regular',
+  a_reciclar: 'A reciclar',
 }
 
 interface MetricItem {
@@ -22,6 +29,7 @@ export default function PropertyMetrics({ property }: PropertyMetricsProps) {
 
   const metrics: MetricItem[] = []
 
+  // Primary metrics
   if (property.area) {
     metrics.push({
       icon: <Ruler className="h-5 w-5" />,
@@ -71,19 +79,59 @@ export default function PropertyMetrics({ property }: PropertyMetricsProps) {
     })
   }
 
+  // Secondary metrics (previously in "Información Adicional" — now unified here)
   if (age !== null && age >= 0) {
     metrics.push({
       icon: <CalendarDays className="h-5 w-5" />,
       value: property.condition === 'a_estrenar' ? 'A estrenar' : `${age} años`,
       label: 'Antigüedad',
     })
+  } else if (property.condition) {
+    metrics.push({
+      icon: <CalendarDays className="h-5 w-5" />,
+      value: conditionLabels[property.condition] || property.condition,
+      label: 'Condición',
+    })
+  }
+
+  if (property.orientation) {
+    metrics.push({
+      icon: <Compass className="h-5 w-5" />,
+      value: property.orientation,
+      label: 'Orientación',
+    })
+  }
+
+  if (property.floor !== undefined && property.totalFloors) {
+    metrics.push({
+      icon: <Layers className="h-5 w-5" />,
+      value: `${property.floor} de ${property.totalFloors}`,
+      label: 'Piso',
+    })
+  }
+
+  if (property.disposition) {
+    metrics.push({
+      icon: <ArrowUpDown className="h-5 w-5" />,
+      value: property.disposition.charAt(0).toUpperCase() + property.disposition.slice(1),
+      label: 'Disposición',
+    })
+  }
+
+  if (property.expenses) {
+    metrics.push({
+      icon: <Receipt className="h-5 w-5" />,
+      value: `$ ${property.expenses.toLocaleString('es-AR')}`,
+      label: 'Expensas',
+    })
   }
 
   if (metrics.length === 0) return null
 
   return (
-    <Card className="bg-white shadow-sm">
-      <CardContent className="p-4 sm:p-6">
+    <div className="bg-white rounded-xl border border-border shadow-sm">
+      <div className="p-4 sm:p-6">
+        <h2 className="text-lg font-semibold text-foreground mb-4">Características</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {metrics.map((metric, index) => (
             <div
@@ -91,26 +139,26 @@ export default function PropertyMetrics({ property }: PropertyMetricsProps) {
               className={cn(
                 "flex items-center gap-3 rounded-xl p-3.5 border transition-colors",
                 metric.highlight
-                  ? "bg-[#2c5f7d]/5 border-[#2c5f7d]/20"
-                  : "bg-slate-50 border-slate-100"
+                  ? "bg-brand-primary/5 border-brand-primary/15"
+                  : "bg-surface border-border"
               )}
             >
               <div className={cn(
                 "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg",
                 metric.highlight
-                  ? "bg-[#2c5f7d]/10 text-[#2c5f7d]"
-                  : "bg-white text-slate-500 shadow-sm"
+                  ? "bg-brand-primary/10 text-brand-primary"
+                  : "bg-white text-muted shadow-sm"
               )}>
                 {metric.icon}
               </div>
               <div className="min-w-0">
-                <p className="text-base font-bold text-slate-900 truncate">{metric.value}</p>
-                <p className="text-xs text-slate-500 truncate">{metric.label}</p>
+                <p className="text-base font-bold text-foreground truncate">{metric.value}</p>
+                <p className="text-xs text-muted truncate">{metric.label}</p>
               </div>
             </div>
           ))}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }

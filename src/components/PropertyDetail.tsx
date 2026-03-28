@@ -19,17 +19,12 @@ import { cn } from '@/lib/utils'
 import { MapPin, Share2, ChevronRight, ChevronLeft, ExternalLink, Phone, Printer, Copy, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-
-/* =============================================================================
-   WHATSAPP ICON
-============================================================================= */
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" className={className} fill="currentColor">
@@ -49,9 +44,7 @@ const InstagramIcon = ({ className }: { className?: string }) => (
   </svg>
 )
 
-/* =============================================================================
-   CONSTANTS
-============================================================================= */
+const WHATSAPP_NUMBER = '543513078376'
 
 const operationLabels: Record<string, string> = {
   venta: 'Venta',
@@ -68,18 +61,6 @@ const typeLabels: Record<string, string> = {
   cochera: 'Cochera',
 }
 
-const conditionLabels: Record<string, string> = {
-  a_estrenar: 'A estrenar',
-  muy_bueno: 'Muy bueno',
-  bueno: 'Bueno',
-  regular: 'Regular',
-  a_reciclar: 'A reciclar',
-}
-
-/* =============================================================================
-   COMPONENT
-============================================================================= */
-
 interface PropertyDetailProps {
   property: Property
 }
@@ -94,10 +75,16 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
   const opLabel = operationLabels[property.operation] || property.operation
   const typeLabel = typeLabels[property.type] || property.type
 
-  /* ---------------------------------------------------------------------------
-     SHARE
-  --------------------------------------------------------------------------- */
+  const formattedPrice = useMemo(() => {
+    const prefix = property.currency === 'USD' ? 'USD' : 'ARS'
+    const formatted = new Intl.NumberFormat('es-AR', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(property.price)
+    return `${prefix} ${formatted}`
+  }, [property.price, property.currency])
 
+  /* -- Share -- */
   const copyLink = async () => {
     await navigator.clipboard.writeText(window.location.href)
     setCopied(true)
@@ -117,13 +104,34 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
     setTimeout(() => setCopied(false), 3000)
   }
 
-  /* ---------------------------------------------------------------------------
-     SIMILAR PROPERTIES
-  --------------------------------------------------------------------------- */
+  const ShareDropdown = ({ iconSize = 'w-4 h-4' }: { iconSize?: string }) => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="sm" className="gap-2 border-border hover:bg-surface">
+          {copied ? <Check className={cn(iconSize, "text-emerald-500")} /> : <Share2 className={iconSize} />}
+          <span className="hidden sm:inline">{copied ? 'Copiado' : 'Compartir'}</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-48">
+        <DropdownMenuItem onClick={shareToFacebook} className="gap-2 cursor-pointer">
+          <FacebookIcon className="w-4 h-4 text-[#1877F2]" />
+          Facebook
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={shareToInstagram} className="gap-2 cursor-pointer">
+          <InstagramIcon className="w-4 h-4 text-[#E4405F]" />
+          Instagram
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={copyLink} className="gap-2 cursor-pointer">
+          <Copy className="w-4 h-4" />
+          Copiar link
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
 
+  /* -- Similar -- */
   const similarProperties = useMemo(() => {
     if (!properties || properties.length === 0) return []
-
     const priceRange = property.price * 0.3
     return properties
       .filter((p) =>
@@ -133,7 +141,6 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
         Math.abs(p.price - property.price) < priceRange
       )
       .sort((a, b) => {
-        // Prioritize same type + operation
         const aScore = (a.type === property.type ? 2 : 0) + (a.operation === property.operation ? 1 : 0)
         const bScore = (b.type === property.type ? 2 : 0) + (b.operation === property.operation ? 1 : 0)
         return bScore - aScore
@@ -141,49 +148,32 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
       .slice(0, 3)
   }, [properties, property])
 
-  /* ---------------------------------------------------------------------------
-     WHATSAPP
-  --------------------------------------------------------------------------- */
-
+  /* -- Actions -- */
   const handleWhatsApp = () => {
     const message = `Hola, estoy interesado/a en ${property.title} - ${property.location}`
-    window.open(`https://wa.me/543513078376?text=${encodeURIComponent(message)}`, '_blank')
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank')
   }
 
   const handleCall = () => {
-    window.open('tel:+543513078376', '_self')
+    window.open(`tel:+${WHATSAPP_NUMBER}`, '_self')
   }
-
-  /* ---------------------------------------------------------------------------
-     PRINT
-  --------------------------------------------------------------------------- */
-
-  const handlePrint = () => {
-    window.print()
-  }
-
-  /* ---------------------------------------------------------------------------
-     RENDER
-  --------------------------------------------------------------------------- */
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-24 pb-28 md:pb-12">
-      {/* ================================================================
-          HEADER
-      ================================================================ */}
+      {/* ── HEADER ── */}
       <div className="mb-6">
-        {/* Breadcrumb + Back button */}
+        {/* Breadcrumb + Back */}
         <div className="flex items-center gap-3 mb-4">
           <Button
             variant="ghost"
             size="sm"
-            className="text-sm gap-1.5 text-slate-600 hover:text-slate-900 print:hidden"
+            className="text-sm gap-1.5 text-muted hover:text-foreground print:hidden"
             onClick={() => router.back()}
           >
             <ChevronLeft className="w-4 h-4" />
             Volver
           </Button>
-          <span className="text-slate-300">|</span>
+          <span className="text-border">|</span>
           <nav className="flex items-center gap-1.5 text-sm">
             <Link href="/" className="text-brand-primary hover:text-brand-accent transition-colors font-medium">
               Inicio
@@ -197,211 +187,133 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
           </nav>
         </div>
 
+        {/* Title row */}
         <div className="flex justify-between items-start flex-wrap gap-4">
           <div className="flex-1 min-w-0">
-            {/* Internal code */}
             {property.internalCode && (
-              <span className="text-xs text-slate-400 font-mono mb-1 block">Ref: {property.internalCode}</span>
+              <span className="text-xs text-muted font-mono mb-1 block">Ref: {property.internalCode}</span>
             )}
 
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-brand-dark mb-3">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-brand-dark mb-2">
               {property.title}
             </h1>
 
-            <div className="flex flex-wrap items-center gap-2">
+            {/* Location + badges — one clean line */}
+            <div className="flex flex-wrap items-center gap-2 text-sm">
+              <span className="flex items-center gap-1.5 text-muted">
+                <MapPin className="w-4 h-4 shrink-0" />
+                {property.location}
+              </span>
+              <span className="text-border">·</span>
               <Badge className={cn(
-                "text-sm font-semibold px-3 py-1",
+                "text-xs font-semibold px-2.5 py-0.5",
                 property.operation === 'venta'
                   ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100"
                   : "bg-blue-100 text-blue-700 hover:bg-blue-100"
               )}>
                 {opLabel}
               </Badge>
-              <Badge variant="outline" className="text-sm font-medium px-3 py-1">
+              <Badge variant="outline" className="text-xs font-medium px-2.5 py-0.5 border-border text-muted">
                 {typeLabel}
               </Badge>
               {property.aptCredit && (
-                <Badge className="text-sm font-semibold px-3 py-1 bg-amber-100 text-amber-700 hover:bg-amber-100">
+                <Badge className="text-xs font-semibold px-2.5 py-0.5 bg-amber-100 text-amber-700 hover:bg-amber-100">
                   Apto Crédito
                 </Badge>
               )}
-              {property.condition && (
-                <Badge variant="outline" className="text-sm px-3 py-1 text-slate-600">
-                  {conditionLabels[property.condition] || property.condition}
-                </Badge>
-              )}
-              <div className="flex items-center gap-1.5 text-muted">
-                <MapPin className="w-4 h-4" />
-                <span className="text-sm">{property.location}</span>
-              </div>
             </div>
           </div>
 
-          {/* Actions */}
-          <div className="flex items-center gap-2 print:hidden">
-            <FavoriteButton propertyId={property.id} size="large" />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-2 border-border hover:bg-surface"
-                >
-                  {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Share2 className="w-4 h-4" />}
-                  <span className="hidden sm:inline">{copied ? 'Copiado' : 'Compartir'}</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={shareToFacebook} className="gap-2 cursor-pointer">
-                  <FacebookIcon className="w-4 h-4 text-[#1877F2]" />
-                  Facebook
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={shareToInstagram} className="gap-2 cursor-pointer">
-                  <InstagramIcon className="w-4 h-4 text-[#E4405F]" />
-                  Instagram
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={copyLink} className="gap-2 cursor-pointer">
-                  <Copy className="w-4 h-4" />
-                  Copiar link
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="hidden sm:flex print:hidden"
-              onClick={handlePrint}
-              title="Imprimir"
-            >
-              <Printer className="w-4 h-4" />
-            </Button>
+          {/* Price + actions — visible immediately */}
+          <div className="flex flex-col items-end gap-2 print:hidden">
+            <div className="text-right">
+              <p className="text-2xl sm:text-3xl font-bold text-foreground">{formattedPrice}</p>
+              {property.expenses && (
+                <p className="text-sm text-muted">+ $ {property.expenses.toLocaleString('es-AR')} expensas</p>
+              )}
+              {property.operation === 'alquiler' && (
+                <p className="text-xs text-muted">/mes</p>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <FavoriteButton propertyId={property.id} size="large" />
+              <ShareDropdown />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="hidden sm:flex"
+                onClick={() => window.print()}
+                title="Imprimir"
+              >
+                <Printer className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* ================================================================
-          MAIN CONTENT
-      ================================================================ */}
+      {/* ── MAIN CONTENT ── */}
       <div className="property-detail-grid">
         <div className="flex flex-col gap-6 min-w-0">
           {/* Gallery */}
-          <Card className="overflow-hidden shadow-sm print:shadow-none">
+          <div className="rounded-xl overflow-hidden border border-border shadow-sm print:shadow-none">
             <PropertyImageGallery images={property.images} title={property.title} />
-          </Card>
+          </div>
 
-          {/* Metrics */}
+          {/* Metrics — unified (primary + secondary, no more duplicate "Info Adicional") */}
           <PropertyMetrics property={property} />
 
           {/* Description */}
-          <Card className="shadow-sm">
-            <CardContent className="p-4 sm:p-6">
-              <h2 className="text-lg font-semibold text-slate-900 mb-3">Descripción</h2>
-              <p className="text-slate-600 leading-relaxed whitespace-pre-line">{sanitizeText(property.description)}</p>
-            </CardContent>
-          </Card>
+          <div className="bg-white rounded-xl border border-border shadow-sm">
+            <div className="p-4 sm:p-6">
+              <h2 className="text-lg font-semibold text-foreground mb-3">Descripción</h2>
+              <p className="text-muted leading-relaxed whitespace-pre-line">{sanitizeText(property.description)}</p>
+            </div>
+          </div>
 
           {/* Video Tour */}
           {property.videoUrl && (
-            <Card className="overflow-hidden shadow-sm print:hidden">
-              <CardContent className="p-0">
-                <div className="p-4 sm:p-6 pb-3">
-                  <h2 className="text-lg font-semibold text-slate-900">Tour Virtual</h2>
+            <div className="bg-white rounded-xl border border-border overflow-hidden shadow-sm print:hidden">
+              <div className="p-4 sm:p-6 pb-3">
+                <h2 className="text-lg font-semibold text-foreground">Tour Virtual</h2>
+              </div>
+              {property.videoUrl.includes('youtube.com') || property.videoUrl.includes('youtu.be') ? (
+                <div className="relative w-full pb-[56.25%]">
+                  <iframe
+                    className="absolute inset-0 w-full h-full"
+                    src={property.videoUrl
+                      .replace('watch?v=', 'embed/')
+                      .replace('youtu.be/', 'youtube.com/embed/')
+                      .split('&')[0]}
+                    title="Tour virtual"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
                 </div>
-                {property.videoUrl.includes('youtube.com') || property.videoUrl.includes('youtu.be') ? (
-                  <div className="relative w-full pb-[56.25%]">
-                    <iframe
-                      className="absolute inset-0 w-full h-full"
-                      src={property.videoUrl
-                        .replace('watch?v=', 'embed/')
-                        .replace('youtu.be/', 'youtube.com/embed/')
-                        .split('&')[0]}
-                      title="Tour virtual"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    />
-                  </div>
-                ) : (
-                  <div className="px-6 pb-6">
-                    <a
-                      href={property.videoUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-brand-primary hover:text-brand-accent font-medium transition-colors"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                      Ver tour virtual
-                    </a>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+              ) : (
+                <div className="px-6 pb-6">
+                  <a
+                    href={property.videoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-brand-primary hover:text-brand-accent font-medium transition-colors"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    Ver tour virtual
+                  </a>
+                </div>
+              )}
+            </div>
           )}
 
-          {/* Features */}
+          {/* Features / Comodidades */}
           <PropertyFeatures features={property.features} />
-
-          {/* Additional Info */}
-          {(property.yearBuilt || property.orientation || (property.floor !== undefined && property.totalFloors) || property.expenses || property.disposition || property.condition || property.rooms) && (
-            <Card className="shadow-sm">
-              <CardContent className="p-4 sm:p-6">
-                <h2 className="text-lg font-semibold text-slate-900 mb-4">Información Adicional</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                  {property.condition && (
-                    <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
-                      <span className="text-xs text-slate-500 block mb-1">Condición</span>
-                      <span className="text-sm font-semibold text-slate-900">
-                        {conditionLabels[property.condition] || property.condition}
-                      </span>
-                    </div>
-                  )}
-                  {property.rooms && (
-                    <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
-                      <span className="text-xs text-slate-500 block mb-1">Ambientes</span>
-                      <span className="text-sm font-semibold text-slate-900">{property.rooms}</span>
-                    </div>
-                  )}
-                  {property.disposition && (
-                    <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
-                      <span className="text-xs text-slate-500 block mb-1">Disposición</span>
-                      <span className="text-sm font-semibold text-slate-900 capitalize">{property.disposition}</span>
-                    </div>
-                  )}
-                  {property.yearBuilt && (
-                    <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
-                      <span className="text-xs text-slate-500 block mb-1">Antigüedad</span>
-                      <span className="text-sm font-semibold text-slate-900">
-                        {property.condition === 'a_estrenar' ? 'A estrenar' : `${new Date().getFullYear() - property.yearBuilt} años`}
-                      </span>
-                    </div>
-                  )}
-                  {property.orientation && (
-                    <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
-                      <span className="text-xs text-slate-500 block mb-1">Orientación</span>
-                      <span className="text-sm font-semibold text-slate-900">{property.orientation}</span>
-                    </div>
-                  )}
-                  {property.floor !== undefined && property.totalFloors && (
-                    <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
-                      <span className="text-xs text-slate-500 block mb-1">Piso</span>
-                      <span className="text-sm font-semibold text-slate-900">{property.floor} de {property.totalFloors}</span>
-                    </div>
-                  )}
-                  {property.expenses && (
-                    <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
-                      <span className="text-xs text-slate-500 block mb-1">Expensas</span>
-                      <span className="text-sm font-semibold text-slate-900">$ {property.expenses.toLocaleString('es-AR')}</span>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
 
           {/* Services */}
           {property.services && property.services.length > 0 && (
-            <Card className="shadow-sm">
-              <CardContent className="p-4 sm:p-6">
-                <h2 className="text-lg font-semibold text-slate-900 mb-4">Servicios e Infraestructura</h2>
+            <div className="bg-white rounded-xl border border-border shadow-sm">
+              <div className="p-4 sm:p-6">
+                <h2 className="text-lg font-semibold text-foreground mb-4">Servicios e Infraestructura</h2>
                 <div className="flex flex-wrap gap-2">
                   {property.services.map((service) => (
                     <Badge key={service} variant="outline" className="px-3 py-1.5 text-sm bg-emerald-50 text-emerald-700 border-emerald-200">
@@ -409,15 +321,15 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                     </Badge>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           )}
 
           {/* Documentation */}
           {property.documentation && property.documentation.length > 0 && (
-            <Card className="shadow-sm">
-              <CardContent className="p-4 sm:p-6">
-                <h2 className="text-lg font-semibold text-slate-900 mb-4">Documentación</h2>
+            <div className="bg-white rounded-xl border border-border shadow-sm">
+              <div className="p-4 sm:p-6">
+                <h2 className="text-lg font-semibold text-foreground mb-4">Documentación</h2>
                 <div className="flex flex-wrap gap-2">
                   {property.documentation.map((doc) => (
                     <Badge key={doc} variant="outline" className="px-3 py-1.5 text-sm bg-blue-50 text-blue-700 border-blue-200">
@@ -425,45 +337,39 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
                     </Badge>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           )}
 
           {/* Location Map */}
-          <Card className="overflow-hidden shadow-sm print:hidden">
-            <CardContent className="p-0">
-              <div className="p-4 sm:p-5 pb-3">
-                <h2 className="text-lg font-semibold text-slate-900">Ubicación</h2>
-                <p className="text-sm text-slate-500 flex items-center gap-1.5 mt-1">
-                  <MapPin className="w-4 h-4 shrink-0" />
-                  {property.location}
-                </p>
-              </div>
-              <PropertyLocationMap
-                latitude={property.coordinates?.lat}
-                longitude={property.coordinates?.lng}
-                address={property.location}
-                propertyTitle={property.title}
-              />
-            </CardContent>
-          </Card>
-
+          <div className="bg-white rounded-xl border border-border overflow-hidden shadow-sm print:hidden">
+            <div className="p-4 sm:p-5 pb-3">
+              <h2 className="text-lg font-semibold text-foreground">Ubicación</h2>
+              <p className="text-sm text-muted flex items-center gap-1.5 mt-1">
+                <MapPin className="w-4 h-4 shrink-0" />
+                {property.location}
+              </p>
+            </div>
+            <PropertyLocationMap
+              latitude={property.coordinates?.lat}
+              longitude={property.coordinates?.lng}
+              address={property.location}
+              propertyTitle={property.title}
+            />
+          </div>
         </div>
 
-        {/* ================================================================
-            SIDEBAR
-        ================================================================ */}
+        {/* ── SIDEBAR ── */}
         <div className="md:sticky md:top-24 h-fit space-y-6 print:hidden">
           <PropertySidebar property={property} />
         </div>
       </div>
 
-      {/* ================================================================
-          SIMILAR PROPERTIES (full width, outside grid)
-      ================================================================ */}
+      {/* ── SIMILAR PROPERTIES ── */}
       {similarProperties.length > 0 && (
-        <div className="mt-8 print:hidden">
-          <h2 className="text-xl font-bold text-slate-900 mb-4">Propiedades similares</h2>
+        <div className="mt-10 print:hidden">
+          <h2 className="text-xl font-bold text-foreground mb-1">Propiedades similares</h2>
+          <p className="text-sm text-muted mb-5">Otras opciones que podrían interesarte</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {similarProperties.map((p) => (
               <PropertyCard key={p.id} property={p} />
@@ -472,51 +378,31 @@ export default function PropertyDetail({ property }: PropertyDetailProps) {
         </div>
       )}
 
-      {/* ================================================================
-          MOBILE BOTTOM CTA BAR
-      ================================================================ */}
-      <div className="fixed bottom-0 inset-x-0 z-30 md:hidden print:hidden bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-[0_-4px_12px_rgba(0,0,0,0.08)]">
+      {/* ── MOBILE BOTTOM CTA ── */}
+      <div className="fixed bottom-0 inset-x-0 z-30 md:hidden print:hidden bg-white/95 backdrop-blur-md border-t border-border shadow-[0_-4px_12px_rgba(0,0,0,0.08)]">
         <div className="flex items-center gap-2 px-4 py-3 max-w-lg mx-auto">
+          {/* Price visible in mobile bar */}
+          <div className="flex-1 min-w-0">
+            <p className="text-base font-bold text-foreground truncate">{formattedPrice}</p>
+            {property.operation === 'alquiler' && (
+              <p className="text-[10px] text-muted">/mes</p>
+            )}
+          </div>
           <Button
-            className="flex-1 bg-[#25D366] hover:bg-[#20bd5a] text-white font-semibold h-11"
+            className="bg-[#25D366] hover:bg-[#20BD5A] text-white font-semibold h-10 px-4"
             onClick={handleWhatsApp}
           >
-            <WhatsAppIcon className="w-5 h-5" />
+            <WhatsAppIcon className="w-4 h-4 mr-1.5" />
             WhatsApp
           </Button>
           <Button
             variant="outline"
-            className="flex-1 font-semibold h-11 border-[#2c5f7d] text-[#2c5f7d]"
+            className="font-semibold h-10 px-4 border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white"
             onClick={handleCall}
           >
-            <Phone className="w-4 h-4" />
+            <Phone className="w-4 h-4 mr-1.5" />
             Llamar
           </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-11 w-11 shrink-0"
-              >
-                {copied ? <Check className="w-5 h-5 text-emerald-500" /> : <Share2 className="w-5 h-5" />}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem onClick={shareToFacebook} className="gap-2 cursor-pointer">
-                <FacebookIcon className="w-4 h-4 text-[#1877F2]" />
-                Facebook
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={shareToInstagram} className="gap-2 cursor-pointer">
-                <InstagramIcon className="w-4 h-4 text-[#E4405F]" />
-                Instagram
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={copyLink} className="gap-2 cursor-pointer">
-                <Copy className="w-4 h-4" />
-                Copiar link
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
       </div>
     </div>
