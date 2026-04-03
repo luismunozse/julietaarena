@@ -3,6 +3,8 @@ export interface LegalService {
   title: string
   description: string
   icon: string
+  /** Lucide icon name used for rendering */
+  iconName: 'Landmark' | 'FileText' | 'BarChart3' | 'Scale' | 'Building2'
   features: string[]
   requirements: string[]
   process: string[]
@@ -18,6 +20,7 @@ export const legalServices: LegalService[] = [
     title: 'Acompañamiento en Sucesiones Inmobiliarias',
     description: 'Coordinamos con abogados y escribanos el proceso sucesorio cuando involucra bienes inmuebles, aportando tasaciones y gestión de la venta posterior.',
     icon: '🏛️',
+    iconName: 'Landmark',
     features: [
       'Tasación de inmuebles del acervo hereditario',
       'Coordinación con abogado para el trámite sucesorio',
@@ -58,6 +61,7 @@ export const legalServices: LegalService[] = [
     title: 'Contratos de Locación',
     description: 'Gestionamos contratos de alquiler entre propietarios e inquilinos, conforme a la normativa vigente de locaciones.',
     icon: '📋',
+    iconName: 'FileText',
     features: [
       'Redacción de contratos de locación habitacional',
       'Contratos de locación comercial',
@@ -98,6 +102,7 @@ export const legalServices: LegalService[] = [
     title: 'Tasaciones Profesionales',
     description: 'Valuación objetiva de inmuebles realizada por perito tasador matriculado (MP: 06-1216), válida para trámites judiciales, bancarios y particulares.',
     icon: '📊',
+    iconName: 'BarChart3',
     features: [
       'Tasaciones para compraventa',
       'Tasaciones para sucesiones y divorcios',
@@ -138,6 +143,7 @@ export const legalServices: LegalService[] = [
     title: 'Remates Judiciales',
     description: 'Organización y ejecución de subastas judiciales designadas por los tribunales de Córdoba, con total transparencia y respaldo legal.',
     icon: '⚖️',
+    iconName: 'Scale',
     features: [
       'Subastas designadas por juzgados',
       'Publicación de edictos en medios oficiales',
@@ -178,6 +184,7 @@ export const legalServices: LegalService[] = [
     title: 'Administración de Propiedades',
     description: 'Gestión integral de propiedades en alquiler: cobro de rentas, mantenimiento, relación con inquilinos y rendición mensual al propietario.',
     icon: '🏠',
+    iconName: 'Building2',
     features: [
       'Cobro y seguimiento de alquileres',
       'Gestión de reparaciones y mantenimiento',

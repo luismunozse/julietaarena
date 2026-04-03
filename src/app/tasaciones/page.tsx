@@ -1,133 +1,94 @@
 import AppraisalForm from '@/components/AppraisalForm'
 import PageBreadcrumb from '@/components/PageBreadcrumb'
+import { Check, FileText, Camera, MapPin, TrendingUp } from 'lucide-react'
 
 export const metadata = {
   title: 'Tasaciones Profesionales | Julieta Arena',
   description:
-    'Solicitá una tasación respaldada por una martillera pública matriculada en Córdoba. Valoración objetiva según el mercado argentino y normativa vigente.',
+    'Solicita una tasacion respaldada por una martillera publica matriculada en Cordoba. Valoracion objetiva segun el mercado argentino y normativa vigente.',
 }
+
+const INCLUDES = [
+  'Analisis comparativo de mercado actual',
+  'Relevamiento fotografico y estado constructivo',
+  'Informe de documentacion y situacion catastral',
+  'Sugerencias de estrategia comercial',
+]
+
+const FEATURES = [
+  'Informe firmado por perito tasador MP: 06-1216 (Ley 7191 / CBA)',
+  'Compatibles con gestiones bancarias y organismos publicos',
+  'Entrega digital en 48/72 h habiles luego de la visita',
+]
 
 export default function TasacionesPage() {
   return (
-    <main style={{ minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-24">
+    <main className="min-h-screen bg-surface">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-20">
         <PageBreadcrumb items={[{ label: 'Tasaciones' }]} />
       </div>
-      <section style={{
-        background: 'linear-gradient(135deg, #2c5f7d 0%, #1a4158 100%)',
-        padding: '80px 0 60px',
-        color: '#fff'
-      }}>
-        <div className="container">
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-            gap: '3rem',
-            alignItems: 'center'
-          }}>
+
+      {/* Hero */}
+      <section className="bg-gradient-to-br from-brand-dark via-brand-accent to-brand-primary py-16 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+            {/* Left — Copy */}
             <div>
-              <p style={{
-                color: '#e8b86d',
-                fontWeight: 600,
-                fontSize: '0.9rem',
-                textTransform: 'uppercase' as const,
-                letterSpacing: '1px',
-                marginBottom: '0.5rem'
-              }}>Tasaciones profesionales</p>
-              <h1 style={{
-                fontSize: '2.25rem',
-                fontWeight: 700,
-                color: '#fff',
-                marginBottom: '1rem',
-                lineHeight: 1.2
-              }}>Valuaciones reales para decisiones seguras</h1>
-              <p style={{
-                color: 'rgba(255,255,255,0.9)',
-                lineHeight: 1.7,
-                marginBottom: '1.5rem'
-              }}>
-                Realizamos informes respaldados por normativa argentina, aplicando metodologías comparativas y de capitalización
-                de renta para viviendas, campos, locales y desarrollos. Cada tasación incluye referencias de mercado, estado
-                dominial y documentación requerida para operaciones ante escribanos y bancos.
+              <p className="text-brand-secondary font-semibold text-sm uppercase tracking-wider mb-2">
+                Tasaciones profesionales
               </p>
-              <ul style={{
-                listStyle: 'none',
-                padding: 0,
-                margin: 0,
-                display: 'flex',
-                flexDirection: 'column' as const,
-                gap: '0.75rem'
-              }}>
-                {[
-                  'Informe firmado por perito tasador MP: 06-1216 (Ley 7191 / CBA)',
-                  'Compatibles con gestiones bancarias y organismos públicos',
-                  'Entrega digital en 48/72 h hábiles luego de la visita'
-                ].map((item, index) => (
-                  <li key={index} style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '0.5rem',
-                    color: 'rgba(255,255,255,0.9)'
-                  }}>
-                    <span style={{ color: '#e8b86d' }}>&#10003;</span>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
+                Valuaciones reales para decisiones seguras
+              </h1>
+              <p className="text-white/85 leading-relaxed mb-6 text-base sm:text-lg">
+                Realizamos informes respaldados por normativa argentina, aplicando metodologias
+                comparativas y de capitalizacion de renta para viviendas, campos, locales y
+                desarrollos. Cada tasacion incluye referencias de mercado, estado dominial y
+                documentacion requerida para operaciones ante escribanos y bancos.
+              </p>
+              <ul className="space-y-3">
+                {FEATURES.map((item, i) => (
+                  <li key={i} className="flex items-start gap-2.5 text-white/90 text-sm sm:text-base">
+                    <Check className="w-5 h-5 text-brand-secondary shrink-0 mt-0.5" />
                     {item}
                   </li>
                 ))}
               </ul>
             </div>
-            <div style={{
-              backgroundColor: 'rgba(255,255,255,0.1)',
-              borderRadius: '16px',
-              padding: '2rem',
-              backdropFilter: 'blur(10px)'
-            }}>
-              <div style={{ marginBottom: '1.5rem' }}>
-                <h3 style={{ color: '#fff', marginTop: 0, marginBottom: '1rem', fontSize: '1.25rem' }}>¿Qué incluye?</h3>
-                <ul style={{
-                  listStyle: 'none',
-                  padding: 0,
-                  margin: 0,
-                  display: 'flex',
-                  flexDirection: 'column' as const,
-                  gap: '0.5rem'
-                }}>
-                  {[
-                    'Análisis comparativo de mercado actual',
-                    'Relevamiento fotográfico y estado constructivo',
-                    'Informe de documentación y situación catastral',
-                    'Sugerencias de estrategia comercial'
-                  ].map((item, index) => (
-                    <li key={index} style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.95rem' }}>
-                      • {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div style={{
-                backgroundColor: '#e8b86d',
-                borderRadius: '12px',
-                padding: '1rem',
-                textAlign: 'center' as const
-              }}>
-                <span style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1a4158', display: 'block' }}>+15 años</span>
-                <p style={{ margin: 0, color: '#1a4158', fontSize: '0.9rem' }}>De experiencia valuando activos inmobiliarios en Córdoba</p>
+
+            {/* Right — Info card */}
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 sm:p-8 border border-white/10">
+              <h3 className="text-white text-xl font-semibold mb-4">Que incluye?</h3>
+              <ul className="space-y-3 mb-6">
+                {INCLUDES.map((item, i) => (
+                  <li key={i} className="flex items-start gap-2.5 text-white/85 text-sm">
+                    <span className="w-1.5 h-1.5 rounded-full bg-brand-secondary mt-2 shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <div className="bg-brand-secondary rounded-xl p-4 text-center">
+                <span className="text-2xl font-bold text-brand-dark block">+15 anos</span>
+                <p className="text-brand-dark/80 text-sm">
+                  De experiencia valuando activos inmobiliarios en Cordoba
+                </p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section style={{ padding: '60px 0' }}>
-        <div className="container">
-          <div style={{
-            textAlign: 'center' as const,
-            maxWidth: '600px',
-            margin: '0 auto 2rem'
-          }}>
-            <h2 style={{ color: '#1a4158', fontSize: '2rem', marginBottom: '1rem' }}>Solicitá tu tasación</h2>
-            <p style={{ color: '#636e72', lineHeight: 1.6 }}>
-              Completá el formulario con los datos de la propiedad. Te contactaremos en menos de 24 h hábiles para coordinar la
-              visita y enviarte el presupuesto de honorarios conforme al arancel profesional vigente.
+      {/* Form section */}
+      <section className="py-16 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="text-center max-w-2xl mx-auto mb-10">
+            <h2 className="text-2xl sm:text-3xl font-bold text-brand-dark mb-3">
+              Solicita tu tasacion
+            </h2>
+            <p className="text-muted leading-relaxed">
+              Completa el formulario con los datos de la propiedad. Te contactaremos en menos
+              de 24 h habiles para coordinar la visita y enviarte el presupuesto de honorarios
+              conforme al arancel profesional vigente.
             </p>
           </div>
           <AppraisalForm />

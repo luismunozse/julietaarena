@@ -2,7 +2,15 @@
 
 import { useState } from 'react'
 import { legalServices, LegalService } from '@/data/legalServices'
-import { X, Clock, DollarSign, Phone } from 'lucide-react'
+import { X, Clock, DollarSign, Phone, Landmark, FileText, BarChart3, Scale, Building2 } from 'lucide-react'
+
+const ICON_MAP = {
+  Landmark,
+  FileText,
+  BarChart3,
+  Scale,
+  Building2,
+} as const
 
 // WhatsApp icon component
 const WhatsAppIcon = ({ className }: { className?: string }) => (
@@ -25,11 +33,11 @@ function ServiceCard({ service, onViewDetails }: ServiceCardProps) {
     <article className="bg-white rounded-2xl shadow-sm border border-border p-6 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
       {/* Header */}
       <div className="flex gap-4 mb-4">
-        <div className="w-12 h-12 bg-brand-primary/10 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">
-          {service.icon}
+        <div className="w-12 h-12 bg-brand-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
+          {(() => { const Icon = ICON_MAP[service.iconName]; return <Icon className="w-6 h-6 text-brand-primary" /> })()}
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-semibold text-brand-accent mb-1 truncate">{service.title}</h3>
+          <h3 className="text-lg font-semibold text-brand-accent mb-1 leading-snug">{service.title}</h3>
           <p className="text-sm text-muted line-clamp-2">{service.description}</p>
         </div>
       </div>
@@ -105,8 +113,8 @@ function ServiceModal({ service, onClose }: ServiceModalProps) {
       >
         {/* Header */}
         <div className="flex items-start gap-4 p-6 border-b border-border sticky top-0 bg-white z-10">
-          <div className="w-14 h-14 bg-brand-primary/10 rounded-xl flex items-center justify-center text-3xl flex-shrink-0">
-            {service.icon}
+          <div className="w-14 h-14 bg-brand-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
+            {(() => { const Icon = ICON_MAP[service.iconName]; return <Icon className="w-7 h-7 text-brand-primary" /> })()}
           </div>
           <div className="flex-1 min-w-0">
             <h2 className="text-xl font-bold text-brand-accent mb-1">{service.title}</h2>

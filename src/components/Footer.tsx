@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { Facebook, Instagram, Linkedin, MapPin, Phone, Mail, Clock } from 'lucide-react'
+import Image from 'next/image'
+import { Facebook, Instagram, MapPin, Phone, Mail, Clock } from 'lucide-react'
 
 export default function Footer() {
   const currentYear = new Date().getFullYear()
@@ -22,38 +23,39 @@ export default function Footer() {
       href: 'https://www.instagram.com/ajulietamarisel',
       icon: Instagram,
     },
-    {
-      label: 'LinkedIn',
-      href: '#',
-      icon: Linkedin,
-    },
   ]
 
   return (
-    <footer className="bg-gradient-to-br from-[#1a4158] to-[#2c5f7d] text-white">
-      <div className="container mx-auto px-4 pt-12 md:pt-16">
+    <footer className="bg-gradient-to-br from-brand-accent to-brand-primary text-white">
+      <div className="container mx-auto px-4 pt-12 md:pt-16 pb-16 md:pb-0">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10 pb-10">
           {/* Brand */}
           <div className="text-center md:text-left">
-            <img src="/logo.png" alt="Julieta Arena" className="h-16 w-16 rounded-full object-contain mx-auto md:mx-0 mb-3 bg-white p-1" />
+            <Image
+              src="/logo.png"
+              alt="Julieta Arena"
+              width={64}
+              height={64}
+              className="h-16 w-16 rounded-full object-contain mx-auto md:mx-0 mb-3 bg-white p-1"
+            />
             <h3 className="text-2xl font-bold mb-2">Julieta Arena</h3>
-            <p className="text-white/90 text-sm">Martillera Pública · Perito Tasador</p>
-            <p className="text-white/60 text-xs mt-0.5">MP: 06-1216 · CPCPI Córdoba</p>
+            <p className="text-white/90 text-sm">Martillera Publica - Perito Tasador</p>
+            <p className="text-white/60 text-xs mt-0.5">MP: 06-1216 - CPCPI Cordoba</p>
             <p className="text-white/80 text-sm mt-2 flex items-center justify-center md:justify-start gap-1.5">
               <MapPin className="h-4 w-4" />
-              Córdoba, Argentina
+              Cordoba, Argentina
             </p>
           </div>
 
           {/* Services */}
           <div className="text-center md:text-left">
-            <h4 className="text-lg font-semibold mb-4 text-[#e8b86d]">Servicios</h4>
+            <h4 className="text-lg font-semibold mb-4 text-brand-secondary">Servicios</h4>
             <ul className="space-y-2.5">
               {services.map((service) => (
                 <li key={service.label}>
                   <Link
                     href={service.href}
-                    className="text-sm text-white/90 hover:text-[#e8b86d] transition-colors inline-block hover:translate-x-1 transform duration-200"
+                    className="text-sm text-white/90 hover:text-brand-secondary transition-colors inline-block hover:translate-x-1 transform duration-200"
                   >
                     {service.label}
                   </Link>
@@ -64,7 +66,7 @@ export default function Footer() {
 
           {/* Contact */}
           <div className="text-center md:text-left">
-            <h4 className="text-lg font-semibold mb-4 text-[#e8b86d]">Contacto</h4>
+            <h4 className="text-lg font-semibold mb-4 text-brand-secondary">Contacto</h4>
             <ul className="space-y-2.5">
               <li className="flex items-center justify-center md:justify-start gap-2 text-sm text-white/90">
                 <Phone className="h-4 w-4 shrink-0" />
@@ -83,7 +85,7 @@ export default function Footer() {
 
           {/* Social */}
           <div className="text-center md:text-left">
-            <h4 className="text-lg font-semibold mb-4 text-[#e8b86d]">Sígueme</h4>
+            <h4 className="text-lg font-semibold mb-4 text-brand-secondary">Seguime</h4>
             <div className="flex gap-3 justify-center md:justify-start">
               {socialLinks.map((social) => (
                 <a
@@ -92,7 +94,7 @@ export default function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={social.label}
-                  className="w-11 h-11 bg-white/10 rounded-lg flex items-center justify-center hover:bg-[#e8b86d] hover:-translate-y-1 transition-all duration-200 hover:shadow-lg"
+                  className="w-11 h-11 bg-white/10 rounded-lg flex items-center justify-center hover:bg-brand-secondary hover:-translate-y-1 transition-all duration-200 hover:shadow-lg"
                 >
                   <social.icon className="h-5 w-5" />
                 </a>

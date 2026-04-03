@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation'
 import Header from './Header'
 import Footer from './Footer'
+import MobileStickyBar from './MobileStickyBar'
 
 export default function ConditionalLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -18,6 +19,7 @@ export default function ConditionalLayout({ children }: { children: React.ReactN
       <Header />
       {children}
       <Footer />
+      <MobileStickyBar />
     </>
   )
 }

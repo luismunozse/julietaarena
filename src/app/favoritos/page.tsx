@@ -8,6 +8,7 @@ import { useProperties } from '@/hooks/useProperties'
 import PropertyCard from '@/components/PropertyCard'
 import FavoriteButton from '@/components/FavoriteButton'
 import PageBreadcrumb from '@/components/PageBreadcrumb'
+import { Heart, Search } from 'lucide-react'
 
 export default function FavoritosPage() {
   const { favorites, clearFavorites } = useFavorites()
@@ -21,13 +22,13 @@ export default function FavoritosPage() {
 
   if (favoriteProperties.length === 0) {
     return (
-      <main className="min-h-screen pt-24 bg-gray-50">
-        {/* Hero Section */}
-        <div className="bg-gradient-to-r from-[#2c5f7d] to-[#1a4158] text-white py-16">
+      <main className="min-h-screen pt-20 bg-surface">
+        {/* Hero */}
+        <div className="bg-gradient-to-br from-brand-primary to-brand-accent text-white py-14 sm:py-16">
           <div className="max-w-6xl mx-auto px-6 text-center">
-            <h1 className="text-4xl font-bold mb-4">Mis Favoritos</h1>
+            <h1 className="text-3xl sm:text-4xl font-bold mb-3">Mis Favoritos</h1>
             <p className="text-lg text-white/80">
-              Guarda las propiedades que más te gustan
+              Guarda las propiedades que mas te gustan
             </p>
           </div>
         </div>
@@ -35,13 +36,16 @@ export default function FavoritosPage() {
         {/* Empty State */}
         <div className="py-20">
           <div className="max-w-md mx-auto text-center px-6">
-            <div className="text-6xl mb-6">❤️</div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">No tienes propiedades favoritas</h2>
-            <p className="text-gray-600 mb-8">Explora nuestras propiedades y agrega las que más te gusten a tus favoritos</p>
+            <div className="w-20 h-20 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-6">
+              <Heart className="w-10 h-10 text-red-400" />
+            </div>
+            <h2 className="text-2xl font-bold text-foreground mb-3">No tenes propiedades favoritas</h2>
+            <p className="text-muted mb-8">Explora nuestras propiedades y agrega las que mas te gusten a tus favoritos</p>
             <Link
               href="/propiedades"
-              className="inline-block px-8 py-3 bg-gradient-to-r from-[#2c5f7d] to-[#1a4158] text-white font-semibold rounded-lg hover:shadow-lg transition-all"
+              className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-brand-primary to-brand-accent text-white font-semibold rounded-xl hover:shadow-lg transition-all"
             >
+              <Search className="w-5 h-5" />
               Ver Propiedades
             </Link>
           </div>
@@ -51,14 +55,14 @@ export default function FavoritosPage() {
   }
 
   return (
-    <main className="min-h-screen pt-24 bg-gray-50">
+    <main className="min-h-screen pt-20 bg-surface">
       <div className="max-w-6xl mx-auto px-6">
         <PageBreadcrumb items={[{ label: 'Mis Favoritos' }]} />
       </div>
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-[#2c5f7d] to-[#1a4158] text-white py-16">
+      {/* Hero */}
+      <div className="bg-gradient-to-br from-brand-primary to-brand-accent text-white py-14 sm:py-16">
         <div className="max-w-6xl mx-auto px-6 text-center">
-          <h1 className="text-4xl font-bold mb-4">Mis Favoritos</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold mb-3">Mis Favoritos</h1>
           <p className="text-lg text-white/80">
             {favoriteProperties.length} propiedad{favoriteProperties.length !== 1 ? 'es' : ''} guardada{favoriteProperties.length !== 1 ? 's' : ''}
           </p>
@@ -69,10 +73,10 @@ export default function FavoritosPage() {
       <div className="py-12">
         <div className="max-w-6xl mx-auto px-6">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-800">Propiedades Favoritas</h2>
+            <h2 className="text-2xl font-bold text-foreground">Propiedades Favoritas</h2>
             <button
               onClick={clearFavorites}
-              className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors font-medium"
+              className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors font-medium text-sm"
             >
               Limpiar Todo
             </button>

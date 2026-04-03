@@ -254,12 +254,11 @@ export default function SearchHero() {
                 <input
                   ref={inputRef}
                   type="text"
-                  placeholder={isLoadingMaps ? "Cargando ubicaciones..." : PLACEHOLDERS[placeholderIndex]}
+                  placeholder={isLoadingMaps && !mapsError ? "Cargando ubicaciones..." : PLACEHOLDERS[placeholderIndex]}
                   value={searchLocation}
                   onChange={(e) => setSearchLocation(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                  disabled={isLoadingMaps}
-                  className="w-full h-12 sm:h-14 pl-11 pr-4 text-sm sm:text-base bg-surface border border-border rounded-xl outline-none transition-all duration-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 focus:bg-white disabled:opacity-60"
+                  className="w-full h-12 sm:h-14 pl-11 pr-4 text-sm sm:text-base bg-surface border border-border rounded-xl outline-none transition-all duration-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 focus:bg-white"
                 />
                 {mapsError && (
                   <span

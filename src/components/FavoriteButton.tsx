@@ -32,10 +32,10 @@ export default function FavoriteButton({
     if (wasFavorite) {
       info('Propiedad removida de favoritos', 3000)
     } else {
-      success('¡Propiedad agregada a favoritos!', 3000)
+      success('Propiedad agregada a favoritos!', 3000)
     }
 
-    setTimeout(() => setIsAnimating(false), 300)
+    setTimeout(() => setIsAnimating(false), 600)
   }
 
   const favorite = isFavorite(propertyId)
@@ -57,9 +57,10 @@ export default function FavoriteButton({
       variant="secondary"
       size="icon"
       className={cn(
-        "rounded-full bg-white/90 hover:bg-white shadow-sm transition-all",
+        "rounded-full bg-white/90 hover:bg-white shadow-sm transition-all duration-300",
         sizeClasses[size],
-        isAnimating && "scale-110",
+        isAnimating && !favorite && "scale-90",
+        isAnimating && favorite && "scale-125",
         favorite && "bg-red-500 hover:bg-red-600"
       )}
       onClick={handleClick}

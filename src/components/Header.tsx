@@ -97,9 +97,9 @@ export default function Header() {
     fixed inset-x-0 top-0 z-[9999]
     transition-all duration-300 ease-out
     ${isMobileMenuOpen
-      ? 'bg-white shadow-md py-3'
+      ? 'bg-white shadow-md py-1.5'
       : isScrolled || needsSolidHeader
-        ? 'bg-white/95 backdrop-blur-md shadow-md py-3'
+        ? 'bg-white/95 backdrop-blur-md shadow-md py-1.5'
         : 'bg-transparent py-5'
     }
   `
@@ -127,7 +127,14 @@ export default function Header() {
               alt="Julieta Arena"
               width={120}
               height={120}
-              className="h-[120px] w-[120px] object-contain drop-shadow-[0_2px_4px_rgba(255,255,255,0.3)]"
+              className={`
+                object-contain drop-shadow-[0_2px_4px_rgba(255,255,255,0.3)]
+                transition-all duration-300
+                ${isScrolled || needsSolidHeader || isMobileMenuOpen
+                  ? 'h-[52px] w-[52px]'
+                  : 'h-[80px] w-[80px]'
+                }
+              `}
             />
             <div>
               <span className={`
